@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>askVGIA — Ask Anything. Search in Video.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+<style>
+/* ── Base reset ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:'Inter Tight',-apple-system,BlinkMacSystemFont,sans-serif}
+
+/* ── Theme variables ── */
+:root {
+  --theme-hero-bg:     #0c0b1e;
+  --theme-nav-bg:      rgba(12,11,30,0.8);
+  --theme-nav-border:  rgba(255,255,255,0.06);
+  --theme-why-card:    rgba(255,255,255,0.04);
+  --theme-why-card-desc: rgba(255,255,255,0.55);
+  --ink1: #ffffff;
+  --ink2: rgba(255,255,255,0.75);
+  --ink3: rgba(255,255,255,0.45);
+  --ink4: rgba(255,255,255,0.25);
+  --brand: #6C5CE7;
+  --brand2: #8b85ff;
+}
+html[data-theme="light"] {
+  --theme-hero-bg:     #f5f4ff;
+  --theme-nav-bg:      rgba(245,244,255,0.85);
+  --theme-nav-border:  rgba(0,0,0,0.07);
+  --theme-why-card:    white;
+  --theme-why-card-desc: #666;
+  --ink1: #111;
+  --ink2: #444;
+  --ink3: #777;
+  --ink4: #aaa;
+}
+html[data-theme="light"] #page-intro { background: var(--theme-hero-bg); }
+html[data-theme="light"] .intro-nav { background: var(--theme-nav-bg); }
+html[data-theme="light"] .intro-nav-wordmark { color: #111; }
+html[data-theme="light"] .intro-nav-links a { color: #555; }
+html[data-theme="light"] .intro-nav-links a:hover,
+html[data-theme="light"] .intro-nav-links a.active { color: #111; }
+html[data-theme="light"] .intro-nav-links a.active::after { background: #6C5CE7; }
+html[data-theme="light"] .intro-h1 { color: #111; }
+html[data-theme="light"] .intro-subtitle { color: #555; }
+html[data-theme="light"] .intro-eyebrow { background: rgba(108,92,231,0.1); color: #6C5CE7; border-color: rgba(108,92,231,0.2); }
+html[data-theme="light"] .btn-learn { background: rgba(0,0,0,0.05); color: #444; }
+html[data-theme="light"] .btn-learn:hover { background: rgba(0,0,0,0.08); color: #111; }
+html[data-theme="light"] .trust-item { color: #666; }
+html[data-theme="light"] .hero-float-chip { background: white; border-color: rgba(0,0,0,0.08); box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+html[data-theme="light"] .hero-float-chip-text { color: #333; }
+
+/* ── Theme toggle ── */
+.theme-toggle-btn {
+  background: transparent;
+  border: 1.5px solid rgba(255,255,255,0.12);
+  color: rgba(255,255,255,0.65);
+  border-radius: 8px;
+  padding: 7px 10px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: all 0.2s;
+  display: flex; align-items: center; gap: 5px;
+}
+.theme-toggle-btn:hover { border-color: rgba(255,255,255,0.25); color: #fff; }
+html[data-theme="light"] .theme-toggle-btn { border-color: rgba(0,0,0,0.12); color: #555; }
+html[data-theme="light"] .theme-toggle-btn:hover { border-color: rgba(0,0,0,0.25); color: #111; }
+.theme-toggle-btn .t-icon-dark { display: inline; }
+.theme-toggle-btn .t-icon-light { display: none; }
+html[data-theme="light"] .theme-toggle-btn .t-icon-dark { display: none; }
+html[data-theme="light"] .theme-toggle-btn .t-icon-light { display: inline; }
+
+/* ── Page intro ── */
+#page-intro {
+  background: var(--theme-hero-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  overflow: hidden;
+}
+#page-intro::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 60% -10%, rgba(108,92,231,0.18) 0%, transparent 70%),
+              radial-gradient(ellipse 50% 40% at 10% 80%,  rgba(139,133,255,0.10) 0%, transparent 60%);
+  pointer-events: none;
+}
+
+/* ── Nav ── */
+.intro-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 48px;
+  height: 64px;
+  background: var(--theme-nav-bg);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--theme-nav-border);
+  position: sticky; top: 0; z-index: 100;
+}
+.intro-nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+.intro-nav-wordmark { font-size: 17px; font-weight: 700; letter-spacing: -0.3px; color: var(--ink1); }
+.intro-nav-links { display: flex; gap: 32px; }
+.intro-nav-links a {
+  font-size: 14px; color: var(--ink3); text-decoration: none; font-weight: 500;
+  position: relative; padding-bottom: 2px; transition: color 0.2s;
+}
+.intro-nav-links a:hover, .intro-nav-links a.active { color: var(--ink1); }
+.intro-nav-links a.active::after {
+  content: ''; position: absolute; bottom: -3px; left: 0; right: 0;
+  height: 2px; background: var(--brand2); border-radius: 2px;
+}
+.intro-nav-actions { display: flex; align-items: center; gap: 12px; }
+.btn-nav-cta {
+  background: #ebebed; color: #111; border: none; border-radius: 8px;
+  padding: 8px 18px; font-size: 13px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+  font-family: inherit;
+}
+.btn-nav-cta:hover { background: #d8d8dc; transform: translateY(-1px); }
+.btn-nav-cta i { font-size: 9px; opacity: 0.6; }
+
+/* ── Hero ── */
+.intro-hero {
+  flex: 1; display: flex; align-items: center; justify-content: space-between;
+  padding: 80px 48px 60px;
+  max-width: 1280px; margin: 0 auto; width: 100%; gap: 48px;
+}
+.intro-hero-left { flex: 0 0 520px; max-width: 520px; }
+.intro-eyebrow {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(139,133,255,0.12); border: 1px solid rgba(139,133,255,0.2);
+  border-radius: 100px; padding: 5px 14px; font-size: 12px; color: var(--brand2);
+  font-weight: 500; letter-spacing: 0.2px; margin-bottom: 28px;
+}
+.intro-eyebrow .eb-divider { width: 1px; height: 12px; background: currentColor; opacity: 0.3; }
+.intro-eyebrow .eb-link { cursor: pointer; opacity: 0.8; }
+.intro-eyebrow .eb-link:hover { opacity: 1; }
+.intro-eyebrow .eb-link i { display: inline; font-size: 9px; opacity: 0.6; }
+.intro-h1 {
+  font-size: clamp(40px,5vw,60px); font-weight: 800; line-height: 1.08;
+  letter-spacing: -1.5px; color: var(--ink1); margin-bottom: 20px;
+}
+.intro-h1-line2 { display: block; }
+.intro-h1-accent { background: linear-gradient(135deg, var(--brand2), #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+.intro-subtitle { font-size: 16px; color: var(--ink2); line-height: 1.65; margin-bottom: 36px; max-width: 460px; }
+.intro-cta-group { display: flex; align-items: center; gap: 12px; margin-bottom: 36px; }
+.btn-enter {
+  background: var(--brand); color: #fff; border: none; border-radius: 10px;
+  padding: 13px 26px; font-size: 15px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; gap: 8px; transition: all 0.2s; font-family: inherit;
+  box-shadow: 0 4px 24px rgba(108,92,231,0.35);
+}
+.btn-enter:hover { background: #7b6cf0; transform: translateY(-2px); box-shadow: 0 8px 32px rgba(108,92,231,0.45); }
+.btn-learn {
+  background: rgba(255,255,255,0.06); color: var(--ink2); border: 1.5px solid rgba(255,255,255,0.1);
+  border-radius: 10px; padding: 12px 22px; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: all 0.2s; font-family: inherit;
+}
+.btn-learn:hover { background: rgba(255,255,255,0.1); color: var(--ink1); }
+.intro-trust-row { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.trust-item { font-size: 12px; color: var(--ink3); display: flex; align-items: center; gap: 6px; }
+.trust-item i { color: var(--brand2); font-size: 11px; }
+
+/* ── Hero right ── */
+.intro-hero-right { flex: 1; display: flex; align-items: center; justify-content: center; position: relative; min-height: 400px; }
+.hero-float-chip {
+  position: absolute; display: flex; align-items: center; gap: 10px;
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+  backdrop-filter: blur(10px); border-radius: 12px; padding: 10px 14px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.3); z-index: 10;
+}
+.chip-top-right { top: 0; right: 0; }
+.chip-mid-left { top: 40%; left: 0; transform: translateY(-50%); }
+.chip-bottom-right { bottom: 10%; right: 5%; }
+.hero-float-chip-icon {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: linear-gradient(135deg, var(--brand), var(--brand2));
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 13px; flex-shrink: 0;
+}
+.hero-float-chip-text { font-size: 11px; color: rgba(255,255,255,0.8); line-height: 1.4; }
+.hero-mock { position: relative; width: 340px; }
+.hero-mock-glow {
+  position: absolute; inset: -20px; border-radius: 24px;
+  background: radial-gradient(ellipse at center, rgba(108,92,231,0.25), transparent 70%);
+  filter: blur(20px); pointer-events: none;
+}
+.hero-card {
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 18px; backdrop-filter: blur(16px); overflow: hidden;
+}
+.hero-card-back {
+  position: absolute; inset: 0; transform: rotate(3deg) translateY(8px) scale(0.97);
+  z-index: 0; opacity: 0.5;
+}
+.hero-card-main { position: relative; z-index: 1; padding: 20px; }
+.hcm-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 16px; }
+.hcm-thumb {
+  width: 48px; height: 32px; border-radius: 6px;
+  background: linear-gradient(135deg, rgba(108,92,231,0.4), rgba(139,133,255,0.2));
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.hcm-thumb-bar { width: 20px; height: 3px; background: rgba(255,255,255,0.5); border-radius: 2px; }
+.hcm-title { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.9); margin-bottom: 3px; }
+.hcm-meta { font-size: 10px; color: rgba(255,255,255,0.4); }
+.hcm-question { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 14px; }
+.hcm-q-avatar {
+  width: 24px; height: 24px; border-radius: 50%; background: var(--brand);
+  display: flex; align-items: center; justify-content: center; font-size: 10px;
+  font-weight: 700; color: white; flex-shrink: 0;
+}
+.hcm-q-bubble {
+  background: rgba(108,92,231,0.2); border: 1px solid rgba(108,92,231,0.3);
+  border-radius: 0 10px 10px 10px; padding: 8px 12px;
+  font-size: 11px; color: rgba(255,255,255,0.8); line-height: 1.45;
+}
+.hcm-answer { padding: 12px; background: rgba(255,255,255,0.03); border-radius: 10px; margin-bottom: 12px; }
+.hcm-a-line {
+  height: 7px; border-radius: 4px; background: rgba(255,255,255,0.1); margin-bottom: 7px;
+}
+.hcm-a-line:nth-child(1) { width: 90%; }
+.hcm-a-line:nth-child(2) { width: 75%; }
+.hcm-a-line:nth-child(3) { width: 85%; margin-bottom: 10px; }
+.hcm-cite-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.hcm-cite {
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(108,92,231,0.15); border: 1px solid rgba(108,92,231,0.25);
+  border-radius: 6px; padding: 3px 8px; font-size: 10px; color: var(--brand2);
+}
+.hcm-cite-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--brand2); }
+.hcm-typing { display: flex; align-items: center; gap: 8px; font-size: 10px; color: rgba(255,255,255,0.35); }
+.hcm-typing-dots { display: flex; gap: 3px; }
+.hcm-typing-dots span {
+  width: 4px; height: 4px; border-radius: 50%; background: var(--brand2); opacity: 0.6;
+  animation: typingBounce 1.2s infinite;
+}
+.hcm-typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.hcm-typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-4px)} }
+
+/* ── Why section ── */
+.intro-why-section { padding: 80px 48px; background: rgba(0,0,0,0.15); }
+.intro-why-inner { max-width: 1280px; margin: 0 auto; }
+.intro-why-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; margin-bottom: 48px; }
+.intro-why-label { font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--brand2); margin-bottom: 10px; }
+.intro-why-title { font-size: clamp(28px,3.5vw,40px); font-weight: 800; color: var(--ink1); letter-spacing: -0.8px; line-height: 1.12; }
+.why-italic { font-style: italic; color: var(--brand2); }
+.intro-why-sub { max-width: 360px; font-size: 14px; color: var(--ink3); line-height: 1.7; margin-top: 8px; }
+.intro-why-cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 20px; }
+.why-card {
+  background: var(--theme-why-card); border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 16px; padding: 24px; transition: all 0.2s;
+}
+.why-card:hover { border-color: rgba(108,92,231,0.3); transform: translateY(-4px); }
+.why-card-num { font-size: 11px; color: var(--ink4); font-family: 'JetBrains Mono',monospace; margin-bottom: 14px; }
+.why-card-icon {
+  width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+  font-size: 16px; margin-bottom: 14px;
+}
+.why-card-icon.purple { background: rgba(108,92,231,0.15); color: var(--brand2); }
+.why-card-title { font-size: 14px; font-weight: 700; color: var(--ink1); margin-bottom: 8px; }
+.why-card-desc { font-size: 13px; color: var(--theme-why-card-desc); line-height: 1.6; }
+
+/* ── Footer ── */
+.intro-footer { padding: 60px 48px 0; border-top: 1px solid rgba(255,255,255,0.06); }
+.intro-footer-inner { max-width: 1280px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 40px; padding-bottom: 48px; }
+.footer-logo { display: flex; align-items: center; gap: 9px; margin-bottom: 12px; font-size: 15px; font-weight: 700; color: var(--ink1); }
+.footer-tagline { font-size: 13px; color: var(--ink3); line-height: 1.65; max-width: 280px; }
+.footer-col-title { font-size: 12px; font-weight: 700; color: var(--ink1); letter-spacing: 0.5px; margin-bottom: 16px; }
+.footer-col { display: flex; flex-direction: column; gap: 10px; }
+.footer-col a { font-size: 13px; color: var(--ink3); text-decoration: none; transition: color 0.2s; }
+.footer-col a:hover { color: var(--ink1); }
+.footer-stay-sub { font-size: 12px; color: var(--ink3); line-height: 1.6; margin-bottom: 14px; }
+.footer-email-row { display: flex; gap: 8px; }
+.footer-email-input {
+  flex: 1; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px; padding: 9px 14px; font-size: 13px; color: var(--ink1);
+  font-family: inherit; outline: none;
+}
+.footer-email-input::placeholder { color: var(--ink4); }
+.footer-email-input:focus { border-color: rgba(108,92,231,0.5); }
+.footer-subscribe-btn {
+  background: var(--brand); color: white; border: none; border-radius: 8px;
+  padding: 9px 16px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; gap: 6px; white-space: nowrap; transition: background 0.2s;
+}
+.footer-subscribe-btn:hover { background: #7b6cf0; }
+.footer-bottom {
+  max-width: 1280px; margin: 0 auto; padding: 20px 0;
+  border-top: 1px solid rgba(255,255,255,0.06);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 12px; color: var(--ink4);
+}
+.footer-socials { display: flex; gap: 16px; }
+.footer-socials a { color: var(--ink4); text-decoration: none; font-size: 14px; transition: color 0.2s; }
+.footer-socials a:hover { color: var(--ink1); }
+</style>
+</head>
+<body>
+
+<div id="page-intro">
+
+  <!-- NAV -->
+  <nav class="intro-nav">
+    <div class="intro-nav-logo">
+      <svg width="22" height="22" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#logoGrad)"/>
+        <path d="M11 12L16 22L21 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <defs>
+          <linearGradient id="logoGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="#8b85ff"/>
+            <stop offset="100%" stop-color="#6C5CE7"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <span class="intro-nav-wordmark">askVGIA</span>
+    </div>
+    <div class="intro-nav-links">
+      <a href="#" class="active">Product</a>
+      <a href="#">Features</a>
+      <a href="app/pricing.html">Pricing</a>
+      <a href="#">Docs</a>
+      <a href="#">Company</a>
+    </div>
+    <div class="intro-nav-actions">
+      <button class="theme-toggle-btn" onclick="toggleTheme()" title="Toggle theme">
+        <span class="t-icon-dark"><i class="fas fa-sun"></i></span>
+        <span class="t-icon-light"><i class="fas fa-moon"></i></span>
+      </button>
+      <button class="btn-nav-cta" onclick="enterApp()">Open app <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <div class="intro-hero">
+
+    <!-- LEFT -->
+    <div class="intro-hero-left">
+      <div class="intro-eyebrow">
+        <span>Now in private beta</span>
+        <span class="eb-divider"></span>
+        <span class="eb-link">Read changelog <i class="fas fa-arrow-right"></i></span>
+      </div>
+
+      <h1 class="intro-h1">
+        Search inside<br/>
+        <span class="intro-h1-line2">video, <span class="intro-h1-accent">like text.</span></span>
+      </h1>
+
+      <p class="intro-subtitle">
+        askVGIA indexes every spoken word, on-screen caption, and visible frame &mdash; then answers questions in any language with timestamped citations you can verify in one click.
+      </p>
+
+      <div class="intro-cta-group">
+        <button class="btn-enter" onclick="enterApp()">
+          Open the app <i class="fas fa-arrow-right"></i>
+        </button>
+        <button class="btn-learn" onclick="document.querySelector('.intro-why-section').scrollIntoView({behavior:'smooth'})">
+          See how it works
+        </button>
+      </div>
+
+      <div class="intro-trust-row">
+        <span class="trust-item"><i class="fas fa-language"></i> 40+ languages</span>
+        <span class="trust-item"><i class="fas fa-bolt"></i> Sub-second retrieval</span>
+        <span class="trust-item"><i class="fas fa-shield-halved"></i> Self-hostable</span>
+      </div>
+    </div>
+
+    <!-- RIGHT: product mockup card -->
+    <div class="intro-hero-right">
+      <div class="hero-float-chip chip-top-right">
+        <div class="hero-float-chip-icon"><i class="fas fa-language"></i></div>
+        <div class="hero-float-chip-text">Answers in any<br/>spoken language</div>
+      </div>
+      <div class="hero-float-chip chip-mid-left">
+        <div class="hero-float-chip-icon"><i class="fas fa-clock"></i></div>
+        <div class="hero-float-chip-text">Timestamped<br/>citations</div>
+      </div>
+      <div class="hero-float-chip chip-bottom-right">
+        <div class="hero-float-chip-icon"><i class="fas fa-eye"></i></div>
+        <div class="hero-float-chip-text">Reads on-screen<br/>text &amp; visuals</div>
+      </div>
+
+      <div class="hero-mock">
+        <div class="hero-mock-glow"></div>
+        <div class="hero-card hero-card-back"></div>
+        <div class="hero-card hero-card-main">
+          <div class="hcm-header">
+            <div class="hcm-thumb"><div class="hcm-thumb-bar"></div></div>
+            <div style="flex:1;min-width:0">
+              <div class="hcm-title">Q3 product all-hands &mdash; recording</div>
+              <div class="hcm-meta">42:18 &nbsp;·&nbsp; EN → FR &nbsp;·&nbsp; 312 chunks</div>
+            </div>
+          </div>
+          <div class="hcm-question">
+            <div class="hcm-q-avatar">M</div>
+            <div class="hcm-q-bubble">When does Sarah mention the European launch timeline?</div>
+          </div>
+          <div class="hcm-answer">
+            <div class="hcm-a-line"></div>
+            <div class="hcm-a-line"></div>
+            <div class="hcm-a-line"></div>
+            <div class="hcm-cite-row">
+              <span class="hcm-cite"><span class="hcm-cite-dot"></span>14:22</span>
+              <span class="hcm-cite"><span class="hcm-cite-dot"></span>27:08</span>
+              <span class="hcm-cite"><span class="hcm-cite-dot"></span>31:45</span>
+            </div>
+          </div>
+          <div class="hcm-typing">
+            <span class="hcm-typing-dots"><span></span><span></span><span></span></span>
+            <span>generating follow-up</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /intro-hero -->
+
+  <!-- WHY SECTION -->
+  <div class="intro-why-section">
+    <div class="intro-why-inner">
+      <div class="intro-why-header">
+        <div>
+          <div class="intro-why-label">Why askVGIA</div>
+          <h2 class="intro-why-title">Built for video as a <span class="why-italic">first-class</span> source.</h2>
+        </div>
+        <p class="intro-why-sub">
+          Most search tools treat video as opaque. We index speech, on-screen text, and frames separately, then fuse them at query time so every answer is grounded in something you can play back.
+        </p>
+      </div>
+
+      <div class="intro-why-cards">
+        <div class="why-card">
+          <div class="why-card-num">01</div>
+          <div class="why-card-icon purple"><i class="fas fa-magnifying-glass"></i></div>
+          <div class="why-card-title">Multimodal retrieval</div>
+          <div class="why-card-desc">Audio transcripts, OCR captions, and frame embeddings searched as one corpus.</div>
+        </div>
+        <div class="why-card">
+          <div class="why-card-num">02</div>
+          <div class="why-card-icon purple"><i class="fas fa-quote-right"></i></div>
+          <div class="why-card-title">Verifiable citations</div>
+          <div class="why-card-desc">Every claim links to a timestamp. Click to jump to the exact moment in the player.</div>
+        </div>
+        <div class="why-card">
+          <div class="why-card-num">03</div>
+          <div class="why-card-icon purple"><i class="fas fa-language"></i></div>
+          <div class="why-card-title">Cross-lingual queries</div>
+          <div class="why-card-desc">Ask in Arabic, get answers from English video. 40+ languages out of the box.</div>
+        </div>
+        <div class="why-card">
+          <div class="why-card-num">04</div>
+          <div class="why-card-icon purple"><i class="fas fa-diagram-project"></i></div>
+          <div class="why-card-title">Knowledge graph</div>
+          <div class="why-card-desc">Entities and relationships extracted automatically &mdash; ask about themes, not just words.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="intro-footer">
+    <div class="intro-footer-inner">
+      <div class="footer-col footer-brand">
+        <div class="footer-logo">
+          <svg width="22" height="22" viewBox="0 0 32 32" fill="none">
+            <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#footLogoGrad)"/>
+            <path d="M11 12L16 22L21 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+              <linearGradient id="footLogoGrad" x1="0" y1="0" x2="32" y2="32">
+                <stop offset="0%" stop-color="#8b85ff"/>
+                <stop offset="100%" stop-color="#6C5CE7"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span>askVGIA</span>
+        </div>
+        <p class="footer-tagline">Ask anything. Search inside video like text &mdash; with verifiable, timestamped answers.</p>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Product</div>
+        <a href="#">Features</a>
+        <a href="#">Pricing</a>
+        <a href="#">Changelog</a>
+        <a href="#">Roadmap</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Company</div>
+        <a href="#">About</a>
+        <a href="#">Contact</a>
+        <a href="#">Terms</a>
+        <a href="#">Privacy</a>
+      </div>
+      <div class="footer-col footer-stay">
+        <div class="footer-col-title">Newsletter</div>
+        <p class="footer-stay-sub">A short, occasional dispatch on retrieval, video AI, and what we ship.</p>
+        <div class="footer-email-row">
+          <input type="email" placeholder="you@work.com" class="footer-email-input"/>
+          <button class="footer-subscribe-btn" onclick="enterApp()">Subscribe <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 askVGIA — Built for video search.</span>
+      <div class="footer-socials">
+        <a href="#" aria-label="X"><i class="fab fa-x-twitter"></i></a>
+        <a href="#" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+        <a href="#" aria-label="GitHub"><i class="fab fa-github"></i></a>
+      </div>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+function toggleTheme() {
+  const html = document.documentElement;
+  const isDark = html.getAttribute('data-theme') !== 'light';
+  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
+  localStorage.setItem('askvgia-theme', isDark ? 'light' : 'dark');
+}
+(function() {
+  const saved = localStorage.getItem('askvgia-theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', saved);
+})();
+
+function enterApp() {
+  window.location.href = '/app';
+}
+</script>
+</body>
+</html>

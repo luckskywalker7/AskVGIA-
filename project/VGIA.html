@@ -1,0 +1,2430 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>VGIA — Every Video. Instantly Searchable.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Homemade+Apple&family=Kalam:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B0B14;
+    --ink-2: #1a1a2e;
+    --muted: #5a5a72;
+    --muted-2: #8a8aa0;
+    --line: #E6E6EF;
+    --bg: #ffffff;
+    --bg-soft: #F6F5FB;
+    --accent: #6366F1;      /* indigo */
+    --accent-2: #8B5CF6;    /* violet */
+    --accent-3: #A78BFA;
+    --highlight: #FEF08A;   /* yellow highlight */
+    --danger: #EF4444;
+    --success: #10B981;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: 0; background: none; }
+  .hand { font-family: 'Kalam', 'Caveat', cursive; font-weight: 700; letter-spacing: -0.005em; }
+  .script { font-family: 'Caveat', cursive; font-weight: 600; }
+  .script-em, em.script-em { font-family: 'Caveat', cursive; font-style: italic; font-weight: 700; }
+  .container { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+  .container-wide { max-width: 1360px; margin: 0 auto; padding: 0 24px; }
+  .accent { color: var(--accent); }
+  .accent-2 { color: var(--accent-2); }
+  .marker {
+    background: var(--highlight);
+    padding: 0 .18em;
+    border-radius: 4px;
+    box-decoration-break: clone;
+  }
+
+  /* ========== HEADER ========== */
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,.85);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid rgba(11,11,20,.06);
+  }
+  .nav-inner {
+    display: flex; align-items: center; gap: 32px;
+    height: 64px;
+  }
+  .logo-link {
+    display: inline-flex; align-items: center;
+    height: 46px; flex-shrink: 0;
+    transition: transform .25s;
+  }
+  .logo-link:hover { transform: translateY(-1px); }
+  .logo-img {
+    height: 46px; width: auto;
+    display: block;
+    transition: filter .35s ease;
+  }
+  /* When nav sits over the dark hero video, invert the logo so it stays visible */
+  .nav.on-dark .logo-img {
+    filter: brightness(0) invert(1);
+  }
+  /* On dark site theme (below the hero, on dark backgrounds), also brighten */
+  html[data-theme="dark"] .logo-img {
+    filter: brightness(0) invert(1);
+  }
+  .lang-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 12px; border-radius: 999px;
+    background: var(--bg-soft);
+    font-size: 13px; font-weight: 700;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: background .2s, color .2s;
+  }
+  .lang-toggle:hover { background: rgba(99,102,241,.1); color: var(--accent); }
+  .lang-toggle .globe { display: inline-flex; }
+  .nav.on-dark { background: rgba(11,11,20,.45); border-bottom-color: rgba(255,255,255,.08); }
+  .nav.on-dark .nav-item, .nav.on-dark .link { color: rgba(255,255,255,.92); }
+  .nav.on-dark .nav-item:hover { background: rgba(255,255,255,.1); }
+  .nav.on-dark .lang-toggle { background: rgba(255,255,255,.14); color: #fff; }
+  .nav.on-dark .lang-toggle:hover { background: rgba(255,255,255,.22); }
+  .login-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 999px;
+    font-size: 13.5px; font-weight: 600;
+    color: var(--ink-2);
+    border: 1px solid var(--line);
+    transition: background .15s, border-color .15s;
+  }
+  .login-btn:hover { background: var(--bg-soft); border-color: var(--ink-2); }
+  .nav.on-dark .login-btn { color: #fff; border-color: rgba(255,255,255,.28); }
+  .nav.on-dark .login-btn:hover { background: rgba(255,255,255,.14); border-color: rgba(255,255,255,.5); }
+  .signup-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border-radius: 999px;
+    font-size: 13.5px; font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    box-shadow: 0 6px 18px -6px rgba(99,102,241,.5);
+    transition: transform .15s;
+  }
+  .signup-btn:hover { transform: translateY(-1px); }
+  .nav-menu {
+    display: flex; gap: 2px; align-items: center;
+    flex: 1; justify-content: center;
+  }
+  .nav-item {
+    padding: 8px 14px; font-size: 14px; font-weight: 500;
+    color: var(--ink-2); border-radius: 8px;
+    display: inline-flex; align-items: center; gap: 4px;
+    transition: background .15s, color .15s;
+    position: relative;
+    white-space: nowrap;
+  }
+  .nav-item:hover { background: var(--bg-soft); color: var(--ink); }
+  .nav-item.active { color: var(--accent); font-weight: 600; }
+  .nav-item.active::after {
+    content: ""; position: absolute;
+    left: 14px; right: 14px; bottom: 2px;
+    height: 2px; border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  }
+  .nav.on-dark .nav-item.active { color: #fff; }
+  .nav.on-dark .nav-item.active::after { background: linear-gradient(90deg, #A78BFA, #C4B5FD); }
+  .nav-right { display: flex; align-items: center; gap: 8px; }
+  .nav-right a.link {
+    font-size: 14px; font-weight: 500; padding: 8px 12px; color: var(--ink-2);
+  }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ink-2);
+  }
+  .icon-btn:hover { background: var(--bg-soft); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: 999px;
+    font-weight: 600; font-size: 14px;
+    transition: transform .15s ease, box-shadow .2s, background .2s;
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: var(--ink); color: #fff;
+  }
+  .btn-primary:hover { transform: translateY(-1px); background: var(--ink-2); }
+  .btn-accent {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    box-shadow: 0 8px 24px -8px rgba(99,102,241,.55);
+  }
+  .btn-accent:hover { transform: translateY(-1px); box-shadow: 0 12px 32px -8px rgba(99,102,241,.7); }
+  /* Handwritten Try VGIA CTA */
+  .btn-try {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 999px;
+    font-family: 'Caveat', cursive;
+    font-weight: 700; font-size: 22px;
+    letter-spacing: -0.005em;
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 55%, #06B6D4 100%);
+    background-size: 200% 100%;
+    background-position: 0% 50%;
+    color: #fff;
+    box-shadow: 0 10px 26px -8px rgba(99,102,241,.55);
+    transition: transform .2s, box-shadow .3s, background-position .6s cubic-bezier(.6,.05,.05,1);
+    text-shadow: 0 1px 6px rgba(0,0,0,.18);
+  }
+  .btn-try:hover {
+    transform: translateY(-2px) rotate(-1deg);
+    background-position: 100% 50%;
+    box-shadow: 0 14px 36px -8px rgba(6,182,212,.55);
+  }
+  .btn-try .arr { transition: transform .2s; }
+  .btn-try:hover .arr { transform: translateX(3px); }
+  .btn-ghost {
+    background: #fff; color: var(--ink); border: 1px solid var(--line);
+  }
+  .btn-ghost:hover { border-color: var(--ink); }
+
+  /* ========== HERO (video-background full-bleed) ========== */
+  .hero {
+    position: relative;
+    min-height: 92vh;
+    padding: 100px 0 80px;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff;
+    isolation: isolate;
+    margin-top: -64px; /* pull under sticky nav */
+    padding-top: 164px;
+  }
+  .hero-bg-video, .hero-bg-video video {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%; object-fit: cover;
+    z-index: -2;
+  }
+  .hero-bg-video::after {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(11,11,20,.55) 0%, rgba(11,11,20,.35) 40%, rgba(11,11,20,.85) 100%);
+    z-index: -1;
+  }
+  .hero-bg-tint {
+    position: absolute; inset: 0; z-index: -1;
+    background: linear-gradient(180deg, rgba(11,11,20,.55) 0%, rgba(11,11,20,.35) 40%, rgba(11,11,20,.85) 100%);
+    pointer-events: none;
+  }
+  .hero-inner {
+    max-width: 1200px; margin: 0 auto; padding: 0 24px;
+    display: flex; flex-direction: column; align-items: center;
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: 999px;
+    background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.2);
+    backdrop-filter: blur(10px);
+    font-size: 13px; color: #fff; font-weight: 500;
+    margin-bottom: 24px;
+  }
+  .hero-badge .pulse {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 0 rgba(99,102,241,.6);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(99,102,241,.5); }
+    70% { box-shadow: 0 0 0 10px rgba(99,102,241,0); }
+    100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
+  }
+  .hero-title {
+    font-family: 'Kalam', cursive;
+    font-weight: 700;
+    font-size: clamp(48px, 7vw, 96px);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+    margin: 0 0 20px;
+    color: #fff;
+    text-align: center;
+    text-shadow: 0 2px 20px rgba(0,0,0,.3);
+  }
+  .hero-title em {
+    font-style: italic;
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+    background: var(--highlight);
+    padding: 0 .14em;
+    border-radius: 6px;
+    color: var(--ink);
+    display: inline-block;
+    transform: rotate(-1deg);
+    text-shadow: none;
+  }
+  .hero-sub {
+    font-size: 19px; line-height: 1.55; color: rgba(255,255,255,.88);
+    max-width: 640px; margin: 0 auto 32px; text-align: center;
+  }
+  .hero-eyebrow {
+    font-family: 'Kalam', cursive;
+    font-weight: 700;
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #A78BFA;
+    margin-bottom: 18px;
+    text-align: center;
+    text-shadow: 0 2px 8px rgba(0,0,0,.4);
+  }
+  .hero-ctas { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; justify-content: center; }
+  .hero-cta-note { font-size: 13px; color: rgba(255,255,255,.65); margin-top: 14px; text-align: center; }
+
+  /* Small floating chips over hero video */
+  .hero-chips {
+    position: absolute; inset: 0;
+    pointer-events: none;
+    z-index: 2;
+  }
+  .hero-chip {
+    position: absolute;
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 999px;
+    background: rgba(255,255,255,.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255,255,255,.22);
+    color: #fff; font-size: 12px; font-weight: 700;
+    animation: chipFloat 6s ease-in-out infinite;
+    pointer-events: auto;
+  }
+  .hero-chip .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: #10B981;
+    box-shadow: 0 0 0 3px rgba(16,185,129,.3);
+    animation: dotPulse 2s ease infinite;
+  }
+  .hero-chip.c1 { top: 22%; left: 8%; animation-delay: 0s; }
+  .hero-chip.c2 { top: 68%; right: 10%; animation-delay: 2s; }
+  .hero-chip.c3 { top: 34%; right: 6%; animation-delay: 1s; }
+  @keyframes chipFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  .hero-blob { display: none; }
+  .hero-blob-2 { display: none; }
+  .hero-scroll-hint {
+    position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,.7); font-size: 11px; letter-spacing: 0.16em;
+    text-transform: uppercase; font-weight: 600;
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    z-index: 3;
+    animation: scrollBounce 2s ease-in-out infinite;
+  }
+  .hero-scroll-hint svg { opacity: .8; }
+  @keyframes scrollBounce {
+    0%, 100% { transform: translate(-50%, 0); }
+    50% { transform: translate(-50%, -6px); }
+  }
+
+  /* Blob bg */
+  .hero-blob {
+    position: absolute;
+    width: 780px; height: 780px;
+    right: -240px; top: -180px;
+    background: radial-gradient(closest-side, rgba(139,92,246,.22), rgba(99,102,241,.10) 40%, transparent 70%);
+    filter: blur(20px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hero-blob-2 {
+    position: absolute;
+    width: 500px; height: 500px;
+    left: -180px; bottom: -160px;
+    background: radial-gradient(closest-side, rgba(99,102,241,.15), transparent 70%);
+    filter: blur(20px);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ========== SECTION heading ========== */
+  .section-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 12px; border-radius: 999px;
+    background: rgba(99,102,241,.09); color: var(--accent);
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: 20px;
+  }
+  .section-title {
+    font-family: 'Kalam', cursive;
+    font-weight: 700;
+    font-size: clamp(34px, 4.2vw, 56px);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    margin: 0 0 16px;
+  }
+  .section-title em {
+    font-style: italic;
+    font-family: 'Caveat', cursive;
+    font-weight: 700;
+  }
+  .section-sub {
+    font-size: 17px; color: var(--muted); line-height: 1.55;
+    max-width: 640px; margin: 0 auto;
+  }
+  .section-head {
+    text-align: center; margin-bottom: 56px;
+  }
+
+  /* ========== MODULES (wow animation) ========== */
+  .modules {
+    padding: 100px 0 120px;
+    background: linear-gradient(180deg, #fff 0%, var(--bg-soft) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .modules-wrap { position: relative; max-width: 1000px; margin: 0 auto; }
+  .modules-svg-connect {
+    position: absolute; inset: 0; pointer-events: none; z-index: 0;
+    overflow: visible;
+  }
+  .modules-svg-connect path {
+    stroke: url(#modGrad);
+    stroke-width: 1.5;
+    fill: none;
+    stroke-dasharray: 6 6;
+    opacity: 0;
+    stroke-dashoffset: 200;
+    animation: connectIn 1.2s ease-out forwards, dashflow 4s linear infinite;
+  }
+  .modules.in .modules-svg-connect path { animation-play-state: running; }
+  @keyframes connectIn {
+    from { opacity: 0; stroke-dashoffset: 200; }
+    to { opacity: .35; stroke-dashoffset: 0; }
+  }
+  @keyframes dashflow { to { stroke-dashoffset: -80; } }
+
+  .modules-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 28px 20px;
+    position: relative; z-index: 1;
+  }
+  @media (max-width: 900px) { .modules-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 520px) { .modules-grid { grid-template-columns: repeat(2, 1fr); } }
+  .module {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    text-align: center;
+    padding: 8px;
+    position: relative;
+    cursor: pointer;
+    opacity: 0; transform: translateY(20px) scale(.85);
+    transition: transform .5s cubic-bezier(.34,1.56,.64,1), opacity .4s;
+  }
+  .modules.in .module { opacity: 1; transform: translateY(0) scale(1); }
+  .modules.in .module:nth-child(1)  { transition-delay: .05s; }
+  .modules.in .module:nth-child(2)  { transition-delay: .10s; }
+  .modules.in .module:nth-child(3)  { transition-delay: .15s; }
+  .modules.in .module:nth-child(4)  { transition-delay: .20s; }
+  .modules.in .module:nth-child(5)  { transition-delay: .25s; }
+  .modules.in .module:nth-child(6)  { transition-delay: .30s; }
+  .modules.in .module:nth-child(7)  { transition-delay: .35s; }
+  .modules.in .module:nth-child(8)  { transition-delay: .40s; }
+  .modules.in .module:nth-child(9)  { transition-delay: .45s; }
+  .modules.in .module:nth-child(10) { transition-delay: .50s; }
+  .modules.in .module:nth-child(11) { transition-delay: .55s; }
+  .modules.in .module:nth-child(12) { transition-delay: .60s; }
+  .modules.in .module:nth-child(13) { transition-delay: .65s; }
+
+  .module:hover { transform: translateY(-6px) rotate(-2deg); }
+  .module:hover .module-ico { transform: scale(1.08); box-shadow: 0 12px 28px -6px rgba(99,102,241,.3); }
+  .module-ico {
+    width: 60px; height: 60px; border-radius: 16px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #fff; box-shadow: 0 6px 18px -4px rgba(11,11,20,.08), 0 2px 4px rgba(11,11,20,.04);
+    border: 1px solid rgba(11,11,20,.04);
+    transition: transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s;
+  }
+  .module-dot {
+    position: absolute; bottom: -10px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.18);
+    animation: dotPulse 2s ease-in-out infinite;
+  }
+  @keyframes dotPulse {
+    0%, 100% { box-shadow: 0 0 0 3px rgba(99,102,241,.18); }
+    50% { box-shadow: 0 0 0 8px rgba(99,102,241,0); }
+  }
+  .module-label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .modules-soon {
+    text-align: center; margin-top: 60px;
+    font-size: 13px; color: var(--muted); letter-spacing: 0.02em;
+  }
+  .modules-soon-chips {
+    display: inline-flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; justify-content: center;
+  }
+  .soon-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 999px;
+    background: #fff; border: 1px solid var(--line);
+    font-size: 13px; color: var(--ink-2); font-weight: 500;
+  }
+  .modules-see-all {
+    display: block; margin: 32px auto 0;
+    text-align: center;
+    color: var(--accent); font-weight: 600; font-size: 14px;
+  }
+
+  /* ========== VIDEO CARDS (hover) ========== */
+  .video-strip {
+    background: var(--ink);
+    color: #fff;
+    padding: 100px 0 120px;
+    position: relative;
+  }
+  .video-strip .section-title { color: #fff; }
+  .video-strip .section-sub { color: rgba(255,255,255,.65); }
+  .vcards {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    max-width: 1200px; margin: 0 auto;
+  }
+  @media (max-width: 900px) { .vcards { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px) { .vcards { grid-template-columns: 1fr; } }
+  .vcard {
+    background: #14141F;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: transform .3s, border-color .3s;
+  }
+  .vcard:hover { transform: translateY(-4px); border-color: rgba(139,92,246,.5); }
+  .vcard-media {
+    aspect-ratio: 16/10;
+    position: relative;
+    overflow: hidden;
+    background: #0a0a12;
+  }
+  .vcard-media video, .vcard-media img.poster {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform .5s;
+  }
+  .vcard:hover .vcard-media video { transform: scale(1.03); }
+  .vcard-play {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; opacity: .9;
+    pointer-events: none;
+    transition: opacity .3s;
+  }
+  .vcard:hover .vcard-play { opacity: 0; }
+  .vcard-play-circle {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,.2);
+  }
+  .vcard-body { padding: 22px; }
+  .vcard-title { font-size: 18px; font-weight: 700; margin: 0 0 8px; }
+  .vcard-desc { font-size: 14px; color: rgba(255,255,255,.62); line-height: 1.55; margin: 0 0 16px; min-height: 60px; }
+  .vcard-cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 999px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14);
+    font-size: 13px; font-weight: 600; color: #fff;
+    transition: background .2s;
+  }
+  .vcard-cta:hover { background: rgba(139,92,246,.2); border-color: var(--accent-2); }
+  .vcard-tag {
+    position: absolute; top: 12px; left: 12px;
+    padding: 4px 10px; border-radius: 999px;
+    background: rgba(0,0,0,.55); backdrop-filter: blur(6px);
+    color: #fff; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    z-index: 2;
+  }
+
+  /* ========== PROBLEM / SOLUTION (image) ========== */
+  .ps-section { padding: 100px 0 60px; background: #fff; }
+  .ps-intro { text-align: center; margin-bottom: 60px; }
+  .ps-image-wrap {
+    max-width: 1200px; margin: 0 auto;
+    border-radius: 24px; overflow: hidden;
+    box-shadow: 0 40px 80px -30px rgba(11,11,20,.25);
+  }
+  .ps-image-wrap img { display: block; width: 100%; height: auto; }
+  .ps-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 0;
+    max-width: 1400px;
+    margin: 0 auto;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 30px 80px -30px rgba(11,11,20,.25);
+  }
+  @media (max-width: 900px) { .ps-grid { grid-template-columns: 1fr; } }
+  .ps-panel {
+    padding: 56px 48px;
+    display: flex; flex-direction: column; gap: 24px;
+    position: relative;
+    min-height: 640px;
+  }
+  .ps-panel.problem {
+    background:
+      linear-gradient(140deg, rgba(11,11,20,.55) 0%, rgba(11,11,20,.82) 100%),
+      url('https://images.pexels.com/photos/4778611/pexels-photo-4778611.jpeg?auto=compress&cs=tinysrgb&w=1400') center/cover;
+    color: #fff;
+  }
+  .ps-panel.solution {
+    background: #F6F5FB;
+    color: var(--ink);
+  }
+  .ps-panel h3 {
+    font-family: 'Kalam', cursive;
+    font-weight: 700;
+    font-size: clamp(28px, 2.5vw, 40px);
+    line-height: 1.2; letter-spacing: -0.01em;
+    margin: 0 0 4px; max-width: 20ch;
+  }
+  .ps-panel h3 em { font-style: normal; font-family: 'Caveat', cursive; color: #93C5FD; font-weight: 700; }
+  .ps-panel.solution h3 em { color: var(--accent); font-family: 'Caveat', cursive; }
+  .ps-panel p {
+    font-size: 15px; line-height: 1.6;
+    max-width: 42ch; margin: 0;
+  }
+  .ps-panel.problem p { color: rgba(255,255,255,.85); }
+  .ps-panel.solution p { color: var(--muted); }
+
+  /* Problem thought bubbles */
+  .ps-thoughts {
+    position: absolute; top: 40px; right: 40px;
+    display: flex; gap: 10px;
+  }
+  .ps-thought {
+    background: rgba(255,255,255,.95); color: var(--ink);
+    border-radius: 999px;
+    padding: 10px 14px 10px 12px;
+    font-size: 11.5px; font-weight: 700;
+    display: flex; align-items: center; gap: 6px;
+    box-shadow: 0 12px 28px rgba(0,0,0,.25);
+    animation: bob 3s ease-in-out infinite;
+    position: relative;
+  }
+  .ps-thought:nth-child(2) { animation-delay: .4s; }
+  .ps-thought:nth-child(3) { animation-delay: .8s; }
+  @keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+  /* Problem screen mockup */
+  .ps-screen {
+    background: #14141F;
+    border-radius: 12px;
+    padding: 10px;
+    box-shadow: 0 24px 48px rgba(0,0,0,.4);
+    border: 1px solid rgba(255,255,255,.08);
+    max-width: 380px;
+    align-self: flex-end;
+    width: 100%;
+  }
+  .ps-screen-head {
+    display: flex; align-items: center; gap: 6px;
+    padding: 2px 4px 8px;
+  }
+  .ps-screen-head .d { width: 7px; height: 7px; border-radius: 50%; background: rgba(255,255,255,.18); }
+  .ps-screen-body {
+    background: #F9FAFB; border-radius: 8px; padding: 12px;
+    display: flex; gap: 10px;
+  }
+  .ps-screen-body .txt { flex: 0 0 42%; font-size: 10px; color: #374151; }
+  .ps-screen-body .txt b { display: block; color: #111; font-size: 11px; margin-bottom: 4px; }
+  .ps-screen-body .txt ul { margin: 4px 0; padding-left: 12px; line-height: 1.6; font-size: 9.5px; }
+  .ps-screen-body .img {
+    flex: 1; aspect-ratio: 4/3;
+    background: url('https://images.pexels.com/photos/5905901/pexels-photo-5905901.jpeg?auto=compress&cs=tinysrgb&w=400') center/cover;
+    border-radius: 4px;
+  }
+  .ps-screen-timeline {
+    margin-top: 8px;
+    height: 4px; background: #E5E7EB; border-radius: 2px;
+    position: relative; overflow: hidden;
+  }
+  .ps-screen-timeline::before {
+    content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 40%;
+    background: linear-gradient(90deg, #6366F1, #8B5CF6);
+    animation: tlprogress 4s ease-in-out infinite;
+  }
+  @keyframes tlprogress { 0%,100% { width: 20%; } 50% { width: 65%; } }
+
+  /* Solution feature list */
+  .ps-checks { display: flex; flex-direction: column; gap: 10px; margin: 8px 0; }
+  .ps-check {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 15px; font-weight: 500; color: var(--ink);
+  }
+  .ps-check .c {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: rgba(99,102,241,.12); color: var(--accent);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+
+  /* Solution mock card */
+  .ps-solution-mock {
+    background: #fff;
+    border-radius: 14px;
+    box-shadow: 0 20px 50px -15px rgba(11,11,20,.15);
+    padding: 12px;
+    max-width: 440px;
+    align-self: flex-end;
+    width: 100%;
+  }
+  .ps-mock-title { font-size: 13px; font-weight: 700; padding: 4px 6px 8px; }
+  .ps-mock-video {
+    aspect-ratio: 16/10;
+    background: url('https://images.pexels.com/photos/5905901/pexels-photo-5905901.jpeg?auto=compress&cs=tinysrgb&w=600') center/cover;
+    border-radius: 8px;
+    position: relative;
+  }
+  .ps-mock-timestamp {
+    position: absolute; top: 8px; left: 8px;
+    background: rgba(0,0,0,.6); color: #fff;
+    padding: 3px 10px; border-radius: 999px; font-size: 10px; font-weight: 700;
+    backdrop-filter: blur(4px);
+  }
+  .ps-mock-search {
+    display: flex; align-items: center; gap: 8px;
+    background: #F3F4F6;
+    padding: 8px 12px 8px 14px; border-radius: 999px;
+    margin-top: 10px;
+    font-size: 12px; color: var(--muted);
+  }
+  .ps-mock-search .send {
+    margin-left: auto;
+    width: 24px; height: 24px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: inline-flex; align-items: center; justify-content: center; color: #fff;
+  }
+
+  /* Bottom mini-cards (problem panel) */
+  .ps-mini-cards {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-top: auto;
+    z-index: 2; position: relative;
+  }
+  .ps-mini-card {
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.14);
+    backdrop-filter: blur(6px);
+    border-radius: 12px;
+    padding: 14px 12px;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  }
+  .ps-mini-card .ico {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(167,139,250,.22); color: #C4B5FD;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .ps-mini-card .lbl { font-size: 12.5px; font-weight: 700; }
+  .ps-mini-card .sub { font-size: 10.5px; opacity: .7; line-height: 1.4; }
+
+  /* ========== FEATURES WOW GRID ========== */
+  .features-wow { padding: 20px 0 120px; background: #fff; }
+  .features-wow .container { max-width: 1200px; }
+  .fw-grid {
+    display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;
+    margin-top: 0;
+  }
+  @media (max-width: 780px) { .fw-grid { grid-template-columns: 1fr; } }
+  .fw-card {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 30px;
+    display: grid; grid-template-columns: 1fr auto; gap: 20px;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
+    transition: transform .5s cubic-bezier(.2,.9,.3,1), box-shadow .5s, border-color .5s;
+    opacity: 0; transform: translateY(30px) scale(.97);
+  }
+  .fw-card.in { opacity: 1; transform: translateY(0) scale(1); }
+  .fw-card::before {
+    content: ""; position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(99,102,241,.05), rgba(139,92,246,.03));
+    opacity: 0; transition: opacity .4s;
+    pointer-events: none;
+  }
+  .fw-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 30px 60px -20px rgba(99,102,241,.25);
+    border-color: rgba(99,102,241,.4);
+  }
+  .fw-card:hover::before { opacity: 1; }
+  .fw-card h4 {
+    font-family: 'Kalam', cursive; font-weight: 700;
+    font-size: 22px; margin: 0 0 8px;
+    letter-spacing: -0.005em;
+  }
+  .fw-card p {
+    font-size: 14px; color: var(--muted); line-height: 1.55; margin: 0;
+    max-width: 32ch;
+  }
+  .fw-visual {
+    width: 200px; height: 130px;
+    position: relative;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  /* Visual: Multimodal */
+  .fw-multi { display: flex; align-items: center; gap: 8px; }
+  .fw-multi .mi {
+    width: 36px; height: 36px; border-radius: 10px;
+    background: linear-gradient(135deg, rgba(99,102,241,.15), rgba(139,92,246,.1));
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--accent);
+    animation: micycle 3s ease-in-out infinite;
+  }
+  .fw-multi .mi:nth-child(2) { animation-delay: .3s; }
+  .fw-multi .mi:nth-child(3) { animation-delay: .6s; }
+  @keyframes micycle {
+    0%, 100% { transform: translateY(0) scale(1); box-shadow: 0 0 0 0 rgba(99,102,241,0); }
+    50% { transform: translateY(-4px) scale(1.05); box-shadow: 0 8px 20px -6px rgba(99,102,241,.4); }
+  }
+  .fw-waveform {
+    display: flex; align-items: center; gap: 3px;
+    margin-left: 6px; height: 40px;
+  }
+  .fw-waveform span {
+    display: block; width: 3px; border-radius: 2px;
+    background: linear-gradient(180deg, var(--accent), var(--accent-2));
+    animation: wave 1.2s ease-in-out infinite;
+  }
+  .fw-waveform span:nth-child(1) { height: 18px; }
+  .fw-waveform span:nth-child(2) { height: 30px; animation-delay: .1s; }
+  .fw-waveform span:nth-child(3) { height: 22px; animation-delay: .2s; }
+  .fw-waveform span:nth-child(4) { height: 36px; animation-delay: .3s; }
+  .fw-waveform span:nth-child(5) { height: 14px; animation-delay: .4s; }
+  .fw-waveform span:nth-child(6) { height: 26px; animation-delay: .5s; }
+  .fw-waveform span:nth-child(7) { height: 20px; animation-delay: .6s; }
+  .fw-waveform span:nth-child(8) { height: 32px; animation-delay: .7s; }
+  @keyframes wave { 0%, 100% { transform: scaleY(.4); } 50% { transform: scaleY(1); } }
+
+  /* Visual: Knowledge Graph */
+  .fw-graph { width: 100%; height: 100%; }
+  .fw-graph svg { width: 100%; height: 100%; overflow: visible; }
+  .fw-graph .node {
+    fill: #fff; stroke: var(--accent); stroke-width: 2;
+    animation: nodepulse 3s ease-in-out infinite;
+  }
+  .fw-graph .node.center { fill: var(--accent); stroke: var(--accent-2); }
+  .fw-graph .node.n1 { animation-delay: .3s; }
+  .fw-graph .node.n2 { animation-delay: .6s; }
+  .fw-graph .node.n3 { animation-delay: .9s; }
+  .fw-graph .node.n4 { animation-delay: 1.2s; }
+  .fw-graph .link {
+    stroke: var(--accent); stroke-width: 1.5; opacity: .35;
+    stroke-dasharray: 4 4;
+    animation: dash 6s linear infinite;
+  }
+  .fw-graph .label { font: 700 8.5px 'Plus Jakarta Sans', sans-serif; fill: var(--ink); }
+  @keyframes nodepulse {
+    0%, 100% { r: 7; opacity: 1; }
+    50% { r: 9; opacity: .7; }
+  }
+  @keyframes dash { to { stroke-dashoffset: -40; } }
+
+  /* Visual: Cross-language */
+  .fw-langs { position: relative; width: 100%; height: 100%; }
+  .fw-lang-chip {
+    position: absolute;
+    padding: 5px 10px; border-radius: 999px;
+    background: #fff; border: 1px solid var(--line);
+    font-size: 11px; font-weight: 700;
+    box-shadow: 0 6px 14px rgba(11,11,20,.06);
+    animation: langfloat 5s ease-in-out infinite;
+    white-space: nowrap;
+  }
+  .fw-lang-chip.l1 { top: 8%; left: 2%; color: #7C3AED; background: rgba(139,92,246,.08); border-color: rgba(139,92,246,.25); }
+  .fw-lang-chip.l2 { top: 42%; right: 4%; color: #059669; background: rgba(16,185,129,.08); border-color: rgba(16,185,129,.25); animation-delay: 1s; }
+  .fw-lang-chip.l3 { bottom: 8%; left: 14%; color: #DB2777; background: rgba(219,39,119,.08); border-color: rgba(219,39,119,.25); animation-delay: 2s; }
+  .fw-lang-chip.l4 { top: 22%; right: 30%; color: var(--accent); background: rgba(99,102,241,.08); border-color: rgba(99,102,241,.25); animation-delay: .5s; }
+  @keyframes langfloat { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-6px); } }
+
+  /* Visual: Source verification */
+  .fw-sources { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+  .fw-src-row {
+    display: flex; align-items: center; gap: 10px;
+    background: #fff; border: 1px solid var(--line); border-radius: 10px;
+    padding: 8px 12px; font-size: 12px;
+  }
+  .fw-src-row .fico {
+    width: 22px; height: 22px; border-radius: 6px;
+    background: rgba(99,102,241,.1); color: var(--accent);
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .fw-src-row .fname { font-weight: 700; font-size: 11.5px; }
+  .fw-src-row .ftime { margin-left: auto; color: var(--muted); font-weight: 600; font-family: 'SF Mono', ui-monospace, monospace; font-size: 10.5px; }
+  .fw-card.in .fw-src-row { animation: srcslide .6s ease-out backwards; }
+  .fw-card.in .fw-src-row:nth-child(1) { animation-delay: .2s; }
+  .fw-card.in .fw-src-row:nth-child(2) { animation-delay: .35s; }
+  .fw-card.in .fw-src-row:nth-child(3) { animation-delay: .5s; }
+  @keyframes srcslide {
+    from { opacity: 0; transform: translateX(-12px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  /* ========== WITH / WITHOUT (chaos vs clean) ========== */
+  .ww-section {
+    padding: 100px 0 120px;
+    background: linear-gradient(180deg, #fff, var(--bg-soft));
+    position: relative;
+    overflow: hidden;
+  }
+  .ww-toggle-wrap { display: flex; justify-content: center; margin: 32px 0 12px; }
+  .ww-toggle {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px; border-radius: 999px;
+    background: #fff; border: 1px solid var(--line);
+    box-shadow: 0 4px 14px rgba(11,11,20,.06);
+    position: relative;
+  }
+  .ww-toggle .thumb {
+    position: absolute; top: 4px; bottom: 4px;
+    width: calc(50% - 4px); left: 4px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #EF4444, #F97316);
+    transition: transform .5s cubic-bezier(.6,.05,.05,1);
+    z-index: 0;
+  }
+  .ww-toggle.with .thumb {
+    transform: translateX(100%);
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+  }
+  .ww-opt {
+    position: relative; z-index: 1;
+    padding: 10px 22px; border-radius: 999px;
+    font-size: 14px; font-weight: 700;
+    color: var(--muted);
+    transition: color .3s;
+    display: inline-flex; align-items: center; gap: 8px;
+    min-width: 140px; justify-content: center;
+    cursor: pointer;
+  }
+  .ww-toggle.without .ww-opt.without,
+  .ww-toggle.with .ww-opt.with { color: #fff; }
+  .ww-scroll-note {
+    text-align: center; font-size: 11px; color: var(--muted-2);
+    margin-bottom: 40px; letter-spacing: 0.14em; text-transform: uppercase;
+    font-weight: 600;
+  }
+
+  /* Two stages, cross-fade */
+  .ww-stage {
+    position: relative;
+    max-width: 1120px; margin: 0 auto;
+    min-height: 560px;
+  }
+  .ww-panel {
+    position: absolute; inset: 0;
+    padding: 20px;
+    transition: opacity .6s ease, transform .8s ease;
+    pointer-events: none;
+  }
+  .ww-panel.hidden { opacity: 0; transform: scale(.98); }
+  .ww-panel.shown { opacity: 1; transform: scale(1); pointer-events: auto; }
+
+  /* WITHOUT — chaos */
+  .chaos-canvas { position: relative; width: 100%; height: 560px; }
+  .chaos-scribble {
+    position: absolute; pointer-events: none;
+    stroke: rgba(239,68,68,.55); stroke-width: 1.5; fill: none;
+    stroke-linecap: round;
+    stroke-dasharray: 400;
+    animation: scribbleDraw 4s ease-out forwards infinite;
+  }
+  @keyframes scribbleDraw {
+    0% { stroke-dashoffset: 400; opacity: 0; }
+    40% { opacity: .6; }
+    100% { stroke-dashoffset: 0; opacity: .55; }
+  }
+  .chaos-video-icon {
+    position: absolute;
+    width: 60px; height: 60px; border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 6px 14px rgba(11,11,20,.08);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 3px;
+    color: var(--ink-2);
+    z-index: 2;
+  }
+  .chaos-video-icon .ci {
+    width: 26px; height: 26px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--muted);
+  }
+  .chaos-video-icon .cl { font-size: 9.5px; font-weight: 700; text-align: center; line-height: 1.1; }
+  .chaos-video-icon .cl small { display: block; font-weight: 500; font-size: 8.5px; color: var(--muted); }
+  .chaos-note {
+    position: absolute;
+    background: #FEE2E2;
+    color: #B91C1C;
+    padding: 6px 12px; border-radius: 8px;
+    font-family: 'Caveat', cursive; font-size: 18px; font-weight: 700;
+    box-shadow: 0 6px 14px rgba(0,0,0,.06);
+    transform: rotate(var(--r, -3deg));
+    z-index: 3;
+    white-space: nowrap;
+  }
+  .chaos-note::after {
+    content: ""; position: absolute; width: 6px; height: 6px;
+    border-radius: 50%; background: #EF4444;
+  }
+  /* Central card */
+  .ww-center {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%,-50%);
+    background: #fff;
+    padding: 22px 28px;
+    border-radius: 18px;
+    box-shadow: 0 24px 60px rgba(11,11,20,.15);
+    border: 1px solid var(--line);
+    text-align: center;
+    z-index: 5;
+    min-width: 260px;
+  }
+  .ww-center h5 {
+    font-family: 'Caveat', cursive;
+    font-weight: 700; font-size: 22px;
+    margin: 0 0 4px;
+    color: #EF4444;
+  }
+  .ww-center.good h5 { color: var(--accent); }
+  .ww-center p { font-size: 12.5px; color: var(--muted); margin: 0 0 12px; }
+  .ww-center p b { color: var(--ink); }
+  .ww-cta {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: 999px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff; font-weight: 700; font-size: 13px;
+    box-shadow: 0 10px 24px -8px rgba(99,102,241,.5);
+  }
+
+  /* WITH — organized askVGIA hub */
+  .clean-canvas { position: relative; width: 100%; height: 560px; }
+  .clean-node {
+    position: absolute;
+    display: flex; align-items: center; gap: 12px;
+    max-width: 220px;
+  }
+  .clean-node .ring {
+    width: 68px; height: 68px; border-radius: 50%;
+    background: #fff;
+    border: 2px solid var(--accent);
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 20px -6px rgba(99,102,241,.28);
+    flex-shrink: 0;
+    animation: ringPulse 3s ease-in-out infinite;
+  }
+  .clean-node .ring.orange { border-color: #F59E0B; box-shadow: 0 8px 20px -6px rgba(245,158,11,.28); }
+  .clean-node .ring.violet { border-color: var(--accent-2); box-shadow: 0 8px 20px -6px rgba(139,92,246,.28); }
+  .clean-node .ring.rose { border-color: #EC4899; box-shadow: 0 8px 20px -6px rgba(236,72,153,.28); }
+  .clean-node .ring.green { border-color: #10B981; box-shadow: 0 8px 20px -6px rgba(16,185,129,.28); }
+  .clean-node .ring.cyan { border-color: #06B6D4; box-shadow: 0 8px 20px -6px rgba(6,182,212,.28); }
+  @keyframes ringPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+  }
+  .clean-node .text .t { font-size: 14px; font-weight: 800; color: var(--ink); margin-bottom: 3px; font-family: 'Kalam', cursive; letter-spacing: -0.01em; }
+  .clean-node .text .d { font-size: 11px; color: var(--muted); line-height: 1.4; }
+  .clean-node.right { flex-direction: row-reverse; text-align: right; }
+  .clean-line {
+    position: absolute;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, currentColor 20%, currentColor 80%, transparent);
+    opacity: .6;
+    z-index: 0;
+  }
+  .clean-hub {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%,-50%);
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(99,102,241,.05);
+    border: 2px solid rgba(99,102,241,.2);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 4;
+    animation: hubPulse 4s ease-in-out infinite;
+  }
+  .clean-hub-inner {
+    background: #fff;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    box-shadow: 0 20px 40px rgba(99,102,241,.15);
+    padding: 20px;
+    text-align: center;
+    border: 1px solid rgba(99,102,241,.15);
+  }
+  @keyframes hubPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,.2); }
+    50% { box-shadow: 0 0 0 16px rgba(99,102,241,0); }
+  }
+  .clean-hub img { width: 100px; height: auto; margin-bottom: 4px; }
+  .clean-hub .tag { font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); font-weight: 700; margin-top: 4px; }
+  .clean-footer {
+    position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 24px;
+    background: #fff;
+    padding: 10px 24px; border-radius: 999px;
+    border: 1px solid var(--line);
+    box-shadow: 0 10px 30px rgba(11,11,20,.08);
+    font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted);
+    z-index: 5;
+  }
+  .clean-footer span { display: inline-flex; align-items: center; gap: 6px; }
+  .clean-footer .divider { width: 1px; height: 12px; background: var(--line); }
+
+  /* ========== TESTIMONIALS ========== */
+  .testis {
+    padding: 120px 0;
+    background: #fff;
+  }
+  .testis-perf {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 999px;
+    background: rgba(99,102,241,.08); color: var(--accent);
+    font-size: 13px; font-weight: 600;
+    margin-bottom: 40px;
+  }
+  .testi-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    margin-top: 20px;
+  }
+  @media (max-width: 900px) { .testi-grid { grid-template-columns: 1fr; } }
+  .testi {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 28px;
+    display: flex; flex-direction: column; gap: 16px;
+    transition: transform .2s, box-shadow .2s, border-color .2s;
+  }
+  .testi:hover { transform: translateY(-4px); border-color: rgba(99,102,241,.4); box-shadow: 0 20px 40px -20px rgba(99,102,241,.2); }
+  .testi-head { display: flex; align-items: center; justify-content: space-between; }
+  .testi-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    background: rgba(99,102,241,.09);
+    color: var(--accent);
+    font-size: 12px; font-weight: 600;
+  }
+  .testi-beta {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    background: var(--bg-soft);
+    color: var(--muted); font-size: 11px; font-weight: 600;
+  }
+  .testi-beta::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+  }
+  .testi-quote-mark {
+    font-family: 'Instrument Serif', serif;
+    font-size: 44px; line-height: 0.8; color: var(--accent);
+    opacity: .7;
+  }
+  .testi-quote {
+    font-size: 15px; line-height: 1.55; color: var(--ink-2);
+    flex: 1;
+  }
+  .testi-stars { color: #F59E0B; letter-spacing: 3px; font-size: 15px; }
+  .testi-person {
+    display: flex; align-items: center; gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .testi-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff; font-weight: 700; font-size: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .testi-avatar.orange { background: linear-gradient(135deg, #F97316, #EF4444); }
+  .testi-avatar.green { background: linear-gradient(135deg, #10B981, #059669); }
+  .testi-name { font-weight: 700; font-size: 14px; }
+  .testi-role { font-size: 12px; color: var(--muted); }
+  .testi-org { font-size: 12px; color: var(--muted-2); }
+  .testis-cta {
+    text-align: center; margin-top: 40px;
+    font-size: 14px; color: var(--muted);
+  }
+  .testis-cta .pulse {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); margin-right: 8px; vertical-align: middle;
+  }
+  .testis-cta a { color: var(--accent); font-weight: 600; }
+
+  /* ========== FAQ + CONTACT ========== */
+  .faq-section {
+    padding: 120px 0;
+    background: var(--bg-soft);
+  }
+  .faq-head { text-align: center; margin-bottom: 60px; }
+  .faq-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+    max-width: 1100px; margin: 0 auto;
+  }
+  @media (max-width: 900px) { .faq-grid { grid-template-columns: 1fr; gap: 40px; } }
+  .faq-side h4 { font-size: 20px; font-weight: 700; margin: 0 0 20px; }
+  .faq-item {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+  }
+  .faq-item-head {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 15px; font-weight: 600;
+  }
+  .faq-item .caret {
+    transition: transform .3s;
+  }
+  .faq-item.open .caret { transform: rotate(180deg); }
+  .faq-item-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height .35s, margin-top .3s, opacity .3s;
+    opacity: 0;
+    font-size: 14px; color: var(--muted); line-height: 1.6;
+  }
+  .faq-item.open .faq-item-body {
+    max-height: 200px; margin-top: 12px; opacity: 1;
+  }
+  .support-direct {
+    margin-top: 32px;
+  }
+  .support-buttons {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px;
+  }
+  .support-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px; border-radius: 12px;
+    background: #fff; border: 1px solid var(--line);
+    font-size: 14px; font-weight: 600; color: var(--ink);
+  }
+  .support-btn:hover { border-color: var(--accent); }
+  .support-info {
+    margin-top: 24px; font-size: 13px; color: var(--muted);
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .contact-card {
+    background: #fff; border: 1px solid var(--line); border-radius: 18px;
+    padding: 32px;
+  }
+  .contact-card h4 { font-size: 20px; font-weight: 700; margin: 0 0 20px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 6px; }
+  .field input, .field textarea {
+    width: 100%; padding: 12px 14px;
+    border-radius: 10px; border: 1px solid var(--line);
+    background: #fff; font: inherit; font-size: 14px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .field input:focus, .field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.14);
+  }
+  .field textarea { resize: vertical; min-height: 100px; }
+  .contact-submit {
+    width: 100%;
+    padding: 14px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff; font-weight: 700; font-size: 15px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 10px 24px -8px rgba(99,102,241,.5);
+  }
+
+  /* ========== FOOTER ========== */
+  .footer {
+    background: #0B0B14;
+    color: rgba(255,255,255,.7);
+    padding: 80px 0 40px;
+  }
+  .footer-top {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 60px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  @media (max-width: 720px) { .footer-top { grid-template-columns: 1fr; } }
+  .footer-block h5 {
+    font-size: 24px; font-weight: 700; color: #fff; margin: 0 0 14px;
+    font-family: 'Kalam', cursive;
+    letter-spacing: -0.01em;
+  }
+  .footer-block p { font-size: 14px; line-height: 1.6; margin: 0 0 18px; max-width: 42ch; }
+  .footer-cols {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 32px;
+    padding: 60px 0 40px;
+  }
+  @media (max-width: 900px) { .footer-cols { grid-template-columns: repeat(2, 1fr); } }
+  .footer-col h6 {
+    font-size: 12px; font-weight: 700; color: #fff;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 0 0 16px;
+  }
+  .footer-col ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col a { font-size: 13.5px; color: rgba(255,255,255,.6); transition: color .15s; }
+  .footer-col a:hover { color: #fff; }
+  .footer-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 24px; border-top: 1px solid rgba(255,255,255,.08);
+    font-size: 12.5px;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .footer-wordmark {
+    text-align: center;
+    padding: 40px 0 30px;
+    overflow: hidden;
+  }
+  .footer-wordmark span {
+    font-family: 'Kalam', cursive;
+    font-weight: 700;
+    font-size: clamp(80px, 18vw, 220px);
+    line-height: 0.9;
+    letter-spacing: -0.04em;
+    background: linear-gradient(135deg, rgba(255,255,255,.14) 0%, rgba(139,92,246,.5) 50%, rgba(99,102,241,.4) 100%);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+    display: inline-block;
+    transform: rotate(-2deg);
+  }
+  .footer-socials { display: flex; gap: 12px; }
+  .footer-socials a {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,.7);
+  }
+  .footer-socials a:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+  /* ========== REVEAL ANIMATION ========== */
+  .reveal {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity .8s, transform .8s;
+  }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+  .reveal[data-delay="1"] { transition-delay: .1s; }
+  .reveal[data-delay="2"] { transition-delay: .2s; }
+  .reveal[data-delay="3"] { transition-delay: .3s; }
+  .reveal[data-delay="4"] { transition-delay: .4s; }
+</style>
+</head>
+<body>
+
+<!-- ================== HEADER ================== -->
+<nav class="nav" id="mainNav">
+  <div class="container-wide nav-inner">
+    <a href="index.html" class="logo-link">
+      <img src="assets/askvgia-logo-transparent.png" alt="askVGIA" class="logo-img"/>
+    </a>
+    <div class="nav-menu">
+      <a class="nav-item active" href="VGIA.html" data-i18n="product">Product</a>
+      <a class="nav-item" href="#featuresWow" data-i18n="usecases">Use cases</a>
+      <a class="nav-item" href="documentation.html" data-i18n="documentation">Documentation</a>
+      <a class="nav-item" href="pricing.html" data-i18n="pricing">Pricing</a>
+      <a class="nav-item" href="whats-new.html" data-i18n="whatsnew">What's new</a>
+    </div>
+    <div class="nav-right">
+      <a class="link" href="#footerContact" data-i18n="contact_us">Contact us</a>
+      <button class="lang-toggle" id="langToggle" title="Switch language">
+        <span class="globe"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9M12 3c-3 3-4 6-4 9s1 6 4 9" stroke="currentColor" stroke-width="1.8"/></svg></span>
+        <span id="langLabel">FR</span>
+      </button>
+      <a class="login-btn" href="login.html" data-i18n="login">Log in</a>
+      <a class="signup-btn" href="signup.html" data-i18n="signup">Sign up</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ================== HERO ================== -->
+<section class="hero">
+  <div class="hero-bg-video">
+    <video autoplay muted loop playsinline poster="assets/hero-poster.jpg">
+      <source src="https://media.w3.org/2010/05/sintel/trailer.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="hero-bg-tint"></div>
+
+  <div class="hero-chips">
+    <div class="hero-chip c1"><span class="dot"></span> <span data-i18n="chip1">Transcript found — 1:17:35</span></div>
+    <div class="hero-chip c2"><span class="dot"></span> <span data-i18n="chip2">OCR · Frame · Speech</span></div>
+    <div class="hero-chip c3"><span class="dot"></span> <span data-i18n="chip3">Answer in your language</span></div>
+  </div>
+
+  <div class="hero-inner reveal in">
+    <div class="hero-eyebrow" data-i18n="hero_eyebrow">✦ Your Video Intelligence Assistant</div>
+    <h1 class="hero-title" data-i18n="hero_title">Every Video.<br/><em>Instantly Searchable.</em></h1>
+    <p class="hero-sub" data-i18n="hero_sub">VGIA understands what is said, shown, and written inside every video — so you find the exact moment you need, in any language, in seconds.</p>
+    <div class="hero-ctas">
+      <a class="btn-try" href="/app"><span data-i18n="try_vgia">Try VGIA</span> <svg class="arr" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="btn btn-ghost" href="#" style="background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.25);color:#fff;backdrop-filter:blur(10px)" data-i18n="see_how"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polygon points="6,4 20,12 6,20" fill="currentColor"/></svg> See how it works</a>
+    </div>
+    <div class="hero-cta-note" data-i18n="hero_note">Free during Beta · No credit card required</div>
+  </div>
+
+  <div class="hero-scroll-hint">
+    <span data-i18n="scroll">Scroll</span>
+    <svg width="14" height="20" viewBox="0 0 14 20" fill="none"><rect x="1" y="1" width="12" height="18" rx="6" stroke="currentColor" stroke-width="1.5"/><circle cx="7" cy="6" r="1.5" fill="currentColor"/></svg>
+  </div>
+</section>
+
+<!-- ================== VIDEO STRIP (hover to play) ================== -->
+<section class="video-strip" id="videoStrip">
+  <div class="container">
+    <div class="section-head reveal">
+      <h2 class="section-title serif" style="color:#fff">The platform that powers <em style="background:linear-gradient(135deg,#A78BFA,#67E8F9);-webkit-background-clip:text;background-clip:text;color:transparent;font-style:italic">any video</em> strategy.</h2>
+      <p class="section-sub">Podcasts, cours, documentaires, films, contenu médical — VGIA les rend tous instantanément recherchables. Passez la souris pour voir.</p>
+    </div>
+
+    <div class="vcards reveal" data-delay="1">
+      <div class="vcard">
+        <div class="vcard-media">
+          <span class="vcard-tag">Podcast</span>
+          <video muted loop playsinline preload="none"
+            poster="https://images.pexels.com/photos/6953876/pexels-photo-6953876.jpeg?auto=compress&cs=tinysrgb&w=800"
+            data-src="https://media.w3.org/2010/05/bunny/trailer.mp4"></video>
+          <div class="vcard-play"><div class="vcard-play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg></div></div>
+        </div>
+        <div class="vcard-body">
+          <h3 class="vcard-title">Podcast shorts</h3>
+          <p class="vcard-desc">Turn 3-hour podcasts into searchable transcripts, chapter markers, and social-ready clips — automatically.</p>
+          <a href="#" class="vcard-cta">Explore podcasts <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+
+      <div class="vcard">
+        <div class="vcard-media">
+          <span class="vcard-tag">Education</span>
+          <video muted loop playsinline preload="none"
+            poster="https://images.pexels.com/photos/8617715/pexels-photo-8617715.jpeg?auto=compress&cs=tinysrgb&w=800"
+            data-src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/flower.mp4"></video>
+          <div class="vcard-play"><div class="vcard-play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg></div></div>
+        </div>
+        <div class="vcard-body">
+          <h3 class="vcard-title">History & lectures</h3>
+          <p class="vcard-desc">Ask a question about any lecture — VGIA jumps to the exact minute, with the slide and transcript quoted.</p>
+          <a href="#" class="vcard-cta">Explore lectures <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+
+      <div class="vcard">
+        <div class="vcard-media">
+          <span class="vcard-tag">Medical</span>
+          <video muted loop playsinline preload="none"
+            poster="https://images.pexels.com/photos/4021815/pexels-photo-4021815.jpeg?auto=compress&cs=tinysrgb&w=800"
+            data-src="https://interactive-examples.mdn.mozilla.net/media/cc0-videos/friday.mp4"></video>
+          <div class="vcard-play"><div class="vcard-play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg></div></div>
+        </div>
+        <div class="vcard-body">
+          <h3 class="vcard-title">Medical training</h3>
+          <p class="vcard-desc">Search surgical footage by procedure, instrument or anatomical term. Cite the exact frame in every report.</p>
+          <a href="#" class="vcard-cta">Explore medical <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+
+      <div class="vcard">
+        <div class="vcard-media">
+          <span class="vcard-tag">Cinema</span>
+          <video muted loop playsinline preload="none"
+            poster="https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=800"
+            data-src="https://media.w3.org/2010/05/sintel/trailer.mp4"></video>
+          <div class="vcard-play"><div class="vcard-play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg></div></div>
+        </div>
+        <div class="vcard-body">
+          <h3 class="vcard-title">Movies & archives</h3>
+          <p class="vcard-desc">Every dialogue, sign, and scene indexed. Find the moment a character says a line — across an entire filmography.</p>
+          <a href="#" class="vcard-cta">Explore cinema <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+
+      <div class="vcard">
+        <div class="vcard-media">
+          <span class="vcard-tag">News</span>
+          <video muted loop playsinline preload="none"
+            poster="https://images.pexels.com/photos/6953868/pexels-photo-6953868.jpeg?auto=compress&cs=tinysrgb&w=800"
+            data-src="https://media.w3.org/2010/05/bunny/movie.mp4"></video>
+          <div class="vcard-play"><div class="vcard-play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg></div></div>
+        </div>
+        <div class="vcard-body">
+          <h3 class="vcard-title">News & journalism</h3>
+          <p class="vcard-desc">Monitor coverage across languages. Get alerts when a keyword, person or place appears — with source clips.</p>
+          <a href="#" class="vcard-cta">Explore news <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+
+      <div class="vcard">
+        <div class="vcard-media">
+          <span class="vcard-tag">Sports</span>
+          <video muted loop playsinline preload="none"
+            poster="https://images.pexels.com/photos/8007412/pexels-photo-8007412.jpeg?auto=compress&cs=tinysrgb&w=800"
+            data-src="https://www.w3schools.com/html/mov_bbb.mp4"></video>
+          <div class="vcard-play"><div class="vcard-play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg></div></div>
+        </div>
+        <div class="vcard-body">
+          <h3 class="vcard-title">Sports & events</h3>
+          <p class="vcard-desc">Auto-tag every play, goal or timeout. Build highlight reels from hours of match footage in one query.</p>
+          <a href="#" class="vcard-cta">Explore sports <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== PROBLEM / SOLUTION (static side by side) ================== -->
+<section class="ps-section" id="psSection">
+  <div class="ps-intro container reveal">
+    <div class="section-eyebrow" style="background:rgba(139,92,246,.10);color:var(--accent-2)">✦ <span data-i18n="ps_eyebrow">La réalité</span></div>
+    <h2 class="section-title" data-i18n="ps_title">En Algérie, on a l'<em>ambition</em>…<br/>il manquait juste les <span class="marker">bons outils</span>.</h2>
+    <p class="section-sub"><b>VGIA</b> <span data-i18n="ps_sub">change cette réalité.</span></p>
+  </div>
+
+  <div class="container-wide">
+    <div class="ps-image-wrap reveal" data-delay="1">
+      <img src="assets/problem-solution.png" alt="Finding the right moment vs precise answers with VGIA"/>
+    </div>
+  </div>
+</section>
+
+<!-- ================== FEATURES WOW GRID ================== -->
+<section class="features-wow" id="featuresWow">
+  <div class="container">
+    <div class="section-head reveal" style="margin-bottom:56px">
+      <div class="section-eyebrow" data-i18n="feat_eyebrow">✦ Powerful features</div>
+      <h2 class="section-title" data-i18n="feat_title">Built for <em>every question</em> you'll ever ask a video.</h2>
+      <p class="section-sub" data-i18n="feat_sub">Four core capabilities that work together to turn hours of footage into instant, sourced answers.</p>
+    </div>
+    <div class="fw-grid">
+      <!-- Multimodal search -->
+      <div class="fw-card reveal">
+        <div>
+          <h4>Multimodal Search</h4>
+          <p>Search across speech, OCR, frames, and subtitles simultaneously — in one query.</p>
+        </div>
+        <div class="fw-visual">
+          <div class="fw-multi">
+            <div class="mi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2a4 4 0 0 0-4 4v6a4 4 0 0 0 8 0V6a4 4 0 0 0-4-4Z" stroke="currentColor" stroke-width="2"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <div class="mi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" stroke="currentColor" stroke-width="2"/><path d="M8 14l2.5-3 3 3.5L16 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="mi"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v10H4z" stroke="currentColor" stroke-width="2"/><path d="M8 20h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+            <div class="fw-waveform">
+              <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Knowledge Graph -->
+      <div class="fw-card reveal" data-delay="1">
+        <div>
+          <h4>Knowledge Graph</h4>
+          <p>Entities automatically connected across every video — people, places, concepts.</p>
+        </div>
+        <div class="fw-visual">
+          <div class="fw-graph">
+            <svg viewBox="0 0 200 130" preserveAspectRatio="xMidYMid meet">
+              <line class="link" x1="100" y1="65" x2="40" y2="30"/>
+              <line class="link" x1="100" y1="65" x2="160" y2="30"/>
+              <line class="link" x1="100" y1="65" x2="40" y2="100"/>
+              <line class="link" x1="100" y1="65" x2="160" y2="100"/>
+              <line class="link" x1="40" y1="30" x2="160" y2="30"/>
+              <line class="link" x1="40" y1="100" x2="160" y2="100"/>
+              <circle class="node center" cx="100" cy="65" r="9"/>
+              <circle class="node n1" cx="40" cy="30" r="7"/>
+              <circle class="node n2" cx="160" cy="30" r="7"/>
+              <circle class="node n3" cx="40" cy="100" r="7"/>
+              <circle class="node n4" cx="160" cy="100" r="7"/>
+              <text class="label" x="100" y="55" text-anchor="middle" fill="#fff">Deep</text>
+              <text class="label" x="40" y="18" text-anchor="middle">AI</text>
+              <text class="label" x="160" y="18" text-anchor="middle">Model</text>
+              <text class="label" x="40" y="118" text-anchor="middle">Data</text>
+              <text class="label" x="160" y="118" text-anchor="middle">Training</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cross-language -->
+      <div class="fw-card reveal" data-delay="2">
+        <div>
+          <h4>Cross-language Search</h4>
+          <p>Ask in any language. Get answers in the language you prefer. Arabic, French, English +40 more.</p>
+        </div>
+        <div class="fw-visual">
+          <div class="fw-langs">
+            <span class="fw-lang-chip l1">ما هو الذكاء الاصطناعي؟</span>
+            <span class="fw-lang-chip l2">Qu'est-ce que l'IA ?</span>
+            <span class="fw-lang-chip l3">What is AI?</span>
+            <span class="fw-lang-chip l4">¿Qué es la IA?</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Source verification -->
+      <div class="fw-card reveal" data-delay="3">
+        <div>
+          <h4>Source Verification</h4>
+          <p>Every answer is linked back to the exact moment in the video — with quote, frame, and timestamp.</p>
+        </div>
+        <div class="fw-visual" style="width:220px">
+          <div class="fw-sources">
+            <div class="fw-src-row">
+              <span class="fico"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v10H4z" stroke="currentColor" stroke-width="2"/></svg></span>
+              <span class="fname">Transcript</span>
+              <span class="ftime">1:17:35</span>
+            </div>
+            <div class="fw-src-row">
+              <span class="fico"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="2"/></svg></span>
+              <span class="fname">Slide 23</span>
+              <span class="ftime">1:17:35</span>
+            </div>
+            <div class="fw-src-row">
+              <span class="fico"><svg width="12" height="12" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" stroke="currentColor" stroke-width="2"/><path d="M10 10v4l3-2z" fill="currentColor"/></svg></span>
+              <span class="fname">Frame</span>
+              <span class="ftime">1:17:35</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== WITHOUT / WITH VGIA (chaos vs organized) ================== -->
+<section class="ww-section" id="wwSection">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="section-eyebrow" data-i18n="ww_eyebrow">✦ Comparez votre quotidien</div>
+      <h2 class="section-title" id="wwTitle">
+        <span id="wwTitleWithout" data-i18n="ww_title_without">La <em style="font-family:'Caveat',cursive;font-style:italic;color:#EF4444">réalité</em> sans <span style="background:#FEE2E2;color:#B91C1C;padding:0 .18em;border-radius:4px">VGIA</span>…</span>
+        <span id="wwTitleWith" style="display:none" data-i18n="ww_title_with">La <em style="font-family:'Caveat',cursive;font-style:italic;color:var(--accent)">clarté</em> avec <span class="marker">VGIA</span>.</span>
+      </h2>
+      <p class="section-sub" id="wwSub" data-i18n="ww_sub_without">Fichiers éparpillés, vidéos oubliées, réponses introuvables — l'ambition freinée par le chaos.</p>
+    </div>
+
+    <div class="ww-toggle-wrap reveal">
+      <div class="ww-toggle without" id="wwToggle">
+        <div class="thumb"></div>
+        <button class="ww-opt without" data-state="without">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 8v5M12 16.5v.5M4.5 19h15L12 5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span data-i18n="ww_without">Without VGIA</span>
+        </button>
+        <button class="ww-opt with" data-state="with">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.5 5 5.5.8-4 3.9.9 5.5L12 14.5 7.1 17.2l1-5.5L4 7.8 9.5 7z" fill="currentColor"/></svg>
+          <span data-i18n="ww_with">With VGIA</span>
+        </button>
+      </div>
+    </div>
+    <div class="ww-scroll-note reveal" data-i18n="ww_compare">Compare the experience</div>
+
+    <div class="ww-stage">
+      <!-- WITHOUT state -->
+      <div class="ww-panel shown" id="wwWithoutPanel">
+        <div class="chaos-canvas">
+          <!-- Scribbles (SVG connecting lines) -->
+          <svg class="chaos-scribble" style="left:0;top:0;width:100%;height:100%" viewBox="0 0 1080 560" preserveAspectRatio="none">
+            <path d="M 90 120 C 200 180 350 60 480 200"/>
+            <path d="M 180 110 C 260 220 400 300 520 260"/>
+            <path d="M 330 130 C 380 220 500 240 560 320"/>
+            <path d="M 480 130 C 520 200 480 300 560 300"/>
+            <path d="M 620 130 C 570 220 600 300 560 280"/>
+            <path d="M 780 130 C 700 220 620 300 560 280"/>
+            <path d="M 100 440 C 240 380 380 340 480 320"/>
+            <path d="M 260 460 C 340 380 460 340 520 320"/>
+            <path d="M 420 460 C 470 400 500 360 540 340"/>
+            <path d="M 580 460 C 560 400 550 360 560 340"/>
+            <path d="M 780 440 C 700 380 640 340 580 320"/>
+            <path d="M 920 400 C 820 380 700 340 620 320"/>
+            <path d="M 60 260 C 200 260 380 240 480 300"/>
+            <path d="M 1020 260 C 900 260 720 240 620 300"/>
+          </svg>
+
+          <!-- Video source icons around perimeter -->
+          <div class="chaos-video-icon" style="top:16%;left:22%">
+            <span class="ci"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 2v4M16 2v4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <span class="cl">Lecture<small>Videos</small></span>
+          </div>
+          <div class="chaos-video-icon" style="top:16%;left:36%">
+            <span class="ci"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z" stroke="currentColor" stroke-width="1.8"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <span class="cl">Podcasts</span>
+          </div>
+          <div class="chaos-video-icon" style="top:16%;left:50%">
+            <span class="ci"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M10 10v4l4-2z" fill="currentColor"/></svg></span>
+            <span class="cl">YouTube<small>Videos</small></span>
+          </div>
+          <div class="chaos-video-icon" style="top:16%;left:64%">
+            <span class="ci"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="12" rx="2" stroke="currentColor" stroke-width="1.8"/><circle cx="18" cy="12" r="2" fill="currentColor"/></svg></span>
+            <span class="cl">Meeting<small>Recordings</small></span>
+          </div>
+          <div class="chaos-video-icon" style="top:16%;left:78%">
+            <span class="ci"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <span class="cl">Conferences</span>
+          </div>
+
+          <!-- Bottom row -->
+          <div class="chaos-video-icon" style="bottom:16%;left:22%">
+            <span class="ci"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9l-6-6Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M14 3v6h6" stroke="currentColor" stroke-width="1.8"/></svg></span>
+            <span class="cl">Slides</span>
+          </div>
+          <div class="chaos-video-icon" style="bottom:16%;left:33%">
+            <span class="ci"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/><circle cx="9" cy="9" r="1.5" fill="currentColor"/><path d="m4 18 5-5 4 4 3-3 4 4" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg></span>
+            <span class="cl">Video<small>Frames</small></span>
+          </div>
+          <div class="chaos-video-icon" style="bottom:16%;left:44%">
+            <span class="ci"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M6 8v8M18 8v8M4 12h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M10 4h4M10 20h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <span class="cl">OCR Text</span>
+          </div>
+          <div class="chaos-video-icon" style="bottom:16%;left:55%">
+            <span class="ci"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 12h3l3-8 4 16 3-8h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+            <span class="cl">Audio</span>
+          </div>
+          <div class="chaos-video-icon" style="bottom:16%;left:66%">
+            <span class="ci"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <span class="cl">Transcript</span>
+          </div>
+          <div class="chaos-video-icon" style="bottom:16%;left:77%">
+            <span class="ci"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9M12 3c-3 3-4 6-4 9s1 6 4 9" stroke="currentColor" stroke-width="1.8"/></svg></span>
+            <span class="cl">Multilingual<small>Speech</small></span>
+          </div>
+          <div class="chaos-video-icon" style="bottom:16%;left:88%">
+            <span class="ci"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M12 7v5l3 2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+            <span class="cl">Timestamp</span>
+          </div>
+
+          <!-- Frustration handwritten notes (FR + EN mix) -->
+          <div class="chaos-note" style="top:8%;left:4%;--r:-6deg" data-i18n="note_1">Où l'a-t-il mentionné ?</div>
+          <div class="chaos-note" style="top:24%;left:2%;--r:-3deg" data-i18n="note_2">Rejouer depuis la minute 0…</div>
+          <div class="chaos-note" style="top:42%;left:4%;--r:-5deg" data-i18n="note_3">Regarder 2h de vidéo…</div>
+          <div class="chaos-note" style="top:56%;left:1%;--r:2deg" data-i18n="note_4">Diapo ratée…</div>
+          <div class="chaos-note" style="top:72%;left:2%;--r:-4deg" data-i18n="note_5">Impossible de chercher dans les frames</div>
+
+          <div class="chaos-note" style="top:8%;right:4%;--r:5deg" data-i18n="note_6">Mauvais timestamp…</div>
+          <div class="chaos-note" style="top:24%;right:2%;--r:3deg" data-i18n="note_7">Audio ET visuel manquants</div>
+          <div class="chaos-note" style="top:42%;right:4%;--r:6deg" data-i18n="note_8">L'équation introuvable</div>
+          <div class="chaos-note" style="top:56%;right:1%;--r:-2deg" data-i18n="note_9">Où était ce diagramme ?</div>
+          <div class="chaos-note" style="top:72%;right:2%;--r:4deg" data-i18n="note_10">Réponse dans une autre langue</div>
+
+          <!-- Central card -->
+          <div class="ww-center">
+            <h5 data-i18n="ww_center_bad_title">C'est ça votre quotidien…</h5>
+            <p data-i18n="ww_center_bad_desc">Vous passez plus de temps à <b>chercher</b> l'information qu'à <b>l'utiliser</b>.</p>
+            <a href="#" class="ww-cta">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.5 5 5.5.8-4 3.9.9 5.5L12 14.5 7.1 17.2l1-5.5L4 7.8 9.5 7z" fill="currentColor"/></svg>
+              <span data-i18n="ww_search_cta">Search with VGIA</span>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <!-- WITH state -->
+      <div class="ww-panel hidden" id="wwWithPanel">
+        <div class="clean-canvas">
+          <!-- Connecting lines -->
+          <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 1080 560" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="cleanGrad1" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stop-color="#06B6D4"/>
+                <stop offset="1" stop-color="#6366F1"/>
+              </linearGradient>
+              <linearGradient id="cleanGrad2" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stop-color="#6366F1"/>
+                <stop offset="1" stop-color="#8B5CF6"/>
+              </linearGradient>
+              <linearGradient id="cleanGrad3" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0" stop-color="#EF4444"/>
+                <stop offset="1" stop-color="#F59E0B"/>
+              </linearGradient>
+            </defs>
+            <path d="M 260 130 L 440 260" stroke="url(#cleanGrad1)" stroke-width="2" fill="none" stroke-dasharray="4 4"/>
+            <path d="M 820 130 L 640 260" stroke="url(#cleanGrad2)" stroke-width="2" fill="none" stroke-dasharray="4 4"/>
+            <path d="M 260 280 L 440 280" stroke="#06B6D4" stroke-width="2" fill="none" stroke-dasharray="4 4"/>
+            <path d="M 820 280 L 640 280" stroke="#F59E0B" stroke-width="2" fill="none" stroke-dasharray="4 4"/>
+            <path d="M 260 430 L 440 300" stroke="url(#cleanGrad3)" stroke-width="2" fill="none" stroke-dasharray="4 4"/>
+            <path d="M 820 430 L 640 300" stroke="#EC4899" stroke-width="2" fill="none" stroke-dasharray="4 4"/>
+          </svg>
+
+          <!-- LEFT nodes -->
+          <div class="clean-node" style="top:12%;left:2%">
+            <div class="ring cyan"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#06B6D4"><circle cx="12" cy="12" r="9" stroke-width="1.8"/><path d="M12 7v5l3 2" stroke-width="1.8" stroke-linecap="round"/></svg></div>
+            <div class="text">
+              <div class="t" data-i18n="clean_1_t">Grounded Answers</div>
+              <div class="d" data-i18n="clean_1_d">Every response tied to an exact timestamp in the video.</div>
+            </div>
+          </div>
+          <div class="clean-node" style="top:44%;left:2%">
+            <div class="ring"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#6366F1"><circle cx="12" cy="12" r="9" stroke-width="1.8"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9M12 3c-3 3-4 6-4 9s1 6 4 9" stroke-width="1.8"/></svg></div>
+            <div class="text">
+              <div class="t" data-i18n="clean_2_t">Multilingual</div>
+              <div class="d" data-i18n="clean_2_d">Arabic, French, English and 100+ languages.</div>
+            </div>
+          </div>
+          <div class="clean-node" style="top:76%;left:2%">
+            <div class="ring" style="border-color:#EF4444;box-shadow:0 8px 20px -6px rgba(239,68,68,.28)"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#EF4444"><path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="text">
+              <div class="t" data-i18n="clean_3_t">Anti-Hallucination</div>
+              <div class="d" data-i18n="clean_3_d">Generates only from verified retrieved evidence.</div>
+            </div>
+          </div>
+
+          <!-- RIGHT nodes -->
+          <div class="clean-node right" style="top:12%;right:2%">
+            <div class="ring violet"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6"><rect x="4" y="4" width="16" height="16" rx="3" stroke-width="1.8"/><path d="M4 10h16M4 16h16" stroke-width="1.8"/></svg></div>
+            <div class="text">
+              <div class="t" data-i18n="clean_4_t">Multimodal Memory</div>
+              <div class="d" data-i18n="clean_4_d">Speech, frames, OCR and knowledge graph unified.</div>
+            </div>
+          </div>
+          <div class="clean-node right" style="top:44%;right:2%">
+            <div class="ring orange"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#F59E0B"><path d="M10 3 6 8m4-5 4 5m-4-5v11m0 0-4 4m4-4 4 4" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+            <div class="text">
+              <div class="t" data-i18n="clean_5_t">Full Traceability</div>
+              <div class="d" data-i18n="clean_5_d">Frame, speaker, transcript and graph per answer.</div>
+            </div>
+          </div>
+          <div class="clean-node right" style="top:76%;right:2%">
+            <div class="ring rose"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#EC4899"><circle cx="8" cy="6" r="2" stroke-width="1.8"/><circle cx="16" cy="6" r="2" stroke-width="1.8"/><circle cx="12" cy="18" r="2" stroke-width="1.8"/><path d="M10 7l4 8M9 8l2.5 8M15 8l-2.5 8" stroke-width="1.6"/></svg></div>
+            <div class="text">
+              <div class="t" data-i18n="clean_6_t">Knowledge Graph</div>
+              <div class="d" data-i18n="clean_6_d">Connects entities, concepts and events into an intelligent graph.</div>
+            </div>
+          </div>
+
+          <!-- Central hub with logo -->
+          <div class="clean-hub">
+            <div class="clean-hub-inner">
+              <img src="assets/askvgia-logo-transparent.png" alt="askVGIA"/>
+              <div class="tag" data-i18n="clean_tag">ASK ANYTHING · SEARCH IN VIDEO</div>
+            </div>
+          </div>
+
+          <!-- Footer badges -->
+          <div class="clean-footer">
+            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#6366F1"><path d="M12 2C7 4 4 8 4 13c0 4 3 8 8 9 5-1 8-5 8-9 0-5-3-9-8-11Z" stroke-width="1.8" stroke-linejoin="round"/></svg> <span data-i18n="badge_1">Intelligent.</span></span>
+            <span class="divider"></span>
+            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#10B981"><path d="M12 2 4 6v6c0 5 3.5 9 8 10 4.5-1 8-5 8-10V6l-8-4Z" stroke-width="1.8" stroke-linejoin="round"/><path d="m9 12 2 2 4-4" stroke-width="1.8" stroke-linecap="round"/></svg> <span data-i18n="badge_2">Trusted.</span></span>
+            <span class="divider"></span>
+            <span><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F59E0B"><path d="M10 4 6 8m4-4 4 4m-4-4v10-1l-4 4m4-4 4 4" stroke-width="1.8" stroke-linecap="round"/></svg> <span data-i18n="badge_3">Traceable.</span></span>
+            <span class="divider"></span>
+            <span><span style="font-weight:900;color:var(--accent);letter-spacing:.02em">AI</span> <span data-i18n="badge_4">POWERED BY AI</span></span>
+          </div>
+
+          <!-- Central CTA above hub -->
+          <div class="ww-center good" style="top:6%;transform:translate(-50%,0);min-width:auto;padding:14px 24px">
+            <a href="#" class="ww-cta" style="margin:0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.5 5 5.5.8-4 3.9.9 5.5L12 14.5 7.1 17.2l1-5.5L4 7.8 9.5 7z" fill="currentColor"/></svg>
+              <span data-i18n="ww_search_cta">Search with VGIA</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== TESTIMONIALS ================== -->
+<section class="testis">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="testis-perf">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" fill="currentColor"/></svg>
+        <span data-i18n="perf_opt">Performance optimisée</span>
+      </div>
+      <div class="section-eyebrow">Témoignages</div>
+      <h2 class="section-title serif">Ce que disent nos <span class="marker">premiers utilisateurs</span></h2>
+      <p class="section-sub">Retours authentiques de nos utilisateurs Beta en Algérie et à l'international.</p>
+    </div>
+
+    <div class="testi-grid">
+      <div class="testi reveal" data-delay="1">
+        <div class="testi-head">
+          <span class="testi-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 3 3 8l9 5 9-5-9-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            Recherche
+          </span>
+          <span class="testi-beta">Beta</span>
+        </div>
+        <div class="testi-quote-mark">"</div>
+        <p class="testi-quote" data-i18n="testi_1">"VGIA a transformé ma thèse. J'ai indexé plus de 200 heures d'interviews en darija et français. Retrouver une citation exacte prend maintenant 3 secondes au lieu de plusieurs jours."</p>
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-person">
+          <div class="testi-avatar">SH</div>
+          <div>
+            <div class="testi-name">Sara Hamidi</div>
+            <div class="testi-role">Doctorante en Sociologie</div>
+            <div class="testi-org">Université d'Alger 2</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi reveal" data-delay="2">
+        <div class="testi-head">
+          <span class="testi-badge" style="background:rgba(239,68,68,.09);color:#EF4444">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5c0-4 3-7 7-7s7 3 7 7-7 8-7 8-7-4-7-8Z" stroke="currentColor" stroke-width="2"/></svg>
+            Médical
+          </span>
+          <span class="testi-beta">Beta</span>
+        </div>
+        <div class="testi-quote-mark">"</div>
+        <p class="testi-quote" data-i18n="testi_2">"Notre CHU utilise VGIA pour indexer les enregistrements chirurgicaux. Les résidents retrouvent une technique précise en tapant simplement son nom. Un gain énorme pour la formation."</p>
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-person">
+          <div class="testi-avatar orange">YM</div>
+          <div>
+            <div class="testi-name">Dr. Yacine Merabet</div>
+            <div class="testi-role">Chef de Service Chirurgie</div>
+            <div class="testi-org">CHU Oran</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi reveal" data-delay="3">
+        <div class="testi-head">
+          <span class="testi-badge" style="background:rgba(16,185,129,.09);color:#059669">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v6a8 8 0 0 1-16 0V4Z" stroke="currentColor" stroke-width="2"/></svg>
+            Média
+          </span>
+          <span class="testi-beta">Beta</span>
+        </div>
+        <div class="testi-quote-mark">"</div>
+        <p class="testi-quote" data-i18n="testi_3">"En tant que producteur podcast, VGIA me fait gagner 15 h par semaine. Le clip social est prêt en 2 minutes, timestamps et sous-titres inclus. Nos équipes ne peuvent plus s'en passer."</p>
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-person">
+          <div class="testi-avatar green">NB</div>
+          <div>
+            <div class="testi-name">Nadir Boudiaf</div>
+            <div class="testi-role">Producteur & Journaliste</div>
+            <div class="testi-org">Studio Casbah Media, Alger</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="testis-cta">
+      <span class="pulse"></span> Vous utilisez VGIA ? <a href="#">Partagez votre expérience →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================== FAQ + CONTACT ================== -->
+<section class="faq-section">
+  <div class="container">
+    <div class="faq-head reveal">
+      <div class="section-eyebrow">⌘ <span data-i18n="support">Support</span></div>
+      <h2 class="section-title serif"><span data-i18n="q_une">Une</span> <span class="marker" data-i18n="q_question">question</span> ?</h2>
+      <p class="section-sub" data-i18n="q_sub">Notre équipe est disponible pour vous accompagner. Contactez-nous directement ou consultez notre FAQ.</p>
+    </div>
+
+    <div class="faq-grid">
+      <div class="faq-side">
+        <h4 data-i18n="faq_title">Questions fréquentes</h4>
+        <div class="faq-item">
+          <div class="faq-item-head"><span data-i18n="faq_q1">La Beta est-elle vraiment gratuite ?</span>
+            <svg class="caret" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="faq-item-body" data-i18n="faq_a1">Oui, 100% gratuite pendant toute la durée de la Beta. Aucune carte de crédit requise, aucun engagement.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-item-head"><span data-i18n="faq_q2">Mes données sont-elles sécurisées ?</span>
+            <svg class="caret" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="faq-item-body" data-i18n="faq_a2">Vos vidéos sont chiffrées de bout en bout (AES-256), stockées sur des serveurs souverains, et jamais utilisées pour entraîner nos modèles.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-item-head"><span data-i18n="faq_q3">Quelles langues sont supportées ?</span>
+            <svg class="caret" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="faq-item-body" data-i18n="faq_a3">Français, Arabe standard, Darija algérienne, Anglais, Espagnol, et 40+ autres langues — avec recherche cross-langue.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-item-head"><span data-i18n="faq_q4">Puis-je exporter mes données ?</span>
+            <svg class="caret" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="faq-item-body" data-i18n="faq_a4">À tout moment, en un clic — vidéos, transcripts, index et métadonnées, aux formats standards (VTT, SRT, JSON, CSV).</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-item-head"><span data-i18n="faq_q5">Combien de temps dure la Beta ?</span>
+            <svg class="caret" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="faq-item-body" data-i18n="faq_a5">Jusqu'à fin 2026. Tous les utilisateurs Beta bénéficieront d'un tarif préférentiel à vie lors du lancement commercial.</div>
+        </div>
+
+        <div class="support-direct">
+          <h4 data-i18n="support_direct">Support direct</h4>
+          <div class="support-buttons">
+            <a class="support-btn" href="#">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 1 1 4 6.9L4 20l1.1-4A8 8 0 0 1 4 12Z" stroke="#25D366" stroke-width="2" stroke-linejoin="round"/></svg>
+              WhatsApp
+            </a>
+            <a class="support-btn" href="#">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="m3 7 9 6 9-6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+              Email
+            </a>
+          </div>
+          <div class="support-info">
+            <div style="display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 5c0-1 1-2 2-2h2l2 5-2 1a11 11 0 0 0 5 5l1-2 5 2v2c0 1-1 2-2 2A16 16 0 0 1 4 5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg> +213 799 94 05 03</div>
+            <div style="display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 22s7-7 7-13a7 7 0 1 0-14 0c0 6 7 13 7 13Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="2"/></svg> Bir El Djir, Oran DZ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-card">
+        <h4 data-i18n="send_msg">Envoyez-nous un message</h4>
+        <div class="field">
+          <label data-i18n="f_name">Nom complet</label>
+          <input type="text" data-i18n-ph="f_name_ph" placeholder="Votre nom">
+        </div>
+        <div class="field">
+          <label data-i18n="f_email">Email</label>
+          <input type="email" data-i18n-ph="f_email_ph" placeholder="votre@email.dz">
+        </div>
+        <div class="field">
+          <label data-i18n="f_message">Message</label>
+          <textarea data-i18n-ph="f_msg_ph" placeholder="Comment pouvons-nous vous aider ?"></textarea>
+        </div>
+        <button class="contact-submit">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 1 1 4 6.9L4 20l1.1-4A8 8 0 0 1 4 12Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          <span data-i18n="send_wa">Envoyer via WhatsApp</span>
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== FOOTER ================== -->
+<footer class="footer" id="footerContact">
+  <div class="container-wide">
+    <div class="footer-top">
+      <div class="footer-block">
+        <h5 data-i18n="foot_try_h">Try VGIA</h5>
+        <p data-i18n="foot_try_p">Turn any video library into a searchable knowledge base. Free during Beta, no credit card required.</p>
+        <a class="btn-try" href="/app"><span data-i18n="try_vgia">Try VGIA</span> <svg class="arr" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
+      <div class="footer-block">
+        <h5 data-i18n="foot_help_h">Assistance 24h/24 · 7j/7</h5>
+        <p data-i18n="foot_help_p">Notre équipe d'assistance est en ligne à toute heure. Vous obtiendrez une réponse humaine, pas un chatbot. Support en français, arabe et anglais.</p>
+        <a class="btn btn-ghost" style="background:rgba(255,255,255,.06);color:#fff;border-color:rgba(255,255,255,.16)" href="#footerContact"><span data-i18n="contact_assist">Contact assistance</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
+    </div>
+
+    <div class="footer-cols">
+      <div class="footer-col">
+        <h6 data-i18n="foot_product">Produit</h6>
+        <ul>
+          <li><a href="VGIA.html" data-i18n="fp_overview">Vue d'ensemble</a></li>
+          <li><a href="#videoStrip" data-i18n="fp_search">Recherche vidéo</a></li>
+          <li><a href="#" data-i18n="fp_trans">Transcription</a></li>
+          <li><a href="#" data-i18n="fp_kg">Knowledge graph</a></li>
+          <li><a href="#" data-i18n="fp_ocr">OCR frames</a></li>
+          <li><a href="documentation.html">API</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h6 data-i18n="foot_solutions">Solutions</h6>
+        <ul>
+          <li><a href="#" data-i18n="fs_edu">Éducation</a></li>
+          <li><a href="#" data-i18n="fs_med">Médical</a></li>
+          <li><a href="#" data-i18n="fs_pod">Podcasts</a></li>
+          <li><a href="#" data-i18n="fs_media">Médias</a></li>
+          <li><a href="#" data-i18n="fs_research">Recherche académique</a></li>
+          <li><a href="pricing.html" data-i18n="fs_ent">Enterprise</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h6 data-i18n="foot_resources">Ressources</h6>
+        <ul>
+          <li><a href="documentation.html" data-i18n="fr_docs">Documentation</a></li>
+          <li><a href="#" data-i18n="fr_guides">Guides</a></li>
+          <li><a href="documentation.html" data-i18n="fr_api">API reference</a></li>
+          <li><a href="#" data-i18n="fr_status">Statut</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h6 data-i18n="foot_company">Entreprise</h6>
+        <ul>
+          <li><a href="#" data-i18n="fc_about">À propos</a></li>
+          <li><a href="#" data-i18n="fc_careers">Carrières</a></li>
+          <li><a href="#footerContact" data-i18n="fc_contact">Contact</a></li>
+          <li><a href="#" data-i18n="fc_made">Made in Algeria 🇩🇿</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Big handwritten VGIA wordmark -->
+    <div class="footer-wordmark">
+      <span>VGIA</span>
+    </div>
+
+    <div class="footer-bottom">
+      <div style="display:flex;align-items:center;gap:16px">
+        <span>© 2026 VGIA · Every video, instantly searchable.</span>
+      </div>
+      <div class="footer-socials">
+        <a href="#" aria-label="Twitter"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 4H22l-7.4 8.5L23 20h-6.5l-5.1-6.6L5.5 20H2.5l7.9-9L2 4h6.7l4.6 6.1L18.9 4Zm-1.1 14.1h1.7L7.3 5.8H5.5l12.3 12.3Z"/></svg></a>
+        <a href="#" aria-label="LinkedIn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5a2.5 2.5 0 0 1-.02-5ZM3 9h4v12H3zM9 9h3.8v1.7c.55-1 1.9-2 3.9-2 4.2 0 5 2.75 5 6.32V21h-4v-5.2c0-1.24-.02-2.83-1.73-2.83-1.73 0-2 1.35-2 2.74V21H9V9Z"/></svg></a>
+        <a href="#" aria-label="YouTube"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22 8s-.2-1.5-.8-2.2c-.75-.85-1.6-.85-2-.9C16.4 4.6 12 4.6 12 4.6s-4.4 0-7.2.3c-.4.05-1.25.05-2 .9C2.2 6.5 2 8 2 8S1.8 9.75 1.8 11.5v1c0 1.75.2 3.5.2 3.5s.2 1.5.8 2.2c.75.85 1.75.82 2.2.92 1.6.15 6.9.3 7 .3 0 0 4.4 0 7.2-.3.4-.05 1.25-.05 2-.9.6-.7.8-2.2.8-2.2s.2-1.75.2-3.5v-1C22.2 9.75 22 8 22 8Zm-12 7.6V8.4L15.5 12l-5.5 3.6Z"/></svg></a>
+        <a href="#" aria-label="Instagram"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm10.5 1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ========== Scroll reveal ========== */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* Modules section wow-animation trigger */
+const modIo = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('in');
+      modIo.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.2 });
+const modSect = document.getElementById('modulesSection');
+if (modSect) modIo.observe(modSect);
+
+/* Feature WOW cards */
+document.querySelectorAll('.fw-card').forEach(el => io.observe(el));
+
+/* ========== Video hover play (vcards) ========== */
+document.querySelectorAll('.vcard').forEach(card => {
+  const video = card.querySelector('video');
+  if (!video) return;
+  const src = video.dataset.src;
+  let loaded = false;
+  card.addEventListener('mouseenter', () => {
+    if (!loaded && src) {
+      const s = document.createElement('source');
+      s.src = src; s.type = 'video/mp4';
+      video.appendChild(s);
+      video.load();
+      loaded = true;
+    }
+    const p = video.play();
+    if (p) p.catch(() => {});
+  });
+  card.addEventListener('mouseleave', () => {
+    video.pause();
+    video.currentTime = 0;
+  });
+});
+
+/* ========== Problem/Solution horizontal scroll ========== */
+(function() {
+  const track = document.getElementById('psTrack');
+  const rail  = document.getElementById('psRail');
+  const dot1  = document.getElementById('psDot1');
+  const dot2  = document.getElementById('psDot2');
+  if (!track || !rail) return;
+
+  function onScroll() {
+    const rect = track.getBoundingClientRect();
+    const total = track.offsetHeight - window.innerHeight;
+    const passed = Math.min(Math.max(-rect.top, 0), total);
+    const progress = total > 0 ? passed / total : 0;
+
+    const railW = rail.scrollWidth;
+    const viewW = window.innerWidth;
+    const maxShift = Math.max(railW - viewW, 0);
+    rail.style.transform = `translateX(${-progress * maxShift}px)`;
+
+    if (progress > 0.5) {
+      dot1.classList.remove('active');
+      dot2.classList.add('active');
+    } else {
+      dot2.classList.remove('active');
+      dot1.classList.add('active');
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+})();
+
+/* ========== Without/With VGIA toggle ========== */
+(function(){
+  const section = document.getElementById('wwSection');
+  const toggle = document.getElementById('wwToggle');
+  const withoutPanel = document.getElementById('wwWithoutPanel');
+  const withPanel = document.getElementById('wwWithPanel');
+  const titleWith = document.getElementById('wwTitleWith');
+  const titleWithout = document.getElementById('wwTitleWithout');
+  const sub = document.getElementById('wwSub');
+  if (!section || !toggle) return;
+
+  function setState(state) {
+    if (state === 'without') {
+      toggle.classList.remove('with'); toggle.classList.add('without');
+      withoutPanel.classList.add('shown'); withoutPanel.classList.remove('hidden');
+      withPanel.classList.add('hidden'); withPanel.classList.remove('shown');
+      if (titleWith) titleWith.style.display = 'none';
+      if (titleWithout) titleWithout.style.display = 'inline';
+      sub.setAttribute('data-i18n', 'ww_sub_without');
+    } else {
+      toggle.classList.remove('without'); toggle.classList.add('with');
+      withPanel.classList.add('shown'); withPanel.classList.remove('hidden');
+      withoutPanel.classList.add('hidden'); withoutPanel.classList.remove('shown');
+      if (titleWith) titleWith.style.display = 'inline';
+      if (titleWithout) titleWithout.style.display = 'none';
+      sub.setAttribute('data-i18n', 'ww_sub_with');
+    }
+    // re-apply current language
+    if (window.__applyLang) window.__applyLang(window.__currentLang || 'fr');
+  }
+
+  toggle.querySelectorAll('.ww-opt').forEach(btn => {
+    btn.addEventListener('click', () => setState(btn.dataset.state));
+  });
+
+  // Scroll-driven auto-toggle
+  let lastState = 'without';
+  function onScroll() {
+    const rect = section.getBoundingClientRect();
+    if (rect.top < window.innerHeight * 0.5 && rect.top > -rect.height * 0.5) {
+      const progress = 1 - (rect.top + rect.height) / (window.innerHeight + rect.height);
+      const state = progress > 0.55 ? 'with' : 'without';
+      if (state !== lastState) { setState(state); lastState = state; }
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+
+/* ========== FAQ accordion ========== */
+document.querySelectorAll('.faq-item').forEach(item => {
+  item.addEventListener('click', () => item.classList.toggle('open'));
+});
+
+/* ========== Nav dark/light detection over hero ========== */
+(function(){
+  const nav = document.getElementById('mainNav');
+  const hero = document.querySelector('.hero');
+  if (!nav || !hero) return;
+  function checkNav() {
+    const heroRect = hero.getBoundingClientRect();
+    // If nav is over the hero video (hero visible at top), use dark mode
+    if (heroRect.bottom > 100) {
+      nav.classList.add('on-dark');
+    } else {
+      nav.classList.remove('on-dark');
+    }
+  }
+  checkNav();
+  window.addEventListener('scroll', checkNav, { passive: true });
+})();
+
+/* ========== i18n language switcher ========== */
+(function(){
+  const dict = {
+    fr: {
+      product: 'Produit', usecases: 'Cas d\'usage', documentation: 'Documentation',
+      pricing: 'Tarifs', whatsnew: 'Nouveautés', contact_us: 'Nous contacter',
+      try_vgia: 'Essayer VGIA', see_how: 'Voir comment ça marche',
+      hero_eyebrow: '✦ Votre assistant intelligence vidéo',
+      hero_title: 'Chaque vidéo.<br/><em>Instantanément cherchable.</em>',
+      hero_sub: "VGIA comprend ce qui est dit, montré et écrit dans chaque vidéo — pour que vous trouviez le moment exact dont vous avez besoin, dans n'importe quelle langue, en quelques secondes.",
+      hero_note: 'Gratuit pendant la Beta · Sans carte bancaire',
+      chip1: 'Transcript trouvé — 1:17:35', chip2: 'OCR · Frame · Speech', chip3: 'Réponse dans votre langue',
+      scroll: 'Défiler',
+      feat_eyebrow: '✦ Fonctionnalités puissantes',
+      feat_title: 'Conçu pour <em>chaque question</em> que vous poserez à une vidéo.',
+      feat_sub: 'Quatre capacités qui fonctionnent ensemble pour transformer des heures de contenu en réponses instantanées et sourcées.',
+      ww_eyebrow: '✦ Comparez votre quotidien',
+      ww_title_without: 'La <em style="color:#EF4444" class="script-em">réalité</em> sans <span style="background:#FEE2E2;color:#B91C1C;padding:0 .18em;border-radius:4px">VGIA</span>…',
+      ww_title_with: 'La <em style="color:var(--accent)" class="script-em">clarté</em> avec <span class="marker">VGIA</span>.',
+      ww_sub_without: "Fichiers éparpillés, vidéos oubliées, réponses introuvables — l'ambition freinée par le chaos.",
+      ww_sub_with: 'Réponses ancrées, sourcées, multilingues — une seule interface, la vôtre.',
+      ww_without: 'Sans VGIA', ww_with: 'Avec VGIA', ww_compare: 'Comparez l\'expérience',
+      ww_search_cta: 'Chercher avec VGIA',
+      ww_center_bad_title: 'C\'est ça votre quotidien…',
+      ww_center_bad_desc: 'Vous passez plus de temps à <b>chercher</b> l\'information qu\'à <b>l\'utiliser</b>.',
+      note_1: 'Où l\'a-t-il mentionné ?', note_2: 'Rejouer depuis la minute 0…',
+      note_3: 'Regarder 2h de vidéo…', note_4: 'Diapo ratée…',
+      note_5: 'Impossible de chercher dans les frames',
+      note_6: 'Mauvais timestamp…', note_7: 'Audio ET visuel manquants',
+      note_8: 'L\'équation introuvable', note_9: 'Où était ce diagramme ?',
+      note_10: 'Réponse dans une autre langue',
+      clean_1_t: 'Réponses ancrées', clean_1_d: 'Chaque réponse liée à un timestamp exact dans la vidéo.',
+      clean_2_t: 'Multilingue', clean_2_d: 'Arabe, français, anglais et 100+ langues.',
+      clean_3_t: 'Anti-hallucination', clean_3_d: 'Générée uniquement à partir de preuves vérifiées.',
+      clean_4_t: 'Mémoire multimodale', clean_4_d: 'Parole, images, OCR et graphe de connaissances unifiés.',
+      clean_5_t: 'Traçabilité totale', clean_5_d: 'Image, orateur, transcript et graphe par réponse.',
+      clean_6_t: 'Graphe de connaissances', clean_6_d: 'Connecte entités, concepts et événements en un graphe intelligent.',
+      clean_tag: 'DEMANDEZ · CHERCHEZ DANS LA VIDÉO',
+      badge_1: 'Intelligent.', badge_2: 'Fiable.', badge_3: 'Traçable.', badge_4: 'PROPULSÉ PAR L\'IA',
+      // Testimonials + FAQ + footer FR
+      perf_opt: 'Performance optimisée',
+      support: 'Support',
+      q_une: 'Une', q_question: 'question',
+      q_sub: 'Notre équipe est disponible pour vous accompagner. Contactez-nous directement ou consultez notre FAQ.',
+      faq_title: 'Questions fréquentes',
+      faq_q1: 'La Beta est-elle vraiment gratuite ?',
+      faq_a1: 'Oui, 100% gratuite pendant toute la durée de la Beta. Aucune carte de crédit requise, aucun engagement.',
+      faq_q2: 'Mes données sont-elles sécurisées ?',
+      faq_a2: 'Vos vidéos sont chiffrées de bout en bout (AES-256), stockées sur des serveurs souverains, et jamais utilisées pour entraîner nos modèles.',
+      faq_q3: 'Quelles langues sont supportées ?',
+      faq_a3: 'Français, Arabe standard, Darija algérienne, Anglais, Espagnol, et 40+ autres langues — avec recherche cross-langue.',
+      faq_q4: 'Puis-je exporter mes données ?',
+      faq_a4: 'À tout moment, en un clic — vidéos, transcripts, index et métadonnées, aux formats standards (VTT, SRT, JSON, CSV).',
+      faq_q5: 'Combien de temps dure la Beta ?',
+      faq_a5: 'Jusqu\'à fin 2026. Tous les utilisateurs Beta bénéficieront d\'un tarif préférentiel à vie lors du lancement commercial.',
+      support_direct: 'Support direct',
+      send_msg: 'Envoyez-nous un message',
+      f_name: 'Nom complet', f_email: 'Email', f_message: 'Message',
+      send_wa: 'Envoyer via WhatsApp',
+      foot_try_h: 'Essayer VGIA',
+      foot_try_p: 'Transformez toute bibliothèque vidéo en base de connaissances cherchable. Gratuit pendant la Beta, sans carte bancaire.',
+      foot_help_h: 'Assistance 24h/24 · 7j/7',
+      foot_help_p: 'Notre équipe d\'assistance est en ligne à toute heure. Vous obtiendrez une réponse humaine, pas un chatbot. Support en français, arabe et anglais.',
+      contact_assist: 'Contact assistance',
+      foot_product: 'Produit', foot_solutions: 'Solutions', foot_resources: 'Ressources', foot_company: 'Entreprise',
+      fp_overview: 'Vue d\'ensemble', fp_search: 'Recherche vidéo', fp_trans: 'Transcription',
+      fp_kg: 'Knowledge graph', fp_ocr: 'OCR frames',
+      fs_edu: 'Éducation', fs_med: 'Médical', fs_pod: 'Podcasts', fs_media: 'Médias',
+      fs_research: 'Recherche académique', fs_ent: 'Enterprise',
+      fr_docs: 'Documentation', fr_guides: 'Guides', fr_api: 'Référence API', fr_status: 'Statut',
+      fc_about: 'À propos', fc_careers: 'Carrières', fc_contact: 'Contact', fc_made: 'Made in Algeria 🇩🇿',
+      login: 'Se connecter', signup: 'Inscription',
+      testi_1: '"VGIA a transformé ma thèse. J\'ai indexé plus de 200 heures d\'interviews en darija et français. Retrouver une citation exacte prend maintenant 3 secondes au lieu de plusieurs jours."',
+      testi_2: '"Notre CHU utilise VGIA pour indexer les enregistrements chirurgicaux. Les résidents retrouvent une technique précise en tapant simplement son nom. Un gain énorme pour la formation."',
+      testi_3: '"En tant que producteur podcast, VGIA me fait gagner 15 h par semaine. Le clip social est prêt en 2 minutes, timestamps et sous-titres inclus. Nos équipes ne peuvent plus s\'en passer."',
+      f_name_ph: 'Votre nom', f_email_ph: 'votre@email.dz', f_msg_ph: 'Comment pouvons-nous vous aider ?',
+    },
+    en: {
+      product: 'Product', usecases: 'Use cases', documentation: 'Documentation',
+      pricing: 'Pricing', whatsnew: "What's new", contact_us: 'Contact us',
+      try_vgia: 'Try VGIA', see_how: 'See how it works',
+      hero_eyebrow: '✦ Your Video Intelligence Assistant',
+      hero_title: 'Every Video.<br/><em>Instantly Searchable.</em>',
+      hero_sub: 'VGIA understands what is said, shown, and written inside every video — so you find the exact moment you need, in any language, in seconds.',
+      hero_note: 'Free during Beta · No credit card required',
+      chip1: 'Transcript found — 1:17:35', chip2: 'OCR · Frame · Speech', chip3: 'Answer in your language',
+      scroll: 'Scroll',
+      feat_eyebrow: '✦ Powerful features',
+      feat_title: 'Built for <em>every question</em> you\'ll ever ask a video.',
+      feat_sub: 'Four core capabilities that work together to turn hours of footage into instant, sourced answers.',
+      ww_eyebrow: '✦ Compare your daily life',
+      ww_title_without: 'The <em style="color:#EF4444" class="script-em">Reality</em> <span style="background:#FEE2E2;color:#B91C1C;padding:0 .18em;border-radius:4px">Without VGIA</span>…',
+      ww_title_with: '<em style="color:var(--accent)" class="script-em">Clarity</em> <span class="marker">With VGIA</span>.',
+      ww_sub_without: 'Pause. Rewind. Guess. Repeat. Searching across long videos wastes hours. Information is buried inside speech, visuals, slides, and subtitles.',
+      ww_sub_with: 'Grounded, sourced, multilingual answers — one interface for every video question.',
+      ww_without: 'Without VGIA', ww_with: 'With VGIA', ww_compare: 'Compare the experience',
+      ww_search_cta: 'Search with VGIA',
+      ww_center_bad_title: 'This is your daily workflow…',
+      ww_center_bad_desc: 'You spend more time <b>looking for</b> information than actually <b>using it</b>.',
+      note_1: 'Where did he mention this?', note_2: 'Replay from minute 0…',
+      note_3: 'Need to watch a 2-hour video', note_4: 'Missed the slide…',
+      note_5: "Can't search inside frames",
+      note_6: 'Wrong timestamp…', note_7: 'Need both audio & visuals',
+      note_8: "Can't find the equation", note_9: 'Where was that diagram?',
+      note_10: 'Answer hidden in another language',
+      clean_1_t: 'Grounded Answers', clean_1_d: 'Every response tied to an exact timestamp in the video.',
+      clean_2_t: 'Multilingual', clean_2_d: 'Arabic, French, English and 100+ languages.',
+      clean_3_t: 'Anti-Hallucination', clean_3_d: 'Generates only from verified retrieved evidence.',
+      clean_4_t: 'Multimodal Memory', clean_4_d: 'Speech, frames, OCR and knowledge graph unified.',
+      clean_5_t: 'Full Traceability', clean_5_d: 'Frame, speaker, transcript and graph per answer.',
+      clean_6_t: 'Knowledge Graph', clean_6_d: 'Connects entities, concepts and events into an intelligent knowledge graph.',
+      clean_tag: 'ASK ANYTHING · SEARCH IN VIDEO',
+      badge_1: 'Intelligent.', badge_2: 'Trusted.', badge_3: 'Traceable.', badge_4: 'POWERED BY AI',
+      perf_opt: 'Performance optimized',
+      support: 'Support',
+      q_une: 'Have a', q_question: 'question',
+      q_sub: 'Our team is available to help. Contact us directly or check the FAQ.',
+      faq_title: 'Frequently asked questions',
+      faq_q1: 'Is the Beta really free?',
+      faq_a1: 'Yes, 100% free during the Beta. No credit card required, no commitment.',
+      faq_q2: 'Is my data secure?',
+      faq_a2: 'Your videos are end-to-end encrypted (AES-256), stored on sovereign servers, and never used to train our models.',
+      faq_q3: 'Which languages are supported?',
+      faq_a3: 'French, Modern Standard Arabic, Algerian Darija, English, Spanish, and 40+ more languages — with cross-language search.',
+      faq_q4: 'Can I export my data?',
+      faq_a4: 'Any time, in one click — videos, transcripts, indexes and metadata, in standard formats (VTT, SRT, JSON, CSV).',
+      faq_q5: 'How long does the Beta last?',
+      faq_a5: 'Until end of 2026. All Beta users get a lifetime preferential rate at commercial launch.',
+      support_direct: 'Direct support',
+      send_msg: 'Send us a message',
+      f_name: 'Full name', f_email: 'Email', f_message: 'Message',
+      send_wa: 'Send via WhatsApp',
+      foot_try_h: 'Try VGIA',
+      foot_try_p: 'Turn any video library into a searchable knowledge base. Free during Beta, no credit card required.',
+      foot_help_h: 'Support 24/7',
+      foot_help_p: 'Our support team is online at all hours. You will get a human answer, not a chatbot. Support in French, Arabic and English.',
+      contact_assist: 'Contact support',
+      foot_product: 'Product', foot_solutions: 'Solutions', foot_resources: 'Resources', foot_company: 'Company',
+      fp_overview: 'Overview', fp_search: 'Video search', fp_trans: 'Transcription',
+      fp_kg: 'Knowledge graph', fp_ocr: 'OCR frames',
+      fs_edu: 'Education', fs_med: 'Medical', fs_pod: 'Podcasts', fs_media: 'Media',
+      fs_research: 'Academic research', fs_ent: 'Enterprise',
+      fr_docs: 'Documentation', fr_guides: 'Guides', fr_api: 'API reference', fr_status: 'Status',
+      fc_about: 'About', fc_careers: 'Careers', fc_contact: 'Contact', fc_made: 'Made in Algeria 🇩🇿',
+      login: 'Log in', signup: 'Sign up',
+      testi_1: '"VGIA transformed my thesis. I indexed over 200 hours of interviews in Darija and French. Finding an exact quote now takes 3 seconds instead of several days."',
+      testi_2: '"Our hospital uses VGIA to index surgical recordings. Residents find a specific technique just by typing its name. A huge win for training."',
+      testi_3: '"As a podcast producer, VGIA saves me 15 hours a week. The social clip is ready in 2 minutes, timestamps and captions included. Our team can\'t work without it."',
+      f_name_ph: 'Your name', f_email_ph: 'you@email.com', f_msg_ph: 'How can we help you?',
+    }
+  };
+
+  window.__currentLang = 'fr';
+  window.__applyLang = function(lang) {
+    window.__currentLang = lang;
+    const d = dict[lang] || dict.fr;
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+      const key = el.getAttribute('data-i18n');
+      if (d[key] != null) el.innerHTML = d[key];
+    });
+    document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+      const k = el.getAttribute('data-i18n-ph');
+      if (d[k] != null) el.setAttribute('placeholder', d[k]);
+    });
+    const label = document.getElementById('langLabel');
+    if (label) label.textContent = lang.toUpperCase();
+    document.documentElement.lang = lang;
+    try { localStorage.setItem('vgia_lang', lang); } catch(e){}
+  };
+  // Restore saved lang
+  try {
+    const saved = localStorage.getItem('vgia_lang');
+    if (saved && (saved === 'fr' || saved === 'en')) {
+      setTimeout(() => window.__applyLang(saved), 0);
+    }
+  } catch(e){}
+
+  // Single-toggle FR<->EN
+  const langToggle = document.getElementById('langToggle');
+  const langLabel = document.getElementById('langLabel');
+  if (langToggle) {
+    langToggle.addEventListener('click', () => {
+      const next = window.__currentLang === 'fr' ? 'en' : 'fr';
+      window.__applyLang(next);
+      if (langLabel) langLabel.textContent = next.toUpperCase();
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — askVGIA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kalam:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+  <link rel="stylesheet" href="/app-assets/css/style.css?v=5"/>
+  <link rel="stylesheet" href="/app-assets/css/pages.css?v=5"/>
+  <style>
+    /* ── Sidebar collapse ── */
+    .sidebar-toggle {
+      position: absolute;
+      top: 22px;
+      right: -14px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 60;
+      transition: background 0.2s, color 0.2s, transform 0.3s;
+      font-size: 11px;
+    }
+    .sidebar-toggle:hover { background: var(--brand-dim); color: var(--brand-light); }
+
+    /* Collapsed state */
+    .sidebar.collapsed { width: 64px; }
+    .sidebar.collapsed .menu-label,
+    .sidebar.collapsed .logo-text,
+    .sidebar.collapsed .sidebar-section-label { opacity: 0; pointer-events: none; width: 0; overflow: hidden; }
+    .sidebar.collapsed .menu-item { justify-content: center; padding: 11px; }
+    .sidebar.collapsed .logo { justify-content: center; padding-left: 0; padding-right: 0; }
+    .sidebar.collapsed .logo svg { margin: 0 auto; }
+    .sidebar.collapsed #sidebar-toggle-icon { transform: rotate(180deg); }
+    .sidebar.collapsed + .main { margin-left: 64px; }
+
+    /* Smooth transitions */
+    .sidebar, .sidebar .menu-label, .sidebar .logo-text, .sidebar .sidebar-section-label,
+    .sidebar .menu-item, .sidebar .logo, .main {
+      transition: width 0.25s ease, margin-left 0.25s ease, opacity 0.2s ease, padding 0.25s ease;
+    }
+
+    /* ── Page-specific extras ── */
+
+    /* Chat thread container */
+    .chat-thread {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 4px;
+      max-height: 520px;
+      overflow-y: auto;
+      padding-right: 4px;
+      scroll-behavior: smooth;
+    }
+    .chat-thread:empty { display: none; }
+
+    /* Scrollbar styling */
+    .chat-thread::-webkit-scrollbar { width: 4px; }
+    .chat-thread::-webkit-scrollbar-track { background: transparent; }
+    .chat-thread::-webkit-scrollbar-thumb { background: var(--brand-border); border-radius: 4px; }
+
+    /* User question bubble */
+    .chat-question {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      padding: 10px 14px;
+      background: rgba(167,139,250,0.10);
+      border: 1px solid rgba(167,139,250,0.22);
+      border-radius: 12px;
+      font-size: 13px;
+      color: var(--text-primary);
+    }
+    .chat-question i { color: #a78bfa; margin-top: 2px; flex-shrink: 0; }
+
+    /* AI answer bubble */
+    .ask-answer {
+      padding: 14px 16px;
+      background: var(--brand-dim);
+      border: 1px solid var(--brand-border);
+      border-radius: 12px;
+      font-size: 13.5px;
+      line-height: 1.7;
+      color: var(--text-primary);
+    }
+    .ask-answer .answer-video-ref {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ask-answer .citation {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(99, 102, 241, 0.18);
+      border: 1px solid var(--brand-border);
+      border-radius: 6px;
+      padding: 1px 7px;
+      font-size: 11px;
+      color: var(--brand-light);
+      cursor: pointer;
+      margin: 0 2px;
+      font-family: var(--font-mono);
+      transition: background 0.15s;
+    }
+    .ask-answer .citation:hover { background: rgba(99, 102, 241, 0.3); }
+
+    /* Clear chat button */
+    .chat-clear-btn {
+      display: none;
+      align-self: flex-end;
+      background: none;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      border-radius: 8px;
+      padding: 3px 10px;
+      font-size: 11.5px;
+      cursor: pointer;
+      margin-top: 2px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .chat-clear-btn:hover { color: #fca5a5; border-color: #fca5a5; }
+    .chat-clear-btn.visible { display: flex; align-items: center; gap: 5px; }
+
+    .ask-loading {
+      display: none;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+    .ask-loading.visible { display: flex; }
+    .ask-loading-dots { display: flex; gap: 4px; }
+    .ask-loading-dots span {
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: var(--brand-light);
+      animation: askBounce 1.1s infinite;
+    }
+    .ask-loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+    .ask-loading-dots span:nth-child(3) { animation-delay: 0.30s; }
+    @keyframes askBounce { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-5px)} }
+
+    /* Video selector bar */
+    .video-select-bar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      backdrop-filter: blur(8px);
+      flex-wrap: wrap;
+    }
+    .video-select-bar > label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      padding-left: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .video-select-bar > label i { color: var(--brand-light); }
+    .video-select {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      border-radius: 9px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+      cursor: pointer;
+      min-width: 0;
+      transition: border-color 0.15s;
+    }
+    .video-select:focus { border-color: var(--brand-border); }
+    .video-select option { background: var(--bg-elevated); color: var(--text-primary); }
+    .btn-ingest {
+      background: var(--bg-input);
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 9px;
+      padding: 8px 13px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      transition: all 0.15s;
+    }
+    .btn-ingest:hover:not(:disabled) {
+      background: var(--brand-dim);
+      border-color: var(--brand-border);
+      color: var(--brand-light);
+    }
+    .btn-ingest:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* Status bar */
+    .status-bar {
+      font-size: 12px;
+      padding: 8px 12px;
+      border-radius: 9px;
+      display: none;
+    }
+    .status-bar.visible { display: flex; align-items: center; gap: 8px; }
+    .status-bar.info { background: var(--brand-dim); color: var(--brand-light); border: 1px solid var(--brand-border); }
+    .status-bar.success { background: var(--success-bg); color: var(--success); border: 1px solid rgba(52,211,153,0.25); }
+    .status-bar.error { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); }
+
+    .transcript-item .transcript-time { cursor: pointer; transition: color 0.15s; }
+    .transcript-item .transcript-time:hover { color: white; }
+
+    .video-player video { width: 100%; height: 100%; object-fit: cover; }
+    .video-player-container.has-video .video-thumb,
+    .video-player-container.has-video .video-overlay,
+    .video-player-container.has-video .video-controls,
+    .video-player-container.has-video .progress-bar { display: none; }
+
+    /* Upload status card on dashboard */
+    .upload-status-card {
+      background: var(--bg-card);
+      border: 1px solid var(--brand-border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: none;
+    }
+    .upload-status-card.visible { display: block; }
+    .upload-status-card h4 {
+      font-size: 13.5px;
+      margin-bottom: 8px;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .upload-status-card .up-bar {
+      height: 4px;
+      background: var(--border-color);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .upload-status-card .up-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--brand-light), var(--brand));
+      border-radius: 4px;
+      transition: width 0.3s;
+    }
+    .upload-status-card .up-label {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-family: var(--font-mono);
+    }
+
+  </style>
+  <script>
+    // Apply the stored theme before first paint (same key as the landing pages)
+    try {
+      var t = localStorage.getItem("vgia_theme") || "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.addEventListener("DOMContentLoaded", function () {
+        document.body.classList.add("light-mode");
+      });
+    } catch (e) {}
+  </script>
+</head>
+<body>
+
+  <div class="app">
+
+    <!-- ───────── SIDEBAR ───────── -->
+    <aside class="sidebar" id="sidebar">
+      <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">
+        <i class="fa-solid fa-chevron-left" id="sidebar-toggle-icon"></i>
+      </button>
+      <div class="sidebar-top">
+        <a href="/" class="logo">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#sbLogoGrad)"/>
+            <path d="M11 12L16 22L21 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <defs>
+              <linearGradient id="sbLogoGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#A78BFA"/>
+                <stop offset="100%" stop-color="#6366F1"/>
+              </linearGradient>
+            </defs>
+          </svg>
+          <span class="logo-text">ask<span class="lt-accent">VGIA</span></span>
+        </a>
+
+        <div class="sidebar-section-label">Workspace</div>
+        <nav class="sidebar-menu">
+          <a href="/app/index.html" class="menu-item active" data-page="ask">
+            <i class="fa-solid fa-comments"></i>
+            <span class="menu-label">Ask</span>
+          </a>
+          <a href="/app/my-videos.html" class="menu-item" data-page="videos">
+            <i class="fa-solid fa-film"></i>
+            <span class="menu-label">My Videos</span>
+          </a>
+          <a href="/app/upload.html" class="menu-item" data-page="upload">
+            <i class="fa-solid fa-cloud-arrow-up"></i>
+            <span class="menu-label">Upload</span>
+          </a>
+          <a href="/app/history.html" class="menu-item" data-page="history">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+            <span class="menu-label">History</span>
+          </a>
+        </nav>
+
+        <div class="sidebar-section-label">Account</div>
+        <nav class="sidebar-menu">
+          <a href="/app/settings.html" class="menu-item" data-page="settings">
+            <i class="fa-solid fa-gear"></i>
+            <span class="menu-label">Settings</span>
+          </a>
+        </nav>
+      </div>
+
+      <div class="sidebar-bottom">
+        <a href="/" class="menu-item logout" title="Sign out" onclick="event.preventDefault(); (async()=>{ try{ await sb.auth.signOut(); }catch(_){}; window.location='/'; })();"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="menu-label">Sign out</span></a>
+      </div>
+    </aside>
+
+    <!-- ───────── MAIN ───────── -->
+    <main class="main">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div class="topbar-title">
+          <span class="crumb">Workspace</span>
+          <span class="crumb-sep">/</span>
+          <h1>Ask</h1>
+        </div>
+
+        <div class="top-actions">
+          <nav class="top-links">
+            <a href="/app/index.html" class="top-link active">Ask</a>
+            <a href="/app/my-videos.html" class="top-link">Videos</a>
+            <a href="/app/upload.html" class="top-link">Upload</a>
+            <a href="/app/history.html" class="top-link">History</a>
+          </nav>
+          <button class="icon-btn" id="theme-toggle" title="Toggle theme">
+            <i class="fa-regular fa-moon"></i>
+          </button>
+          <div class="user-menu" id="user-menu">
+            <div class="user-avatar" id="user-avatar-initial">H</div>
+            <span class="user-name" id="user-name-label">Hanane</span>
+            <i class="fa-solid fa-chevron-down"></i>
+            <div class="dropdown-menu" id="user-dropdown">
+              <a href="/app/settings.html#profile"><i class="fa-solid fa-user"></i> Profile</a>
+              <a href="/app/settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- CONTENT -->
+      <div class="content-wrapper">
+
+        <!-- LEFT COLUMN -->
+        <div class="left-column">
+
+          <!-- Video selector -->
+          <div class="video-select-bar">
+            <label><i class="fa-solid fa-film"></i> Source</label>
+            <select class="video-select" id="video-select">
+              <option value="">— Select a video to ask about —</option>
+            </select>
+            <button class="btn-ingest" id="btn-ingest" disabled title="Re-index selected video">
+              <i class="fa-solid fa-rotate"></i> Re-index
+            </button>
+          </div>
+
+          <div class="status-bar" id="status-bar"></div>
+
+          <div class="upload-status-card" id="upload-status-card">
+            <h4 id="upload-status-name">Uploading…</h4>
+            <div class="up-bar"><div class="up-fill" id="upload-fill" style="width:0%"></div></div>
+            <div class="up-label" id="upload-status-label">0%</div>
+          </div>
+
+          <!-- Video header -->
+          <div class="video-header">
+            <div class="video-title-row">
+              <h2 class="video-title" id="video-title">Select a video above</h2>
+              <div class="video-actions">
+                <button class="btn-upload" id="btn-upload-new">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                  Upload video
+                </button>
+                <button class="icon-btn-more" id="btn-delete-video" title="Delete video" style="display:none">
+                  <i class="fa-solid fa-trash"></i>
+                </button>
+              </div>
+            </div>
+            <a href="/app/my-videos.html" class="back-link">
+              <i class="fa-solid fa-arrow-left"></i> All videos
+            </a>
+          </div>
+
+          <!-- Video player -->
+          <div class="video-player-container" id="video-player-container">
+            <div class="video-player" id="video-player">
+              <img src="https://images.unsplash.com/photo-1544531586-fde5298cdd40?w=960&h=540&fit=crop" alt="Select a video" class="video-thumb" id="video-thumb"/>
+              <video id="video-el" style="display:none;width:100%;border-radius:12px;" controls></video>
+              <div class="video-overlay" id="video-overlay">
+                <div class="play-overlay">
+                  <button class="play-btn-big" id="play-btn"><i class="fa-solid fa-play"></i></button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div class="tabs">
+            <button class="tab active" data-tab="transcript">Transcript</button>
+            <button class="tab" data-tab="timeline">Timeline</button>
+            <button class="tab" data-tab="chapters">Chapters</button>
+            <button class="tab" data-tab="graph">Graph</button>
+          </div>
+
+          <div class="tab-contents">
+            <div class="tab-panel active" id="transcript">
+              <div style="text-align:center;color:var(--text-muted);padding:36px 16px;font-size:13px">
+                <i class="fa-solid fa-file-lines" style="font-size:22px;opacity:0.4;display:block;margin-bottom:10px;"></i>
+                Select a video to view its transcript
+              </div>
+            </div>
+            <div class="tab-panel" id="timeline">
+              <div style="text-align:center;color:var(--text-muted);padding:36px 16px;font-size:13px">
+                <i class="fa-solid fa-timeline" style="font-size:22px;opacity:0.4;display:block;margin-bottom:10px;"></i>
+                Timeline will appear after the video is indexed
+              </div>
+            </div>
+            <div class="tab-panel" id="chapters">
+              <div style="text-align:center;color:var(--text-muted);padding:36px 16px;font-size:13px">
+                <i class="fa-solid fa-bookmark" style="font-size:22px;opacity:0.4;display:block;margin-bottom:10px;"></i>
+                Chapters will appear after the video is indexed
+              </div>
+            </div>
+            <div class="tab-panel" id="graph">
+              <div id="graph-viz-legend" style="display:none;flex-wrap:wrap;gap:8px;padding:4px 4px 12px;"></div>
+              <div id="graph-viz-container" style="position:relative;width:100%;height:420px;border:1px solid var(--border-color);border-radius:12px;overflow:hidden;background:var(--bg-elevated,rgba(255,255,255,0.02));">
+                <div id="graph-viz-empty" style="text-align:center;color:var(--text-muted);padding:36px 16px;font-size:13px">
+                  <i class="fa-solid fa-diagram-project" style="font-size:22px;opacity:0.4;display:block;margin-bottom:10px;"></i>
+                  Select a video to view its knowledge graph
+                </div>
+              </div>
+              <div id="graph-viz-tooltip" style="position:fixed;display:none;pointer-events:none;z-index:9999;background:#111827;color:#e5e7eb;border:1px solid rgba(255,255,255,0.15);border-radius:8px;padding:8px 10px;font-size:12px;max-width:260px;box-shadow:0 8px 24px rgba(0,0,0,0.35);"></div>
+            </div>
+          </div>
+
+          <!-- Recommendations -->
+          <div class="recommendations" id="recommendations" style="display:none">
+            <h3 class="rec-title">More in your library</h3>
+            <div class="rec-grid" id="rec-grid"></div>
+          </div>
+        </div>
+
+        <!-- RIGHT COLUMN — Ask Panel -->
+        <aside class="ask-panel">
+          <div class="ask-header">
+            <h2>Ask anything</h2>
+            <p>Get cited, timestamped answers grounded in the selected video.</p>
+          </div>
+
+          <div class="ask-input-wrap">
+            <textarea id="ask-textarea" placeholder="What are the main points discussed in this video?" rows="3"></textarea>
+            <button class="ask-send-btn" id="ask-send-btn"><i class="fa-solid fa-arrow-up"></i></button>
+          </div>
+
+          <div class="ask-loading" id="ask-loading">
+            <div class="ask-loading-dots"><span></span><span></span><span></span></div>
+            <span>Searching across speech, captions &amp; frames…</span>
+          </div>
+
+          <div class="chat-thread" id="chat-thread"></div>
+          <button class="chat-clear-btn" id="chat-clear-btn" title="Clear conversation">
+            <i class="fa-solid fa-trash-can"></i> Clear chat
+          </button>
+
+          <div class="suggested-section">
+            <div class="suggested-title">Try one of these</div>
+            <div class="question-card" data-question="What are the main points discussed in this video?">
+              <div class="q-icon"><i class="fa-solid fa-list-ul"></i></div>
+              <span class="q-text">Main points discussed in this video</span>
+            </div>
+            <div class="question-card" data-question="What are the key conclusions or takeaways?">
+              <div class="q-icon"><i class="fa-solid fa-lightbulb"></i></div>
+              <span class="q-text">Key conclusions and takeaways</span>
+            </div>
+            <div class="question-card" data-question="Give me a summary of the entire video.">
+              <div class="q-icon"><i class="fa-solid fa-file-lines"></i></div>
+              <span class="q-text">Summarize the entire video</span>
+            </div>
+            <div class="question-card" data-question="What topics or themes are covered?">
+              <div class="q-icon"><i class="fa-solid fa-tags"></i></div>
+              <span class="q-text">Topics and themes covered</span>
+            </div>
+          </div>
+
+          <div class="ask-footer">
+            <i class="fa-solid fa-bolt" style="color:var(--brand-light);font-size:12px;margin-top:2px;"></i>
+            <span>Answers are grounded in the actual video — every claim links to a timestamp you can verify.</span>
+          </div>
+        </aside>
+      </div>
+
+    </main>
+  </div>
+
+  <input type="file" id="file-input" accept="video/*" style="display:none"/>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/app-assets/js/supabase-client.js"></script>
+  <script src="/app-assets/js/guard.js"></script>
+  <script src="/app-assets/js/profile.js?v=6"></script>
+  <script src="/app-assets/js/main.js?v=5"></script>
+  <script src="/app-assets/js/api.js?v=5"></script>
+</body>
+</html>

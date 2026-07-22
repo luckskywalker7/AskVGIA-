@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>History — askVGIA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kalam:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+  <link rel="stylesheet" href="/app-assets/css/style.css?v=5"/>
+  <link rel="stylesheet" href="/app-assets/css/pages.css?v=5"/>
+  <style>
+    .history-toolbar {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .btn-clear-all {
+      background: var(--danger-bg);
+      border: 1px solid rgba(248,113,113,0.25);
+      color: var(--danger);
+      border-radius: 9px;
+      padding: 8px 14px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      transition: background .15s;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .btn-clear-all:hover { background: rgba(248,113,113,0.18); }
+
+    .history-count {
+      font-size: 12px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      font-family: var(--font-mono);
+    }
+
+    .history-empty {
+      text-align: center;
+      padding: 80px 24px;
+      color: var(--text-muted);
+      background: var(--bg-card);
+      border: 1px dashed var(--border-color);
+      border-radius: var(--radius-lg);
+    }
+    .history-empty .icon-wrap {
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      background: var(--brand-dim);
+      border: 1px solid var(--brand-border);
+      color: var(--brand-light);
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 22px; margin-bottom: 14px;
+    }
+    .history-empty h3 { font-size: 16px; font-weight: 700; color: var(--text-primary); margin-bottom: 6px; }
+    .history-empty p { font-size: 13px; margin: 0; max-width: 360px; margin: 0 auto; line-height: 1.55; }
+
+    .filter-tabs {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .filter-tab {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      border-radius: 999px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+    .filter-tab:hover {
+      color: var(--text-primary);
+      background: var(--bg-card-hover);
+    }
+    .filter-tab.active {
+      background: var(--brand-dim);
+      border-color: var(--brand-border);
+      color: var(--brand-light);
+    }
+
+    .history-item {
+      display: flex;
+      gap: 14px;
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 16px 18px;
+      margin-bottom: 10px;
+      transition: border-color .15s, background .15s;
+      backdrop-filter: blur(8px);
+    }
+    .history-item:hover {
+      border-color: var(--brand-border);
+    }
+    .history-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: var(--brand-dim);
+      border: 1px solid var(--brand-border);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      color: var(--brand-light);
+      font-size: 14px;
+    }
+    .history-body { flex: 1; min-width: 0; }
+    .history-body h4 {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin: 0 0 8px;
+      line-height: 1.4;
+      letter-spacing: -0.1px;
+    }
+    .history-answer {
+      font-size: 12.5px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+      margin: 0 0 10px;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .history-answer.expanded {
+      -webkit-line-clamp: unset;
+      display: block;
+    }
+    .history-meta {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .history-meta span {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .history-meta .video-tag {
+      background: var(--brand-dim);
+      color: var(--brand-light);
+      padding: 3px 9px;
+      border-radius: 999px;
+      font-weight: 600;
+      border: 1px solid var(--brand-border);
+      font-size: 11px;
+    }
+    .ttl-badge {
+      font-size: 10px;
+      padding: 2px 9px;
+      border-radius: 999px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .ttl-badge.fresh    { background: var(--success-bg); color: var(--success); border: 1px solid rgba(52,211,153,0.25); }
+    .ttl-badge.aging    { background: var(--warn-bg);    color: var(--warn);    border: 1px solid rgba(251,191,36,0.25); }
+    .ttl-badge.expiring { background: var(--danger-bg);  color: var(--danger);  border: 1px solid rgba(248,113,113,0.25); }
+
+    .history-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .btn-expand {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      border-radius: 8px;
+      padding: 5px 10px;
+      font-size: 11.5px;
+      cursor: pointer;
+      transition: all .15s;
+      white-space: nowrap;
+      font-family: inherit;
+      display: inline-flex; align-items: center; gap: 5px;
+    }
+    .btn-expand:hover {
+      background: var(--brand-dim);
+      border-color: var(--brand-border);
+      color: var(--brand-light);
+    }
+    .btn-goto {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 8px;
+      transition: all .15s;
+      font-size: 12px;
+    }
+    .btn-goto:hover {
+      color: var(--brand-light);
+      background: var(--brand-dim);
+      border-color: var(--brand-border);
+    }
+    .history-actions .btn-icon {
+      width: 28px; height: 28px;
+      border: 1px solid var(--border-color);
+      background: var(--bg-input);
+    }
+  </style>
+  <script>
+    // Apply the stored theme before first paint (same key as the landing pages)
+    try {
+      var t = localStorage.getItem("vgia_theme") || "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.addEventListener("DOMContentLoaded", function () {
+        document.body.classList.add("light-mode");
+      });
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <a href="/" class="logo">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="url(#sbLogoGrad)"/><path d="M11 12L16 22L21 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="sbLogoGrad" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#6366F1"/></linearGradient></defs></svg>
+          <span class="logo-text">ask<span class="lt-accent">VGIA</span></span>
+        </a>
+        <div class="sidebar-section-label">Workspace</div>
+        <nav class="sidebar-menu">
+          <a href="/app/index.html" class="menu-item"><i class="fa-solid fa-comments"></i><span class="menu-label">Ask</span></a>
+          <a href="/app/my-videos.html" class="menu-item"><i class="fa-solid fa-film"></i><span class="menu-label">My Videos</span></a>
+          <a href="/app/upload.html" class="menu-item"><i class="fa-solid fa-cloud-arrow-up"></i><span class="menu-label">Upload</span></a>
+          <a href="/app/history.html" class="menu-item active"><i class="fa-solid fa-clock-rotate-left"></i><span class="menu-label">History</span></a>
+        </nav>
+        <div class="sidebar-section-label">Account</div>
+        <nav class="sidebar-menu">
+          <a href="/app/settings.html" class="menu-item"><i class="fa-solid fa-gear"></i><span class="menu-label">Settings</span></a>
+        </nav>
+      </div>
+      <div class="sidebar-bottom">
+        <a href="/" class="menu-item logout" title="Sign out" onclick="event.preventDefault(); (async()=>{ try{ await sb.auth.signOut(); }catch(_){}; window.location='/'; })();"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="menu-label">Sign out</span></a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-title">
+          <span class="crumb">Workspace</span><span class="crumb-sep">/</span><h1>History</h1>
+        </div>
+        <div class="top-actions">
+          <button class="icon-btn" id="theme-toggle"><i class="fa-regular fa-moon"></i></button>
+          <div class="user-menu" id="user-menu">
+            <div class="user-avatar" id="user-avatar-initial">H</div>
+            <span class="user-name" id="user-name-label">Hanane</span>
+            <i class="fa-solid fa-chevron-down"></i>
+            <div class="dropdown-menu" id="user-dropdown">
+              <a href="/app/settings.html#profile"><i class="fa-solid fa-user"></i> Profile</a>
+              <a href="/app/settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-wrapper single-column">
+        <div class="page-header">
+          <h1>History</h1>
+          <p>Your past questions and AI answers. Entries are auto-deleted after 3 days for your privacy.</p>
+        </div>
+
+        <div class="history-toolbar">
+          <div class="search-box" style="flex:1;max-width:420px;">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="history-search" placeholder="Search questions or answers…"/>
+          </div>
+          <span class="history-count" id="history-count"></span>
+          <button class="btn-clear-all" id="btn-clear-all">
+            <i class="fa-solid fa-trash"></i> Clear all
+          </button>
+        </div>
+
+        <div class="filter-tabs" id="filter-tabs"></div>
+
+        <div id="history-list"></div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/app-assets/js/supabase-client.js"></script>
+  <script src="/app-assets/js/guard.js"></script>
+  <script src="/app-assets/js/profile.js?v=6"></script>
+  <script src="/app-assets/js/main.js?v=5"></script>
+  <script src="/app-assets/js/api.js?v=5"></script>
+  <script>
+  function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+  function timeAgo(ts) {
+    // ts from server is seconds; Date.now() is ms
+    const tsMs = ts < 1e12 ? ts * 1000 : ts;
+    const diff = Date.now() - tsMs;
+    const m = Math.floor(diff / 60000);
+    if (m < 1)   return 'just now';
+    if (m < 60)  return m + 'm ago';
+    const h = Math.floor(m / 60);
+    if (h < 24)  return h + 'h ago';
+    return Math.floor(h / 24) + 'd ago';
+  }
+  function ttlLabel(ts) {
+    const tsMs = ts < 1e12 ? ts * 1000 : ts;
+    const days = (Date.now() - tsMs) / (24 * 60 * 60 * 1000);
+    if (days < 1)   return { cls: 'fresh',    label: 'expires in ~' + Math.ceil(3 - days) + 'd' };
+    if (days < 2)   return { cls: 'aging',    label: 'expires tomorrow' };
+    return              { cls: 'expiring', label: 'expires today' };
+  }
+
+  let _activeFilter = 'all';
+  let _searchQuery  = '';
+
+  async function render() {
+    const all     = await HistoryStore.list();
+    const videos  = [...new Set(all.map(i => i.videoId))];
+
+    const countEl = document.getElementById('history-count');
+    if (countEl) countEl.textContent = all.length + ' entr' + (all.length === 1 ? 'y' : 'ies');
+
+    const tabsEl = document.getElementById('filter-tabs');
+    if (tabsEl) {
+      const allTab = `<button class="filter-tab ${_activeFilter === 'all' ? 'active' : ''}" onclick="setFilter('all')">All</button>`;
+      const vidTabs = videos.map(vid => {
+        const item = all.find(i => i.videoId === vid);
+        const label = item?.videoTitle || vid;
+        const short = label.length > 22 ? label.slice(0, 22) + '…' : label;
+        const cls   = _activeFilter === vid ? 'active' : '';
+        return `<button class="filter-tab ${cls}" onclick="setFilter('${esc(vid)}')">${esc(short)}</button>`;
+      }).join('');
+      tabsEl.innerHTML = allTab + vidTabs;
+    }
+
+    let items = all;
+    if (_activeFilter !== 'all') items = items.filter(i => i.videoId === _activeFilter);
+    if (_searchQuery) {
+      const q = _searchQuery.toLowerCase();
+      items = items.filter(i =>
+        i.question.toLowerCase().includes(q) ||
+        i.answer.toLowerCase().includes(q) ||
+        (i.videoTitle || '').toLowerCase().includes(q)
+      );
+    }
+
+    const listEl = document.getElementById('history-list');
+    if (!listEl) return;
+
+    if (!items.length) {
+      listEl.innerHTML = `
+        <div class="history-empty">
+          <div class="icon-wrap"><i class="fa-solid fa-clock-rotate-left"></i></div>
+          <h3>${all.length === 0 ? 'No history yet' : 'Nothing matches'}</h3>
+          <p>${all.length === 0
+            ? 'Ask a question on any video and your conversation will appear here.'
+            : 'Try a different search or clear the filter.'}</p>
+        </div>`;
+      return;
+    }
+
+    listEl.innerHTML = items.map(item => {
+      const { cls, label } = ttlLabel(item.ts);
+      const answerPreview   = esc(item.answer).replace(/\n/g, '<br>');
+      return `
+        <div class="history-item" id="hitem-${item.id}">
+          <div class="history-icon"><i class="fa-solid fa-sparkles"></i></div>
+          <div class="history-body">
+            <h4>${esc(item.question)}</h4>
+            <div class="history-answer" id="ans-${item.id}">${answerPreview}</div>
+            <div class="history-meta">
+              <span class="video-tag">
+                <i class="fa-solid fa-film"></i>
+                ${esc(item.videoTitle || item.videoId)}
+              </span>
+              <span><i class="fa-regular fa-clock"></i>${timeAgo(item.ts)}</span>
+              <span class="ttl-badge ${cls}">${label}</span>
+            </div>
+          </div>
+          <div class="history-actions">
+            <button class="btn-expand" onclick="toggleExpand(${item.id})">
+              <i class="fa-solid fa-chevron-down" id="exp-icon-${item.id}"></i> More
+            </button>
+            <button class="btn-goto" title="Open this video"
+              onclick="sessionStorage.setItem('selectedVideo','${esc(item.videoId)}');window.location.href='/app/index.html'">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>
+            </button>
+            <button class="btn-icon" title="Delete" onclick="deleteItem('${item.id}')">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        </div>`;
+    }).join('');
+  }
+
+  function toggleExpand(id) {
+    const el   = document.getElementById('ans-' + id);
+    const icon = document.getElementById('exp-icon-' + id);
+    if (!el) return;
+    const expanded = el.classList.toggle('expanded');
+    if (icon) icon.className = expanded ? 'fa-solid fa-chevron-up' : 'fa-solid fa-chevron-down';
+    const btn = icon?.closest('.btn-expand');
+    if (btn) btn.innerHTML = expanded
+      ? '<i class="fa-solid fa-chevron-up" id="exp-icon-' + id + '"></i> Less'
+      : '<i class="fa-solid fa-chevron-down" id="exp-icon-' + id + '"></i> More';
+  }
+
+  async function deleteItem(id) { await HistoryStore.delete(id); render(); }
+  function setFilter(vid) { _activeFilter = vid; render(); }
+
+  document.addEventListener('DOMContentLoaded', () => {
+    render();
+    const searchInput = document.getElementById('history-search');
+    if (searchInput) {
+      searchInput.addEventListener('input', () => {
+        _searchQuery = searchInput.value.trim();
+        render();
+      });
+    }
+    const clearBtn = document.getElementById('btn-clear-all');
+    if (clearBtn) {
+      clearBtn.addEventListener('click', async () => {
+        if (confirm('Delete all history? This cannot be undone.')) {
+          await HistoryStore.clearAll();
+          render();
+        }
+      });
+    }
+  });
+  </script>
+</body>
+</html>

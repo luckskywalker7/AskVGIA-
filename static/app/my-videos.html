@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>My Videos — askVGIA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kalam:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+  <link rel="stylesheet" href="/app-assets/css/style.css?v=5"/>
+  <link rel="stylesheet" href="/app-assets/css/pages.css?v=5"/>
+  <style>
+    /* states */
+    .empty-state, .loading-state, .error-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 24px;
+      gap: 14px;
+      text-align: center;
+    }
+    .empty-state .icon-wrap, .error-state .icon-wrap {
+      width: 64px; height: 64px;
+      border-radius: 16px;
+      background: var(--brand-dim);
+      border: 1px solid var(--brand-border);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--brand-light);
+      font-size: 24px;
+    }
+    .error-state .icon-wrap { background: var(--danger-bg); border-color: rgba(248,113,113,0.25); color: var(--danger); }
+    .empty-state h3, .error-state h3 { font-size: 18px; font-weight: 700; letter-spacing: -0.2px; }
+    .empty-state p, .error-state p, .loading-state p { font-size: 13.5px; color: var(--text-muted); max-width: 360px; line-height: 1.55; }
+    .loading-state i { font-size: 28px; color: var(--brand-light); }
+
+    /* delete modal */
+    .modal-overlay {
+      display: none;
+      position: fixed; inset: 0;
+      background: rgba(8, 7, 26, 0.75);
+      backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+      z-index: 1000;
+    }
+    .modal-overlay.visible { display: flex; }
+    .modal-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 28px;
+      max-width: 400px;
+      width: 90%;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+    }
+    .modal-card .modal-icon {
+      width: 56px; height: 56px;
+      border-radius: 14px;
+      background: var(--danger-bg);
+      color: var(--danger);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
+      margin: 0 auto 14px;
+    }
+    .modal-card h3 { font-size: 17px; font-weight: 700; margin-bottom: 6px; letter-spacing: -0.3px; }
+    .modal-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+    .modal-actions { display: flex; gap: 8px; justify-content: center; }
+    .btn-danger-solid {
+      background: var(--danger);
+      color: white;
+      border: none;
+      border-radius: 9px;
+      padding: 9px 18px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      display: inline-flex; align-items: center; gap: 6px;
+    }
+    .btn-danger-solid:hover { background: #ef4747; }
+
+    /* rename */
+    .video-title-row { display:flex; align-items:center; gap:6px; }
+    .video-title-row h3 { flex:1; min-width:0; }
+    .video-title-row .rename-btn { opacity:0; transition:opacity .15s; flex-shrink:0; }
+    .video-card:hover .video-title-row .rename-btn { opacity:1; }
+    .rename-input {
+      flex:1; min-width:0;
+      background: var(--bg-elevated);
+      border: 1px solid var(--brand-border);
+      border-radius: 7px;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 600;
+      font-family: inherit;
+      padding: 3px 8px;
+      outline: none;
+    }
+    .rename-input:focus { border-color: var(--brand-light); box-shadow: 0 0 0 2px rgba(167, 139, 250,.2); }
+    .rename-save-btn {
+      background: var(--brand);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      padding: 4px 10px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      flex-shrink:0;
+    }
+    .rename-save-btn:hover { opacity:.85; }
+  </style>
+  <script>
+    // Apply the stored theme before first paint (same key as the landing pages)
+    try {
+      var t = localStorage.getItem("vgia_theme") || "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.addEventListener("DOMContentLoaded", function () {
+        document.body.classList.add("light-mode");
+      });
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <a href="/" class="logo">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="url(#sbLogoGrad)"/><path d="M11 12L16 22L21 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="sbLogoGrad" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#6366F1"/></linearGradient></defs></svg>
+          <span class="logo-text">ask<span class="lt-accent">VGIA</span></span>
+        </a>
+        <div class="sidebar-section-label">Workspace</div>
+        <nav class="sidebar-menu">
+          <a href="/app/index.html" class="menu-item"><i class="fa-solid fa-comments"></i><span class="menu-label">Ask</span></a>
+          <a href="/app/my-videos.html" class="menu-item active"><i class="fa-solid fa-film"></i><span class="menu-label">My Videos</span></a>
+          <a href="/app/upload.html" class="menu-item"><i class="fa-solid fa-cloud-arrow-up"></i><span class="menu-label">Upload</span></a>
+          <a href="/app/history.html" class="menu-item"><i class="fa-solid fa-clock-rotate-left"></i><span class="menu-label">History</span></a>
+        </nav>
+        <div class="sidebar-section-label">Account</div>
+        <nav class="sidebar-menu">
+          <a href="/app/settings.html" class="menu-item"><i class="fa-solid fa-gear"></i><span class="menu-label">Settings</span></a>
+        </nav>
+      </div>
+      <div class="sidebar-bottom">
+        <a href="/" class="menu-item logout" title="Sign out" onclick="event.preventDefault(); (async()=>{ try{ await sb.auth.signOut(); }catch(_){}; window.location='/'; })();"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="menu-label">Sign out</span></a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-title">
+          <span class="crumb">Workspace</span><span class="crumb-sep">/</span><h1>My Videos</h1>
+        </div>
+        <div class="top-actions">
+          <button class="icon-btn" id="theme-toggle"><i class="fa-regular fa-moon"></i></button>
+          <div class="user-menu" id="user-menu">
+            <div class="user-avatar" id="user-avatar-initial">H</div>
+            <span class="user-name" id="user-name-label">Hanane</span>
+            <i class="fa-solid fa-chevron-down"></i>
+            <div class="dropdown-menu" id="user-dropdown">
+              <a href="/app/settings.html#profile"><i class="fa-solid fa-user"></i> Profile</a>
+              <a href="/app/settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-wrapper single-column">
+        <div class="page-header">
+          <h1>My Videos</h1>
+          <p>Every video you've indexed, ready to query. Click a card to open the Ask workspace.</p>
+        </div>
+
+        <div class="videos-toolbar">
+          <div class="search-box">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="search-input" placeholder="Search by title, topic, or keyword…"/>
+          </div>
+          <div class="toolbar-actions">
+            <button class="btn-filter" id="filter-btn"><i class="fa-solid fa-sliders"></i> Filter</button>
+            <a href="/app/upload.html" class="btn-primary"><i class="fa-solid fa-cloud-arrow-up"></i> Upload</a>
+          </div>
+        </div>
+
+        <div id="videos-loading" class="loading-state">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          <p>Loading your library…</p>
+        </div>
+
+        <div id="videos-empty" class="empty-state" style="display:none">
+          <div class="icon-wrap"><i class="fa-solid fa-film"></i></div>
+          <h3>No videos yet</h3>
+          <p>Upload your first video to index its speech, on-screen text and visuals — then ask anything about it.</p>
+          <a href="/app/upload.html" class="btn-primary" style="margin-top:8px;">
+            <i class="fa-solid fa-cloud-arrow-up"></i> Upload your first video
+          </a>
+        </div>
+
+        <div id="videos-error" class="error-state" style="display:none">
+          <div class="icon-wrap"><i class="fa-solid fa-triangle-exclamation"></i></div>
+          <h3>Couldn't load videos</h3>
+          <p id="videos-error-msg"></p>
+          <button class="btn-filter" id="retry-btn" style="margin-top:6px;">
+            <i class="fa-solid fa-rotate-right"></i> Try again
+          </button>
+        </div>
+
+        <div class="videos-grid" id="videos-grid" style="display:none"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Delete modal -->
+  <div id="delete-modal" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-icon"><i class="fa-solid fa-trash"></i></div>
+      <h3>Delete this video?</h3>
+      <p id="delete-modal-name">This will remove all indexed chunks, transcripts and embeddings.</p>
+      <div class="modal-actions">
+        <button id="delete-cancel" class="btn-filter">Cancel</button>
+        <button id="delete-confirm" class="btn-danger-solid">
+          <i class="fa-solid fa-trash"></i> Delete
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/app-assets/js/supabase-client.js"></script>
+  <script src="/app-assets/js/guard.js"></script>
+  <script src="/app-assets/js/profile.js?v=6"></script>
+  <script src="/app-assets/js/main.js?v=5"></script>
+  <script src="/app-assets/js/api.js?v=5"></script>
+  <script>
+  (function () {
+    const grid       = document.getElementById('videos-grid');
+    const loading    = document.getElementById('videos-loading');
+    const empty      = document.getElementById('videos-empty');
+    const errorEl    = document.getElementById('videos-error');
+    const errorMsg   = document.getElementById('videos-error-msg');
+    const retryBtn   = document.getElementById('retry-btn');
+    const searchInput = document.getElementById('search-input');
+
+    const modal         = document.getElementById('delete-modal');
+    const modalName     = document.getElementById('delete-modal-name');
+    const deleteCancel  = document.getElementById('delete-cancel');
+    const deleteConfirm = document.getElementById('delete-confirm');
+    let pendingDeleteId = null;
+    let pendingDeleteTitle = '';
+
+    let allVideos = [];
+
+    function formatDuration(seconds) {
+      if (!seconds && seconds !== 0) return null;
+      const s = Math.round(seconds);
+      const h = Math.floor(s / 3600);
+      const m = Math.floor((s % 3600) / 60);
+      const sec = s % 60;
+      if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+      return `${m}:${String(sec).padStart(2,'0')}`;
+    }
+    function truncate(str, n) { if (!str) return ''; return str.length > n ? str.slice(0, n) + '…' : str; }
+    function esc(s) { return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+    function cleanVideoLabel(s) {
+      let clean = String(s || '').replace(/^[0-9a-f]{8,}\s+/i, '');
+      clean = clean.replace(/YTDown[\s.]?com\s*/gi, '');
+      clean = clean.replace(/\.[^/.]+$/, '');
+      return clean.trim() || s;
+    }
+
+    function buildCard(v, index) {
+      const id        = esc(v.video_id);
+      const title     = esc(cleanVideoLabel(v.title || v.filename || v.video_id));
+      const summary   = esc(truncate(v.summary, 110));
+      const duration  = v.duration_seconds != null ? formatDuration(v.duration_seconds) : null;
+      const chunks    = v.total_chunks || 0;
+      const lang      = esc(v.language && v.language !== 'unknown' ? v.language.toUpperCase() : '');
+      const featured  = index === 0 ? ' featured' : '';
+
+      const rawTags = (v.topics?.length ? v.topics : v.keywords?.length ? v.keywords : v.filter_tags) || [];
+      const tags = rawTags.slice(0, 3).map(t => `<span class="tag">${esc(t)}</span>`).join('');
+
+      const thumbContent = v.thumbnail_url
+        ? `<img src="${esc(v.thumbnail_url)}" alt="${title}"
+               style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"
+               onerror="this.style.display='none'"/>`
+        : `<div class="vid-thumb-placeholder" data-video-id="${id}"
+                data-video-src="${esc(v.file_url || '')}"
+                style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;position:absolute;inset:0;">
+             <i class="fa-solid fa-film" style="font-size:38px;color:#a5b4fc;opacity:0.55;"></i>
+           </div>`;
+
+      return `
+        <div class="video-card${featured}" data-video-id="${id}" data-title="${title.toLowerCase()}" style="cursor:pointer;" onclick="sessionStorage.setItem('selectedVideo','${id}'); window.location='/app/index.html'">
+          <div class="video-card-thumb">
+            ${thumbContent}
+            ${duration ? `<span class="video-duration">${duration}</span>` : ''}
+            <div class="video-overlay-card">
+              <button class="play-btn-sm" onclick="event.stopPropagation();sessionStorage.setItem('selectedVideo','${id}'); window.location='/app/index.html'">
+                <i class="fa-solid fa-play"></i>
+              </button>
+            </div>
+          </div>
+          <div class="video-card-body">
+            <div class="video-title-row" onclick="event.stopPropagation()">
+              <h3 class="video-title-text" title="${title}" data-video-id="${id}">${title}</h3>
+              <button class="btn-icon rename-btn" data-video-id="${id}" data-title="${title}" title="Rename video" onclick="event.stopPropagation();startRename('${id}',this)">
+                <i class="fa-solid fa-pencil"></i>
+              </button>
+            </div>
+            ${summary ? `<p class="video-meta" title="${summary}">${summary}</p>` : ''}
+            <p class="video-meta" style="margin-top:6px;font-family:var(--font-mono);font-size:11px;">
+              ${chunks} chunks${lang ? ` · ${lang}` : ''}
+            </p>
+            ${tags ? `<div class="video-tags">${tags}</div>` : ''}
+            <div class="video-card-actions">
+              <a href="/app/index.html" class="btn-ask" onclick="event.stopPropagation();sessionStorage.setItem('selectedVideo','${id}')">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Ask
+              </a>
+              <button class="btn-icon rename-btn" data-video-id="${id}" data-title="${title}" title="Rename video" onclick="event.stopPropagation();startRename('${id}',this)">
+                <i class="fa-solid fa-pencil"></i>
+              </button>
+              <button class="btn-icon delete-btn" data-video-id="${id}" data-title="${title}" title="Delete video" onclick="event.stopPropagation()">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    function extractFrameFromVideo(videoSrc) {
+      return new Promise((resolve) => {
+        if (!videoSrc) return resolve(null);
+        const vid = document.createElement('video');
+        vid.crossOrigin = 'anonymous';
+        vid.muted = true;
+        vid.preload = 'metadata';
+        const cleanup = () => { try { vid.src = ''; } catch(_){} };
+        const timeout = setTimeout(() => { cleanup(); resolve(null); }, 8000);
+        vid.addEventListener('loadedmetadata', () => {
+          vid.currentTime = Math.min(2, vid.duration * 0.1 || 2);
+        }, { once: true });
+        vid.addEventListener('seeked', () => {
+          clearTimeout(timeout);
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width  = vid.videoWidth  || 320;
+            canvas.height = vid.videoHeight || 180;
+            canvas.getContext('2d').drawImage(vid, 0, 0, canvas.width, canvas.height);
+            resolve(canvas.toDataURL('image/jpeg', 0.85));
+          } catch(_) { resolve(null); }
+          cleanup();
+        }, { once: true });
+        vid.addEventListener('error', () => { clearTimeout(timeout); cleanup(); resolve(null); }, { once: true });
+        vid.src = videoSrc;
+      });
+    }
+
+    async function loadThumbnails(videos) {
+      for (const v of videos) {
+        if (v.thumbnail_url) continue;
+        const videoId = v.video_id || v.id;
+        const placeholder = grid.querySelector(`.vid-thumb-placeholder[data-video-id="${CSS.escape(videoId)}"]`);
+        if (!placeholder) continue;
+        const videoSrc = placeholder.dataset.videoSrc;
+        if (!videoSrc) continue;
+        const dataUrl = await extractFrameFromVideo(videoSrc);
+        if (!dataUrl) continue;
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.alt = v.title || v.filename || videoId;
+        img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none;';
+        img.addEventListener('load', () => {
+          const icon = placeholder.querySelector('i.fa-film');
+          if (icon) icon.style.display = 'none';
+        }, { once: true });
+        placeholder.insertBefore(img, placeholder.firstChild);
+      }
+    }
+
+    function renderVideos(videos) {
+      if (!videos.length) {
+        grid.style.display    = 'none';
+        empty.style.display   = 'flex';
+        return;
+      }
+      empty.style.display  = 'none';
+      grid.style.display   = 'grid';
+      grid.innerHTML       = videos.map((v, i) => buildCard(v, i)).join('');
+      loadThumbnails(videos);
+
+      grid.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          pendingDeleteId = btn.dataset.videoId;
+          pendingDeleteTitle = btn.dataset.title;
+          modalName.textContent = `“${pendingDeleteTitle}” will be permanently removed along with its index.`;
+          modal.classList.add('visible');
+        });
+      });
+    }
+
+    function applySearch(query) {
+      const q = query.trim().toLowerCase();
+      const filtered = q
+        ? allVideos.filter(v =>
+            (v.title || '').toLowerCase().includes(q) ||
+            (v.filename || '').toLowerCase().includes(q) ||
+            (v.summary || '').toLowerCase().includes(q) ||
+            (v.topics || []).some(t => t.toLowerCase().includes(q)) ||
+            (v.keywords || []).some(k => k.toLowerCase().includes(q))
+          )
+        : allVideos;
+      renderVideos(filtered);
+    }
+
+    async function renameVideo(videoId, newTitle) {
+      const res = await fetch(`/video/${encodeURIComponent(videoId)}/metadata`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: newTitle.trim() })
+      });
+      if (!res.ok) throw new Error(`Server error ${res.status}`);
+      // Update local cache
+      const v = allVideos.find(v => v.video_id === videoId);
+      if (v) v.title = newTitle.trim();
+    }
+
+    function startRename(videoId, triggerEl) {
+      const card = triggerEl.closest('.video-card');
+      const titleRow = card.querySelector('.video-title-row');
+      const h3 = titleRow.querySelector('h3');
+      const currentTitle = h3.textContent;
+
+      titleRow.innerHTML = `
+        <input class="rename-input" type="text" value="${esc(currentTitle)}" maxlength="120" onclick="event.stopPropagation()"/>
+        <button class="rename-save-btn" onclick="event.stopPropagation();commitRename('${esc(videoId)}', this)">Save</button>
+        <button class="btn-icon" onclick="event.stopPropagation();cancelRename(this,'${esc(currentTitle)}')" title="Cancel"><i class="fa-solid fa-xmark"></i></button>`;
+      const input = titleRow.querySelector('.rename-input');
+      input.focus();
+      input.select();
+      input.addEventListener('keydown', e => {
+        if (e.key === 'Enter') commitRename(videoId, titleRow.querySelector('.rename-save-btn'));
+        if (e.key === 'Escape') cancelRename(titleRow.querySelector('.btn-icon'), currentTitle);
+      });
+    }
+
+    function cancelRename(btn, originalTitle) {
+      const titleRow = btn.closest('.video-title-row');
+      const videoId = titleRow.closest('.video-card').dataset.videoId;
+      titleRow.innerHTML = `
+        <h3 class="video-title-text" title="${esc(originalTitle)}" data-video-id="${esc(videoId)}">${esc(originalTitle)}</h3>
+        <button class="btn-icon rename-btn" data-video-id="${esc(videoId)}" data-title="${esc(originalTitle)}" title="Rename video" onclick="event.stopPropagation();startRename('${esc(videoId)}',this)">
+          <i class="fa-solid fa-pencil"></i>
+        </button>`;
+    }
+
+    async function commitRename(videoId, btn) {
+      const titleRow = btn.closest('.video-title-row');
+      const input = titleRow.querySelector('.rename-input');
+      const newTitle = input.value.trim();
+      if (!newTitle) return;
+      btn.disabled = true;
+      btn.textContent = '…';
+      try {
+        await renameVideo(videoId, newTitle);
+        titleRow.innerHTML = `
+          <h3 class="video-title-text" title="${esc(newTitle)}" data-video-id="${esc(videoId)}">${esc(newTitle)}</h3>
+          <button class="btn-icon rename-btn" data-video-id="${esc(videoId)}" data-title="${esc(newTitle)}" title="Rename video" onclick="event.stopPropagation();startRename('${esc(videoId)}',this)">
+            <i class="fa-solid fa-pencil"></i>
+          </button>`;
+        // update data-title on delete btn too
+        const card = titleRow.closest('.video-card');
+        const deleteBtn = card.querySelector('.delete-btn');
+        if (deleteBtn) deleteBtn.dataset.title = newTitle;
+        card.dataset.title = newTitle.toLowerCase();
+      } catch(err) {
+        btn.disabled = false;
+        btn.textContent = 'Save';
+        input.style.borderColor = 'var(--danger)';
+      }
+    }
+
+    async function loadVideos() {
+      loading.style.display   = 'flex';
+      grid.style.display      = 'none';
+      empty.style.display     = 'none';
+      errorEl.style.display   = 'none';
+      try {
+        allVideos = await API.listVideos();
+        loading.style.display = 'none';
+        applySearch(searchInput.value);
+      } catch (err) {
+        loading.style.display    = 'none';
+        errorEl.style.display    = 'flex';
+        errorMsg.textContent     = err.message || 'Unknown error';
+      }
+    }
+
+    deleteCancel.addEventListener('click', () => {
+      modal.classList.remove('visible');
+      pendingDeleteId = null;
+    });
+    deleteConfirm.addEventListener('click', async () => {
+      if (!pendingDeleteId) return;
+      const id = pendingDeleteId;
+      modal.classList.remove('visible');
+      pendingDeleteId = null;
+      const card = grid.querySelector(`[data-video-id="${id}"]`);
+      if (card) card.remove();
+      try {
+        await API.deleteVideo(id);
+        allVideos = allVideos.filter(v => v.video_id !== id);
+        if (!grid.querySelectorAll('.video-card').length) {
+          grid.style.display  = 'none';
+          empty.style.display = 'flex';
+        }
+      } catch (err) {
+        loadVideos();
+      }
+    });
+
+    searchInput.addEventListener('input', () => applySearch(searchInput.value));
+    retryBtn.addEventListener('click', loadVideos);
+    loadVideos();
+
+    // Expose rename functions globally so inline onclick handlers can reach them
+    window.startRename   = startRename;
+    window.commitRename  = commitRename;
+    window.cancelRename  = cancelRename;
+  })();
+  </script>
+</body>
+</html>

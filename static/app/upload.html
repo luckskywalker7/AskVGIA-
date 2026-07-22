@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Upload — askVGIA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kalam:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+  <link rel="stylesheet" href="/app-assets/css/style.css?v=5"/>
+  <link rel="stylesheet" href="/app-assets/css/pages.css?v=5"/>
+  <style>
+    /* Two-column intake: drop + YouTube */
+    .intake-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 18px;
+      margin-bottom: 28px;
+    }
+    @media (max-width: 900px) { .intake-grid { grid-template-columns: 1fr; } }
+
+    .upload-drop-zone {
+      border: 1.5px dashed var(--brand-border);
+      border-radius: var(--radius-xl);
+      padding: 44px 28px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      background: var(--bg-card);
+      position: relative;
+      overflow: hidden;
+      backdrop-filter: blur(8px);
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+    .upload-drop-zone::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 0%, rgba(99, 102, 241,0.10) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .upload-drop-zone:hover,
+    .upload-drop-zone.drag-over {
+      border-color: var(--brand-light);
+      background: rgba(99, 102, 241, 0.04);
+    }
+    .upload-drop-zone input[type="file"] {
+      position: absolute; inset: 0; opacity: 0; cursor: pointer;
+      width: 100%; height: 100%;
+    }
+    .drop-icon-wrap {
+      width: 60px; height: 60px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--brand-light), var(--brand));
+      display: flex; align-items: center; justify-content: center;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(99, 102, 241,0.4);
+    }
+    .drop-icon-wrap i { font-size: 26px; color: white; }
+    .drop-title {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+    .drop-sub {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+    .format-badges {
+      display: flex; gap: 6px; justify-content: center; flex-wrap: wrap;
+    }
+    .format-badge {
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      padding: 3px 10px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      font-family: var(--font-mono);
+    }
+
+    .yt-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl);
+      padding: 28px 26px;
+      backdrop-filter: blur(8px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .yt-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+    .yt-title .yt-dot {
+      width: 22px; height: 22px;
+      border-radius: 7px;
+      background: rgba(248,113,113,0.12);
+      color: #ef4444;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px;
+    }
+    .yt-section h3 {
+      font-size: 18px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin-bottom: 6px;
+    }
+    .yt-section .yt-blurb {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      line-height: 1.55;
+    }
+    .yt-form {
+      display: flex; gap: 8px;
+    }
+    .yt-input {
+      flex: 1;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-primary);
+      border-radius: 9px;
+      padding: 10px 13px;
+      font-family: var(--font-mono);
+      font-size: 12.5px;
+      outline: none;
+      transition: border-color 0.15s;
+      min-width: 0;
+    }
+    .yt-input:focus { border-color: var(--brand-border); }
+    .yt-input::placeholder { color: var(--text-faint); }
+    .yt-btn {
+      padding: 10px 16px;
+      background: var(--brand);
+      color: white;
+      border: none;
+      border-radius: 9px;
+      font-size: 12.5px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      font-family: inherit;
+      box-shadow: 0 4px 14px rgba(99, 102, 241,0.32);
+    }
+    .yt-btn:hover { background: #818CF8; transform: translateY(-1px); }
+    .yt-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* Processing queue */
+    .jobs-section { margin-top: 8px; }
+    .jobs-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 14px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .jobs-title .badge-count {
+      background: var(--brand-dim);
+      border: 1px solid var(--brand-border);
+      color: var(--brand-light);
+      padding: 1px 8px;
+      border-radius: 999px;
+      font-size: 10.5px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      text-transform: none;
+    }
+
+    .job-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+      backdrop-filter: blur(8px);
+    }
+    .job-card.active { border-color: var(--brand-border); }
+    .job-card.done   { border-color: rgba(52, 211, 153, 0.3); }
+    .job-card.error  { border-color: rgba(248, 113, 113, 0.3); }
+
+    .job-header {
+      display: flex; align-items: center; gap: 12px;
+      margin-bottom: 14px;
+    }
+    .job-icon {
+      width: 36px; height: 36px;
+      background: var(--bg-input);
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 15px;
+      color: var(--brand-light);
+    }
+    .job-name {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      min-width: 0;
+    }
+    .job-size {
+      font-size: 11.5px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      flex-shrink: 0;
+    }
+    .job-badge {
+      font-size: 10px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 999px;
+      flex-shrink: 0;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+    .job-badge.uploading  { background: var(--brand-dim); color: var(--brand-light); border: 1px solid var(--brand-border); }
+    .job-badge.processing { background: var(--warn-bg); color: var(--warn); border: 1px solid rgba(251,191,36,0.25); }
+    .job-badge.done       { background: var(--success-bg); color: var(--success); border: 1px solid rgba(52,211,153,0.25); }
+    .job-badge.error      { background: var(--danger-bg); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); }
+    .job-badge.queued     { background: var(--bg-input); color: var(--text-muted); border: 1px solid var(--border-color); }
+
+    .upload-bar-wrap { margin-bottom: 12px; }
+    .upload-bar-label {
+      display: flex; justify-content: space-between;
+      font-size: 11.5px; color: var(--text-muted);
+      margin-bottom: 6px; font-family: var(--font-mono);
+    }
+    .upload-bar { height: 4px; background: var(--bg-input); border-radius: 4px; overflow: hidden; }
+    .upload-bar-fill {
+      height: 100%; border-radius: 4px;
+      background: linear-gradient(90deg, var(--brand-light), var(--brand));
+      transition: width 0.3s ease;
+    }
+
+    .pipeline { display: flex; flex-direction: column; gap: 4px; }
+    .pipeline-step {
+      display: flex; align-items: flex-start; gap: 10px;
+      padding: 7px 11px;
+      border-radius: 8px;
+      background: var(--bg-input);
+      font-size: 12.5px;
+      transition: background 0.2s, opacity 0.2s;
+      opacity: 0.45;
+    }
+    .pipeline-step.active  { opacity: 1; background: var(--brand-dim); }
+    .pipeline-step.done    { opacity: 1; background: rgba(52,211,153,0.06); }
+    .pipeline-step.error   { opacity: 1; background: rgba(248,113,113,0.07); }
+    .pipeline-step.skipped { opacity: 0.3; }
+    .step-icon {
+      width: 18px; height: 18px;
+      display: flex; align-items: center; justify-content: center;
+      margin-top: 1px; flex-shrink: 0;
+    }
+    .step-icon .spin {
+      width: 12px; height: 12px;
+      border: 2px solid rgba(167, 139, 250,0.25);
+      border-top-color: var(--brand-light);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .step-body { flex: 1; min-width: 0; }
+    .step-label { color: var(--text-secondary); font-weight: 500; }
+    .step-label.active { color: var(--brand-light); font-weight: 600; }
+    .step-label.done   { color: var(--success); }
+    .step-label.error  { color: var(--danger); }
+    .step-detail {
+      color: var(--text-muted);
+      font-size: 11px;
+      margin-top: 2px;
+      font-family: var(--font-mono);
+      word-break: break-word;
+    }
+
+    .job-summary {
+      margin-top: 14px;
+      padding: 12px 14px;
+      background: var(--success-bg);
+      border: 1px solid rgba(52,211,153,0.25);
+      border-radius: 10px;
+      display: flex; align-items: center;
+      gap: 12px; flex-wrap: wrap;
+    }
+    .job-summary i { color: var(--success); font-size: 18px; }
+    .job-summary-text { font-size: 13px; color: var(--text-secondary); flex: 1; }
+    .job-summary-text strong { color: var(--text-primary); }
+
+    .empty-jobs {
+      text-align: center;
+      padding: 36px 20px;
+      color: var(--text-muted);
+      font-size: 13px;
+      background: var(--bg-card);
+      border: 1px dashed var(--border-color);
+      border-radius: var(--radius-lg);
+    }
+    .empty-jobs i { font-size: 26px; opacity: 0.4; display: block; margin-bottom: 10px; }
+  </style>
+  <script>
+    // Apply the stored theme before first paint (same key as the landing pages)
+    try {
+      var t = localStorage.getItem("vgia_theme") || "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.addEventListener("DOMContentLoaded", function () {
+        document.body.classList.add("light-mode");
+      });
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <a href="/" class="logo">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="url(#sbLogoGrad)"/><path d="M11 12L16 22L21 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="sbLogoGrad" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#6366F1"/></linearGradient></defs></svg>
+          <span class="logo-text">ask<span class="lt-accent">VGIA</span></span>
+        </a>
+        <div class="sidebar-section-label">Workspace</div>
+        <nav class="sidebar-menu">
+          <a href="/app/index.html" class="menu-item"><i class="fa-solid fa-comments"></i><span class="menu-label">Ask</span></a>
+          <a href="/app/my-videos.html" class="menu-item"><i class="fa-solid fa-film"></i><span class="menu-label">My Videos</span></a>
+          <a href="/app/upload.html" class="menu-item active"><i class="fa-solid fa-cloud-arrow-up"></i><span class="menu-label">Upload</span></a>
+          <a href="/app/history.html" class="menu-item"><i class="fa-solid fa-clock-rotate-left"></i><span class="menu-label">History</span></a>
+        </nav>
+        <div class="sidebar-section-label">Account</div>
+        <nav class="sidebar-menu">
+          <a href="/app/settings.html" class="menu-item"><i class="fa-solid fa-gear"></i><span class="menu-label">Settings</span></a>
+        </nav>
+      </div>
+      <div class="sidebar-bottom">
+        <a href="/" class="menu-item logout" title="Sign out" onclick="event.preventDefault(); (async()=>{ try{ await sb.auth.signOut(); }catch(_){}; window.location='/'; })();"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="menu-label">Sign out</span></a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-title">
+          <span class="crumb">Workspace</span><span class="crumb-sep">/</span><h1>Upload</h1>
+        </div>
+        <div class="top-actions">
+          <button class="icon-btn" id="theme-toggle"><i class="fa-regular fa-moon"></i></button>
+          <div class="user-menu" id="user-menu">
+            <div class="user-avatar" id="user-avatar-initial">H</div>
+            <span class="user-name" id="user-name-label">Hanane</span>
+            <i class="fa-solid fa-chevron-down"></i>
+            <div class="dropdown-menu" id="user-dropdown">
+              <a href="/app/settings.html#profile"><i class="fa-solid fa-user"></i> Profile</a>
+              <a href="/app/settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-wrapper single-column">
+        <div class="page-header">
+          <h1>Upload a video</h1>
+          <p>Drop a file or paste a YouTube link. We'll transcribe, OCR, embed and index every modality — you can ask questions as soon as the pipeline finishes.</p>
+        </div>
+
+        <div class="intake-grid">
+          <div class="upload-drop-zone" id="drop-zone">
+            <input type="file" id="file-input" accept="video/*,.mp4,.mov,.avi,.mkv,.webm" multiple/>
+            <div class="drop-icon-wrap"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+            <div class="drop-title">Drop video files here</div>
+            <div class="drop-sub">or click anywhere to browse — multiple files supported</div>
+            <div class="format-badges">
+              <span class="format-badge">MP4</span>
+              <span class="format-badge">MOV</span>
+              <span class="format-badge">AVI</span>
+              <span class="format-badge">MKV</span>
+              <span class="format-badge">WEBM</span>
+            </div>
+          </div>
+
+          <div class="yt-section">
+            <div class="yt-title">
+              <div class="yt-dot"><i class="fa-brands fa-youtube"></i></div>
+              Import from URL
+            </div>
+            <h3>Paste a YouTube link</h3>
+            <p class="yt-blurb">We'll download, transcribe and index the public video the same way we do uploads.</p>
+            <div class="yt-form">
+              <input type="text" class="yt-input" id="yt-url" placeholder="https://www.youtube.com/watch?v=…"/>
+              <button class="yt-btn" id="yt-btn" onclick="submitYoutube()">
+                <i class="fa-solid fa-download"></i> Import
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="jobs-section" id="jobs-section">
+          <div class="jobs-title">
+            Processing queue
+            <span class="badge-count" id="jobs-count" style="display:none">0</span>
+          </div>
+          <div id="jobs-list">
+            <div class="empty-jobs" id="empty-msg">
+              <i class="fa-solid fa-inbox"></i>
+              No videos in the queue — drop a file above to get started
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/app-assets/js/supabase-client.js"></script>
+  <script src="/app-assets/js/guard.js"></script>
+  <script src="/app-assets/js/profile.js?v=6"></script>
+  <script src="/app-assets/js/main.js?v=5"></script>
+  <script src="/app-assets/js/api.js?v=5"></script>
+  <script>
+  const API_BASE = '';
+
+  const STEP_DEFS = [
+    { key: 'upload',        label: 'File upload',        icon: 'fa-arrow-up' },
+    { key: 'transcription', label: 'Transcription',      icon: 'fa-microphone' },
+    { key: 'chunking',      label: 'Chunking',           icon: 'fa-scissors' },
+    { key: 'vision',        label: 'Vision / keyframes', icon: 'fa-eye' },
+    { key: 'embedding',     label: 'Embedding',          icon: 'fa-vector-square' },
+    { key: 'storage',       label: 'Storage',            icon: 'fa-database' },
+    { key: 'graph',         label: 'Graph building',     icon: 'fa-diagram-project' },
+    { key: 'graph_enrich',  label: 'Graph enrichment',   icon: 'fa-circle-nodes' },
+    { key: 'metadata',      label: 'Metadata & summary', icon: 'fa-tag' },
+  ];
+
+  const jobs = {};
+  const _pollTimers = {};
+
+  function makeJob(filename, size) {
+    return { filename, size, video_id: null, phase: 'queued', uploadPct: 0, steps: {}, errorMsg: null, elapsedTotal: null, meta: null, _startedAt: null };
+  }
+
+  const dropZone = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    [...e.dataTransfer.files].forEach(enqueueFile);
+  });
+  fileInput.addEventListener('change', e => {
+    [...e.target.files].forEach(enqueueFile);
+    fileInput.value = '';
+  });
+
+  function enqueueFile(file) {
+    const tempId = 'tmp_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const job = makeJob(file.name, file.size);
+    job.phase = 'uploading';
+    job._startedAt = Date.now();
+    jobs[tempId] = job;
+    renderAll();
+    uploadFile(tempId, file);
+  }
+
+  function uploadFile(tempId, file) {
+    const job = jobs[tempId];
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', API_BASE + '/upload');
+
+    xhr.upload.onprogress = e => {
+      if (e.lengthComputable) {
+        job.uploadPct = Math.round((e.loaded / e.total) * 100);
+        renderAll();
+      }
+    };
+
+    xhr.onload = () => {
+      try {
+        const data = JSON.parse(xhr.responseText);
+        if (xhr.status === 200 || xhr.status === 202) {
+          job.video_id = data.video_id;
+          job.uploadPct = 100;
+          job.steps['upload'] = { state: 'done', detail: formatBytes(file.size) };
+          delete jobs[tempId];
+          jobs[data.video_id] = job;
+
+          if (data.status === 'already_indexed') {
+            job.phase = 'done';
+            markAllDone(data.video_id, {});
+          } else {
+            job.phase = 'processing';
+            startPolling(data.video_id);
+          }
+          renderAll();
+        } else {
+          job.phase = 'error';
+          job.errorMsg = 'Upload failed: HTTP ' + xhr.status + ' — ' + (data.detail || '');
+          renderAll();
+        }
+      } catch(e) {
+        job.phase = 'error';
+        job.errorMsg = 'Bad response from server';
+        renderAll();
+      }
+    };
+
+    xhr.onerror = () => {
+      job.phase = 'error';
+      job.errorMsg = 'Network error during upload';
+      renderAll();
+    };
+
+    xhr.send(formData);
+  }
+
+  async function submitYoutube() {
+    const urlEl = document.getElementById('yt-url');
+    const btn   = document.getElementById('yt-btn');
+    const url   = urlEl.value.trim();
+    if (!url) return;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Importing…';
+    try {
+      const res  = await fetch(API_BASE + '/download-yt', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url })
+      });
+      const data = await res.json();
+      if (data.video_id) {
+        const job = makeJob(url, 0);
+        job.video_id  = data.video_id;
+        job.uploadPct = 100;
+        job.steps['upload'] = { state: 'done', detail: 'YouTube download complete' };
+        job.phase = data.status === 'already_indexed' ? 'done' : 'processing';
+        job._startedAt = Date.now();
+        jobs[data.video_id] = job;
+        urlEl.value = '';
+        renderAll();
+        if (job.phase === 'processing') startPolling(data.video_id);
+      } else {
+        alert('YouTube import failed: ' + (data.detail || data.error || 'unknown error'));
+      }
+    } catch(e) {
+      alert('Request failed: ' + e.message);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fa-solid fa-download"></i> Import';
+    }
+  }
+
+  function startPolling(video_id) {
+    if (_pollTimers[video_id]) return;
+    _pollTimers[video_id] = setInterval(() => pollOnce(video_id), 3000);
+    pollOnce(video_id);
+  }
+
+  async function pollOnce(video_id) {
+    const job = jobs[video_id];
+    if (!job) { clearInterval(_pollTimers[video_id]); return; }
+
+    try {
+      animateSteps(video_id);
+      const r = await fetch(API_BASE + '/ingestion/status/' + video_id);
+      const d = await r.json();
+
+      if (d.indexed) {
+        try {
+          const r2 = await fetch(API_BASE + '/debug/storage/' + video_id);
+          const d2 = r2.ok ? await r2.json() : d;
+          markAllDone(video_id, d2);
+        } catch(_) { markAllDone(video_id, d); }
+        clearInterval(_pollTimers[video_id]);
+        delete _pollTimers[video_id];
+      }
+      renderAll();
+    } catch(e) { console.warn('poll error:', e); }
+  }
+
+  const STEP_TIMELINE = [
+    { key: 'transcription', from: 2,   to: 120 },
+    { key: 'chunking',      from: 120, to: 300 },
+    { key: 'vision',        from: 300, to: 500 },
+    { key: 'embedding',     from: 500, to: 560 },
+    { key: 'storage',       from: 560, to: 590 },
+    { key: 'graph',         from: 590, to: 640 },
+    { key: 'graph_enrich',  from: 640, to: 660 },
+    { key: 'metadata',      from: 660, to: 700 },
+  ];
+
+  function animateSteps(video_id) {
+    const job = jobs[video_id];
+    if (!job || job.phase !== 'processing') return;
+    const elapsed = (Date.now() - (job._startedAt || Date.now())) / 1000;
+    for (const t of STEP_TIMELINE) {
+      const existing = job.steps[t.key];
+      if (existing && existing.state === 'done') continue;
+      if (elapsed >= t.from && elapsed < t.to) {
+        job.steps[t.key] = { state: 'active', detail: 'Running…' };
+      } else if (elapsed >= t.to && (!existing || existing.state !== 'done')) {
+        job.steps[t.key] = { state: 'done', detail: '' };
+      }
+    }
+  }
+
+  function markAllDone(video_id, data) {
+    const job = jobs[video_id];
+    if (!job) return;
+    job.phase = 'done';
+    job.elapsedTotal = data.elapsed_seconds || null;
+    for (const def of STEP_DEFS) {
+      if (def.key === 'upload') {
+        if (!job.steps['upload']) job.steps['upload'] = { state: 'done', detail: formatBytes(job.size) };
+        continue;
+      }
+      const existing = job.steps[def.key];
+      if (!existing || existing.state === 'active') {
+        job.steps[def.key] = { state: 'done', detail: '' };
+      }
+    }
+    if (data.total_chunks) {
+      job.steps['storage'] = { state: 'done', detail: data.total_chunks + ' chunks stored' };
+    }
+    job.meta = { chunks: data.total_chunks || 0 };
+  }
+
+  function renderAll() {
+    const list = document.getElementById('jobs-list');
+    const countEl = document.getElementById('jobs-count');
+    const ids = Object.keys(jobs);
+
+    if (countEl) {
+      if (ids.length) { countEl.style.display = 'inline-block'; countEl.textContent = ids.length; }
+      else countEl.style.display = 'none';
+    }
+
+    if (ids.length === 0) {
+      list.innerHTML = '<div class="empty-jobs"><i class="fa-solid fa-inbox"></i>No videos in the queue — drop a file above to get started</div>';
+      return;
+    }
+    const em = list.querySelector('.empty-jobs');
+    if (em) em.remove();
+
+    for (const id of ids) {
+      const job = jobs[id];
+      let el = document.getElementById('job-' + id);
+      if (!el) {
+        el = document.createElement('div');
+        el.id = 'job-' + id;
+        list.prepend(el);
+      }
+      el.className = 'job-card ' + (job.phase === 'done' ? 'done' : job.phase === 'error' ? 'error' : (job.phase === 'uploading' || job.phase === 'processing') ? 'active' : '');
+      el.innerHTML = buildJobHTML(job);
+    }
+  }
+
+  function buildJobHTML(job) {
+    const BADGE = { queued: 'queued', uploading: 'uploading', processing: 'processing', done: 'done', error: 'error' };
+    const LABEL = { queued: 'Queued', uploading: 'Uploading', processing: 'Processing', done: 'Indexed', error: 'Failed' };
+
+    let html = `<div class="job-header">
+      <div class="job-icon"><i class="fa-solid fa-film"></i></div>
+      <div class="job-name" title="${esc(job.filename)}">${esc(job.filename)}</div>
+      ${job.size ? `<div class="job-size">${formatBytes(job.size)}</div>` : ''}
+      <span class="job-badge ${BADGE[job.phase] || 'queued'}">${LABEL[job.phase] || job.phase}</span>
+    </div>`;
+
+    if (job.phase === 'uploading') {
+      html += `<div class="upload-bar-wrap">
+        <div class="upload-bar-label"><span>Uploading to server…</span><span>${job.uploadPct}%</span></div>
+        <div class="upload-bar"><div class="upload-bar-fill" style="width:${job.uploadPct}%"></div></div>
+      </div>`;
+    }
+
+    if (job.phase === 'error') {
+      return html + `<div style="color:var(--danger);font-size:13px;padding:8px 0">
+        <i class="fa-solid fa-circle-exclamation"></i> ${esc(job.errorMsg || 'Unknown error')}
+      </div>`;
+    }
+
+    if (job.phase === 'processing' || job.phase === 'done') {
+      html += '<div class="pipeline">';
+      for (const def of STEP_DEFS) {
+        const s   = job.steps[def.key] || { state: 'waiting' };
+        const cls = s.state === 'done' ? 'done' : s.state === 'active' ? 'active' : s.state === 'error' ? 'error' : s.state === 'skipped' ? 'skipped' : '';
+
+        let icon = '';
+        if (s.state === 'active')         icon = '<div class="spin"></div>';
+        else if (s.state === 'done')      icon = '<i class="fa-solid fa-check" style="color:var(--success);font-size:11px"></i>';
+        else if (s.state === 'error')     icon = '<i class="fa-solid fa-xmark" style="color:var(--danger);font-size:11px"></i>';
+        else if (s.state === 'skipped')   icon = '<i class="fa-solid fa-minus" style="color:var(--text-faint);font-size:10px"></i>';
+        else                              icon = '<i class="fa-regular fa-circle" style="color:var(--text-faint);font-size:10px"></i>';
+
+        html += `<div class="pipeline-step ${cls}">
+          <div class="step-icon">${icon}</div>
+          <div class="step-body">
+            <div class="step-label ${cls}"><i class="fa-solid ${def.icon}" style="font-size:10px;margin-right:6px;opacity:0.7"></i>${def.label}</div>
+            ${s.detail ? `<div class="step-detail">${esc(s.detail)}</div>` : ''}
+          </div>
+        </div>`;
+      }
+      html += '</div>';
+    }
+
+    if (job.phase === 'done' && job.meta) {
+      const t = job.elapsedTotal ? ` in ${Math.round(job.elapsedTotal)}s` : '';
+      html += `<div class="job-summary">
+        <i class="fa-solid fa-circle-check"></i>
+        <div class="job-summary-text">Indexed${t} — <strong>${job.meta.chunks || 0} chunks</strong> stored.</div>
+        <a href="/app/index.html?video_id=${encodeURIComponent(job.video_id||'')}" class="btn-ask">
+          <i class="fa-solid fa-comments"></i> Ask this video
+        </a>
+      </div>`;
+    }
+
+    return html;
+  }
+
+  function formatBytes(b) {
+    if (!b) return '';
+    if (b < 1024) return b + ' B';
+    if (b < 1048576) return (b/1024).toFixed(1) + ' KB';
+    if (b < 1073741824) return (b/1048576).toFixed(1) + ' MB';
+    return (b/1073741824).toFixed(2) + ' GB';
+  }
+  function esc(s) {
+    if (!s) return '';
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  </script>
+</body>
+</html>

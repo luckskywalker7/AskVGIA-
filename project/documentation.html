@@ -1,0 +1,622 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Documentation — VGIA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;600;700&family=Kalam:wght@400;700&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B0B14; --ink-2: #1a1a2e; --muted: #5a5a72; --muted-2: #8a8aa0;
+    --line: #E6E6EF; --bg: #ffffff; --bg-soft: #F6F5FB;
+    --accent: #6366F1; --accent-2: #8B5CF6; --code-bg: #0B0B14;
+    --highlight: #FEF08A;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    color: var(--ink); background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: 0; background: none; }
+  .container-wide { max-width: 1360px; margin: 0 auto; padding: 0 24px; }
+  code, pre { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+  /* NAV */
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,.9);
+    backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(11,11,20,.06);
+  }
+  .nav-inner { display: flex; align-items: center; gap: 32px; height: 64px; }
+  .logo-link { height: 46px; display: inline-flex; align-items: center; transition: transform .25s; }
+  .logo-link:hover { transform: translateY(-1px); }
+  .logo-img { height: 46px; width: auto; display: block; transition: filter .35s ease; }
+  html[data-theme="dark"] .logo-img { filter: brightness(0) invert(1); }
+  .nav-menu { display: flex; gap: 4px; flex: 1; align-items: center; }
+  .nav-menu { justify-content: center; gap: 2px !important; }
+  .nav-item {
+    padding: 8px 14px; font-size: 14px; font-weight: 500; color: var(--ink-2);
+    border-radius: 8px; display: inline-flex; align-items: center; gap: 4px;
+    position: relative; white-space: nowrap;
+    transition: background .15s, color .15s;
+  }
+  .nav-item:hover { background: var(--bg-soft); color: var(--ink); }
+  .nav-item.active { color: var(--accent); font-weight: 600; background: transparent; }
+  .nav-item.active::after {
+    content: ""; position: absolute;
+    left: 14px; right: 14px; bottom: 2px;
+    height: 2px; border-radius: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+  }
+  .nav-right { display: flex; align-items: center; gap: 8px; }
+  .nav-right a.link { font-size: 14px; padding: 8px 12px; color: var(--ink-2); transition: color .15s; }
+  .nav-right a.link:hover { color: var(--accent); }
+  .lang-toggle {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 12px; border-radius: 999px;
+    background: var(--bg-soft);
+    font-size: 13px; font-weight: 700; color: var(--ink-2);
+    cursor: pointer;
+    transition: background .2s, color .2s, transform .2s;
+  }
+  .lang-toggle:hover { background: rgba(99,102,241,.12); color: var(--accent); transform: translateY(-1px); }
+  .login-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 999px;
+    font-size: 13.5px; font-weight: 600;
+    color: var(--ink-2); border: 1px solid var(--line);
+    transition: background .15s, border-color .15s;
+  }
+  .login-btn:hover { background: var(--bg-soft); border-color: var(--ink-2); }
+  .signup-btn {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 9px 16px; border-radius: 999px;
+    font-size: 13.5px; font-weight: 700;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    box-shadow: 0 6px 18px -6px rgba(99,102,241,.5);
+    transition: transform .15s;
+  }
+  .signup-btn:hover { transform: translateY(-1px); }
+  .btn-try {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 20px; border-radius: 999px;
+    font-family: 'Caveat', cursive; font-weight: 700; font-size: 22px;
+    letter-spacing: -0.005em;
+    background: linear-gradient(135deg, #6366F1 0%, #8B5CF6 55%, #06B6D4 100%);
+    background-size: 200% 100%; background-position: 0% 50%;
+    color: #fff;
+    box-shadow: 0 10px 26px -8px rgba(99,102,241,.55);
+    transition: transform .2s, box-shadow .3s, background-position .6s cubic-bezier(.6,.05,.05,1);
+    text-shadow: 0 1px 6px rgba(0,0,0,.18);
+  }
+  .btn-try:hover { transform: translateY(-2px) rotate(-1deg); background-position: 100% 50%; box-shadow: 0 14px 36px -8px rgba(6,182,212,.55); }
+  .btn-try .arr { transition: transform .2s; }
+  .btn-try:hover .arr { transform: translateX(3px); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: 999px;
+    font-weight: 600; font-size: 14px;
+  }
+  .btn-accent {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff; box-shadow: 0 8px 24px -8px rgba(99,102,241,.55);
+  }
+
+  /* DOC LAYOUT */
+  .doc-layout {
+    max-width: 1360px; margin: 0 auto; padding: 40px 24px 80px;
+    display: grid; grid-template-columns: 260px 1fr 220px; gap: 40px;
+  }
+  @media (max-width: 1000px) {
+    .doc-layout { grid-template-columns: 1fr; }
+    .doc-side, .doc-toc { display: none; }
+  }
+  .doc-side {
+    position: sticky; top: 88px; align-self: start;
+    max-height: calc(100vh - 100px); overflow-y: auto;
+    padding-right: 12px;
+  }
+  .doc-side h4 {
+    font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--muted); margin: 22px 0 8px; font-weight: 700;
+  }
+  .doc-side h4:first-child { margin-top: 0; }
+  .doc-side ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 2px; }
+  .doc-side a {
+    display: block; padding: 6px 10px; border-radius: 6px;
+    font-size: 13.5px; color: var(--ink-2);
+    transition: background .15s;
+  }
+  .doc-side a:hover { background: var(--bg-soft); }
+  .doc-side a.active { background: rgba(99,102,241,.08); color: var(--accent); font-weight: 600; }
+
+  .doc-content { max-width: 720px; }
+  .doc-breadcrumb {
+    display: flex; align-items: center; gap: 8px;
+    font-size: 12px; color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .doc-title {
+    font-family: 'Kalam', cursive; font-weight: 700;
+    font-size: 44px; letter-spacing: -0.02em; line-height: 1.05;
+    margin: 0 0 12px;
+  }
+  .doc-lede {
+    font-size: 18px; color: var(--muted); line-height: 1.55;
+    margin: 0 0 40px;
+  }
+  .doc-content h2 {
+    font-size: 26px; font-weight: 700; margin: 48px 0 12px;
+    letter-spacing: -0.01em;
+    scroll-margin-top: 88px;
+  }
+  .doc-content h3 {
+    font-size: 18px; font-weight: 700; margin: 28px 0 10px;
+    scroll-margin-top: 88px;
+  }
+  .doc-content p, .doc-content li {
+    font-size: 15.5px; line-height: 1.7; color: var(--ink-2);
+  }
+  .doc-content ul, .doc-content ol { padding-left: 24px; }
+  .doc-content ul li, .doc-content ol li { margin-bottom: 6px; }
+  .doc-content a { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; }
+  .doc-content code:not(pre code) {
+    background: var(--bg-soft); padding: 2px 6px; border-radius: 4px;
+    font-size: 13px; color: var(--accent-2);
+  }
+  pre {
+    background: var(--code-bg); color: #E4E4F0;
+    padding: 18px 20px; border-radius: 12px;
+    overflow-x: auto; font-size: 13px; line-height: 1.6;
+    margin: 20px 0;
+  }
+  pre .k { color: #A78BFA; }
+  pre .s { color: #6EE7B7; }
+  pre .c { color: #64748B; }
+  pre .n { color: #FCD34D; }
+
+  .callout {
+    display: flex; gap: 12px;
+    background: rgba(99,102,241,.06);
+    border: 1px solid rgba(99,102,241,.2);
+    border-left: 4px solid var(--accent);
+    border-radius: 12px;
+    padding: 16px 18px; margin: 24px 0;
+  }
+  .callout .ico {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 12px; font-weight: 700;
+  }
+  .callout p { margin: 0; font-size: 14px; }
+  .callout strong { color: var(--ink); }
+
+  /* Method table */
+  .api-table { width: 100%; border-collapse: collapse; margin: 16px 0 24px; }
+  .api-table th, .api-table td {
+    text-align: left; padding: 10px 12px; font-size: 13.5px;
+    border-bottom: 1px solid var(--line);
+  }
+  .api-table th { font-weight: 700; background: var(--bg-soft); }
+  .method {
+    display: inline-block; padding: 2px 8px; border-radius: 4px;
+    font-size: 11px; font-weight: 700; letter-spacing: 0.02em;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .method.get { background: #DCFCE7; color: #059669; }
+  .method.post { background: #DBEAFE; color: #2563EB; }
+  .method.put { background: #FEF3C7; color: #D97706; }
+  .method.del { background: #FEE2E2; color: #DC2626; }
+
+  /* TOC (right) */
+  .doc-toc {
+    position: sticky; top: 88px; align-self: start;
+    max-height: calc(100vh - 100px);
+    font-size: 12.5px;
+  }
+  .doc-toc h5 {
+    font-size: 11px; font-weight: 700; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 0 0 10px;
+  }
+  .doc-toc ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 4px; border-left: 1px solid var(--line); }
+  .doc-toc a {
+    display: block; padding: 4px 12px; color: var(--muted);
+    border-left: 2px solid transparent; margin-left: -1px;
+    transition: color .15s;
+  }
+  .doc-toc a:hover, .doc-toc a.active { color: var(--accent); border-left-color: var(--accent); }
+
+  /* Hero of doc */
+  .doc-hero {
+    background: linear-gradient(180deg, var(--bg-soft), #fff);
+    padding: 60px 0 40px;
+    border-bottom: 1px solid var(--line);
+  }
+  .doc-hero .container-wide {
+    display: grid; grid-template-columns: 1fr auto; gap: 40px;
+    align-items: center;
+  }
+  @media (max-width: 700px) { .doc-hero .container-wide { grid-template-columns: 1fr; } }
+  .doc-hero-title {
+    font-family: 'Kalam', cursive; font-weight: 700;
+    font-size: clamp(36px, 4vw, 52px);
+    margin: 0 0 12px; letter-spacing: -0.01em;
+    line-height: 1.05;
+  }
+  .doc-hero-title em { font-family: 'Caveat', cursive; font-style: italic; color: var(--accent); }
+  .doc-hero-sub { font-size: 17px; color: var(--muted); line-height: 1.55; max-width: 60ch; margin: 0; }
+  .doc-hero-cards {
+    display: flex; gap: 12px;
+    flex-wrap: wrap;
+  }
+  .doc-hero-card {
+    background: #fff; border: 1px solid var(--line);
+    padding: 14px 18px; border-radius: 12px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 13px; font-weight: 600;
+  }
+  .doc-hero-card .ico {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(139,92,246,.08));
+    color: var(--accent);
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+
+  /* Footer */
+  .footer {
+    background: #0B0B14; color: rgba(255,255,255,.7);
+    padding: 40px 0 30px; margin-top: 60px;
+  }
+  .footer-inner {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 12.5px; flex-wrap: wrap; gap: 16px;
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="container-wide nav-inner">
+    <a href="VGIA.html" class="logo-link"><img src="assets/askvgia-logo-transparent.png" class="logo-img" alt="askVGIA"></a>
+    <div class="nav-menu">
+      <a class="nav-item" href="VGIA.html" data-i18n="product">Product</a>
+      <a class="nav-item" href="VGIA.html#featuresWow" data-i18n="usecases">Use cases</a>
+      <a class="nav-item active" href="documentation.html" data-i18n="documentation">Documentation</a>
+      <a class="nav-item" href="pricing.html" data-i18n="pricing">Pricing</a>
+      <a class="nav-item" href="whats-new.html" data-i18n="whatsnew">What's new</a>
+    </div>
+    <div class="nav-right">
+      <a class="link" href="VGIA.html#footerContact" data-i18n="contact_us">Contact us</a>
+      <button class="lang-toggle" id="langToggle">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9M12 3c-3 3-4 6-4 9s1 6 4 9"/></svg>
+        <span id="langLabel">FR</span>
+      </button>
+      <a class="login-btn" href="login.html" data-i18n="login">Log in</a>
+      <a class="signup-btn" href="signup.html" data-i18n="signup">Sign up</a>
+      <a class="btn-try" href="/app"><span data-i18n="try_vgia">Try VGIA</span> <svg class="arr" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
+  </div>
+</nav>
+
+<!-- DOC HERO -->
+<section class="doc-hero">
+  <div class="container-wide">
+    <div>
+      <h1 class="doc-hero-title" data-i18n="doc_title">Documentation <em>askVGIA</em></h1>
+      <p class="doc-hero-sub" data-i18n="doc_sub">Tout ce qu'il faut savoir pour indexer, chercher et intégrer VGIA dans vos vidéos. Guides pas-à-pas, référence API complète, et exemples de code prêts à copier.</p>
+    </div>
+    <div class="doc-hero-cards">
+      <a class="doc-hero-card" href="#getting-started">
+        <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="6,4 20,12 6,20"/></svg></span>
+        <span data-i18n="quickstart">Démarrage rapide</span>
+      </a>
+      <a class="doc-hero-card" href="#api">
+        <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m8 6-6 6 6 6M16 6l6 6-6 6"/></svg></span>
+        <span data-i18n="api_ref">Référence API</span>
+      </a>
+      <a class="doc-hero-card" href="#sdks">
+        <span class="ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/></svg></span>
+        <span data-i18n="sdks">SDKs</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="doc-layout">
+  <!-- SIDEBAR -->
+  <aside class="doc-side">
+    <h4 data-i18n="side_started">Commencer</h4>
+    <ul>
+      <li><a class="active" href="#getting-started" data-i18n="s_intro">Introduction</a></li>
+      <li><a href="#install" data-i18n="s_install">Installation</a></li>
+      <li><a href="#first-query" data-i18n="s_first">Première recherche</a></li>
+      <li><a href="#auth" data-i18n="s_auth">Authentification</a></li>
+    </ul>
+    <h4 data-i18n="side_core">Fonctionnalités</h4>
+    <ul>
+      <li><a href="#search" data-i18n="s_search">Recherche multimodale</a></li>
+      <li><a href="#transcripts" data-i18n="s_trans">Transcripts</a></li>
+      <li><a href="#kg" data-i18n="s_kg">Knowledge Graph</a></li>
+      <li><a href="#languages" data-i18n="s_lang">Langues</a></li>
+    </ul>
+    <h4>API</h4>
+    <ul>
+      <li><a href="#api" data-i18n="s_endpoints">Endpoints</a></li>
+      <li><a href="#sdks">SDKs</a></li>
+      <li><a href="#webhooks">Webhooks</a></li>
+      <li><a href="#rate-limits" data-i18n="s_rate">Rate limits</a></li>
+    </ul>
+    <h4 data-i18n="side_guides">Guides</h4>
+    <ul>
+      <li><a href="#education">Éducation</a></li>
+      <li><a href="#medical" data-i18n="s_medical">Médical</a></li>
+      <li><a href="#podcast">Podcasts</a></li>
+    </ul>
+  </aside>
+
+  <!-- CONTENT -->
+  <article class="doc-content">
+    <div class="doc-breadcrumb">
+      <a href="documentation.html">Documentation</a>
+      <span>›</span>
+      <span data-i18n="crumb_started">Démarrage rapide</span>
+    </div>
+    <h1 class="doc-title" id="getting-started" data-i18n="doc_h1">Démarrage rapide</h1>
+    <p class="doc-lede" data-i18n="doc_lede">Passez d'une vidéo brute à des réponses instantanées et sourcées en moins de 5 minutes. Ce guide vous accompagne de la création du compte jusqu'à votre première requête réussie.</p>
+
+    <div class="callout">
+      <span class="ico">i</span>
+      <p><strong data-i18n="callout_strong">Beta gratuite.</strong> <span data-i18n="callout_text">Toutes les fonctionnalités sont disponibles pendant la Beta, sans carte bancaire. Les Early Adopters bénéficient d'un tarif réduit à vie.</span></p>
+    </div>
+
+    <h2 id="install" data-i18n="h2_install">1. Installation</h2>
+    <p data-i18n="p_install">Installez le SDK officiel via npm, pip ou téléchargez directement depuis notre CDN.</p>
+    <pre><code><span class="c"># npm</span>
+npm install <span class="s">@vgia/sdk</span>
+
+<span class="c"># pip</span>
+pip install <span class="s">vgia</span>
+
+<span class="c"># CDN</span>
+&lt;script src=<span class="s">"https://cdn.vgia.io/v1/vgia.min.js"</span>&gt;&lt;/script&gt;</code></pre>
+
+    <h2 id="auth" data-i18n="h2_auth">2. Authentification</h2>
+    <p data-i18n="p_auth">Récupérez votre clé API depuis le tableau de bord et incluez-la dans chaque requête.</p>
+    <pre><code><span class="k">import</span> { <span class="n">VGIA</span> } <span class="k">from</span> <span class="s">'@vgia/sdk'</span>;
+
+<span class="k">const</span> vgia = <span class="k">new</span> <span class="n">VGIA</span>({
+  apiKey: process.env.<span class="n">VGIA_API_KEY</span>,
+  region: <span class="s">'eu-west'</span>,
+});</code></pre>
+
+    <h2 id="first-query" data-i18n="h2_first">3. Votre première recherche</h2>
+    <p data-i18n="p_first">Indexez une vidéo puis posez une question en langage naturel. VGIA retournera le timestamp exact, le transcript et la frame source.</p>
+    <pre><code><span class="c">// 1. Indexer la vidéo (asynchrone, ~1x la durée de la vidéo)</span>
+<span class="k">const</span> job = <span class="k">await</span> vgia.videos.index({
+  url: <span class="s">'https://vimeo.com/…'</span>,
+  languages: [<span class="s">'fr'</span>, <span class="s">'ar'</span>, <span class="s">'en'</span>],
+});
+
+<span class="c">// 2. Chercher</span>
+<span class="k">const</span> answer = <span class="k">await</span> vgia.ask({
+  videoId: job.id,
+  query: <span class="s">"Où l'orateur mentionne-t-il les réseaux neuronaux profonds ?"</span>,
+});
+
+<span class="n">console</span>.log(answer.timestamp);   <span class="c">// "1:17:35"</span>
+<span class="n">console</span>.log(answer.quote);       <span class="c">// transcript verbatim</span>
+<span class="n">console</span>.log(answer.frameUrl);    <span class="c">// visual evidence</span></code></pre>
+
+    <h2 id="api" data-i18n="h2_api">Référence API</h2>
+    <p data-i18n="p_api">Endpoints REST principaux. Chaque appel retourne du JSON structuré avec timestamp, source et niveau de confiance.</p>
+    <table class="api-table">
+      <thead>
+        <tr>
+          <th data-i18n="t_method">Méthode</th>
+          <th>Endpoint</th>
+          <th data-i18n="t_desc">Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="method post">POST</span></td>
+          <td><code>/v1/videos</code></td>
+          <td data-i18n="t_r1">Indexer une nouvelle vidéo</td>
+        </tr>
+        <tr>
+          <td><span class="method get">GET</span></td>
+          <td><code>/v1/videos/:id</code></td>
+          <td data-i18n="t_r2">Statut d'indexation</td>
+        </tr>
+        <tr>
+          <td><span class="method post">POST</span></td>
+          <td><code>/v1/ask</code></td>
+          <td data-i18n="t_r3">Poser une question</td>
+        </tr>
+        <tr>
+          <td><span class="method get">GET</span></td>
+          <td><code>/v1/transcripts/:id</code></td>
+          <td data-i18n="t_r4">Récupérer le transcript</td>
+        </tr>
+        <tr>
+          <td><span class="method get">GET</span></td>
+          <td><code>/v1/graph/:id</code></td>
+          <td data-i18n="t_r5">Knowledge graph de la vidéo</td>
+        </tr>
+        <tr>
+          <td><span class="method del">DEL</span></td>
+          <td><code>/v1/videos/:id</code></td>
+          <td data-i18n="t_r6">Supprimer une vidéo</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 id="rate-limits" data-i18n="h2_rate">Rate limits</h2>
+    <p data-i18n="p_rate">Les limites varient selon votre plan. Chaque réponse inclut les headers <code>X-RateLimit-*</code> pour suivre votre consommation en temps réel.</p>
+    <ul>
+      <li data-i18n="rl_1"><strong>Starter :</strong> 1 000 requêtes / mois</li>
+      <li data-i18n="rl_2"><strong>Business :</strong> 10 000 requêtes / mois</li>
+      <li data-i18n="rl_3"><strong>Enterprise :</strong> illimité (fair-use)</li>
+    </ul>
+
+    <div class="callout">
+      <span class="ico">?</span>
+      <p><span data-i18n="need_help">Besoin d'aide ?</span> <a href="VGIA.html#footerContact" data-i18n="contact_team">Contactez l'équipe</a> — <span data-i18n="reply_15">nous répondons en moins de 15 minutes pendant les heures ouvrées algériennes.</span></p>
+    </div>
+  </article>
+
+  <!-- TOC -->
+  <aside class="doc-toc">
+    <h5 data-i18n="on_this_page">Sur cette page</h5>
+    <ul id="tocList">
+      <li><a href="#install" data-i18n="h2_install_short">Installation</a></li>
+      <li><a href="#auth" data-i18n="h2_auth_short">Authentification</a></li>
+      <li><a href="#first-query" data-i18n="h2_first_short">Première recherche</a></li>
+      <li><a href="#api" data-i18n="h2_api_short">Référence API</a></li>
+      <li><a href="#rate-limits" data-i18n="h2_rate_short">Rate limits</a></li>
+    </ul>
+  </aside>
+</div>
+
+<footer class="footer">
+  <div class="container-wide footer-inner">
+    <span>© 2026 VGIA · Every video, instantly searchable.</span>
+    <span><a href="pricing.html" style="color:rgba(255,255,255,.85)">Pricing</a> · <a href="VGIA.html#footerContact" style="color:rgba(255,255,255,.85)">Contact</a></span>
+  </div>
+</footer>
+
+<script>
+// simple i18n for documentation
+const dict = {
+  fr: {
+    product: 'Produit', usecases: 'Cas d\'usage', documentation: 'Documentation',
+    pricing: 'Tarifs', whatsnew: 'Nouveautés', contact_us: 'Nous contacter',
+    login: 'Se connecter', signup: 'Inscription', try_vgia: 'Essayer VGIA',
+    doc_title: 'Documentation <em>askVGIA</em>',
+    doc_sub: 'Tout ce qu\'il faut savoir pour indexer, chercher et intégrer VGIA dans vos vidéos. Guides pas-à-pas, référence API complète, et exemples de code prêts à copier.',
+    quickstart: 'Démarrage rapide', api_ref: 'Référence API', sdks: 'SDKs',
+    side_started: 'Commencer', side_core: 'Fonctionnalités', side_guides: 'Guides',
+    s_intro: 'Introduction', s_install: 'Installation', s_first: 'Première recherche',
+    s_auth: 'Authentification', s_search: 'Recherche multimodale',
+    s_trans: 'Transcripts', s_kg: 'Knowledge Graph', s_lang: 'Langues',
+    s_endpoints: 'Endpoints', s_rate: 'Rate limits', s_medical: 'Médical',
+    crumb_started: 'Démarrage rapide',
+    doc_h1: 'Démarrage rapide',
+    doc_lede: 'Passez d\'une vidéo brute à des réponses instantanées et sourcées en moins de 5 minutes. Ce guide vous accompagne de la création du compte jusqu\'à votre première requête réussie.',
+    callout_strong: 'Beta gratuite.',
+    callout_text: 'Toutes les fonctionnalités sont disponibles pendant la Beta, sans carte bancaire. Les Early Adopters bénéficient d\'un tarif réduit à vie.',
+    h2_install: '1. Installation', p_install: 'Installez le SDK officiel via npm, pip ou téléchargez directement depuis notre CDN.',
+    h2_auth: '2. Authentification', p_auth: 'Récupérez votre clé API depuis le tableau de bord et incluez-la dans chaque requête.',
+    h2_first: '3. Votre première recherche',
+    p_first: 'Indexez une vidéo puis posez une question en langage naturel. VGIA retournera le timestamp exact, le transcript et la frame source.',
+    h2_api: 'Référence API',
+    p_api: 'Endpoints REST principaux. Chaque appel retourne du JSON structuré avec timestamp, source et niveau de confiance.',
+    t_method: 'Méthode', t_desc: 'Description',
+    t_r1: 'Indexer une nouvelle vidéo', t_r2: 'Statut d\'indexation',
+    t_r3: 'Poser une question', t_r4: 'Récupérer le transcript',
+    t_r5: 'Knowledge graph de la vidéo', t_r6: 'Supprimer une vidéo',
+    h2_rate: 'Rate limits',
+    p_rate: 'Les limites varient selon votre plan. Chaque réponse inclut les headers <code>X-RateLimit-*</code> pour suivre votre consommation en temps réel.',
+    rl_1: '<strong>Starter :</strong> 1 000 requêtes / mois',
+    rl_2: '<strong>Business :</strong> 10 000 requêtes / mois',
+    rl_3: '<strong>Enterprise :</strong> illimité (fair-use)',
+    need_help: 'Besoin d\'aide ?', contact_team: 'Contactez l\'équipe',
+    reply_15: 'nous répondons en moins de 15 minutes pendant les heures ouvrées algériennes.',
+    on_this_page: 'Sur cette page',
+    h2_install_short: 'Installation', h2_auth_short: 'Authentification',
+    h2_first_short: 'Première recherche', h2_api_short: 'Référence API',
+    h2_rate_short: 'Rate limits',
+  },
+  en: {
+    product: 'Product', usecases: 'Use cases', documentation: 'Documentation',
+    pricing: 'Pricing', whatsnew: "What's new", contact_us: 'Contact us',
+    login: 'Log in', signup: 'Sign up', try_vgia: 'Try VGIA',
+    doc_title: 'Documentation <em>askVGIA</em>',
+    doc_sub: 'Everything you need to index, search and integrate VGIA into your videos. Step-by-step guides, full API reference, and copy-paste code examples.',
+    quickstart: 'Quickstart', api_ref: 'API reference', sdks: 'SDKs',
+    side_started: 'Get started', side_core: 'Features', side_guides: 'Guides',
+    s_intro: 'Introduction', s_install: 'Installation', s_first: 'First query',
+    s_auth: 'Authentication', s_search: 'Multimodal search',
+    s_trans: 'Transcripts', s_kg: 'Knowledge Graph', s_lang: 'Languages',
+    s_endpoints: 'Endpoints', s_rate: 'Rate limits', s_medical: 'Medical',
+    crumb_started: 'Quickstart',
+    doc_h1: 'Quickstart',
+    doc_lede: 'Go from raw video to instant sourced answers in under 5 minutes. This guide walks you from account creation to your first successful query.',
+    callout_strong: 'Free Beta.',
+    callout_text: 'All features available during Beta, no credit card. Early Adopters get a lifetime discount.',
+    h2_install: '1. Install', p_install: 'Install the official SDK via npm, pip or grab it from our CDN.',
+    h2_auth: '2. Authentication', p_auth: 'Grab your API key from the dashboard and include it in every request.',
+    h2_first: '3. Your first query',
+    p_first: 'Index a video, then ask a natural-language question. VGIA returns the exact timestamp, transcript quote, and source frame.',
+    h2_api: 'API reference',
+    p_api: 'Core REST endpoints. Every call returns structured JSON with timestamp, source and confidence level.',
+    t_method: 'Method', t_desc: 'Description',
+    t_r1: 'Index a new video', t_r2: 'Indexing status',
+    t_r3: 'Ask a question', t_r4: 'Get transcript',
+    t_r5: 'Video knowledge graph', t_r6: 'Delete a video',
+    h2_rate: 'Rate limits',
+    p_rate: 'Limits vary by plan. Every response includes <code>X-RateLimit-*</code> headers to track usage in real time.',
+    rl_1: '<strong>Starter:</strong> 1,000 requests / month',
+    rl_2: '<strong>Business:</strong> 10,000 requests / month',
+    rl_3: '<strong>Enterprise:</strong> unlimited (fair-use)',
+    need_help: 'Need help?', contact_team: 'Contact the team',
+    reply_15: '— we reply in under 15 minutes during Algerian business hours.',
+    on_this_page: 'On this page',
+    h2_install_short: 'Install', h2_auth_short: 'Authentication',
+    h2_first_short: 'First query', h2_api_short: 'API reference',
+    h2_rate_short: 'Rate limits',
+  }
+};
+let curLang = 'fr';
+function applyLang(lang) {
+  curLang = lang;
+  const d = dict[lang];
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const k = el.getAttribute('data-i18n');
+    if (d[k] != null) el.innerHTML = d[k];
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const k = el.getAttribute('data-i18n-ph');
+    if (d[k] != null) el.setAttribute('placeholder', d[k]);
+  });
+  const label = document.getElementById('langLabel');
+  if (label) label.textContent = lang.toUpperCase();
+  document.documentElement.lang = lang;
+  try { localStorage.setItem('vgia_lang', lang); } catch(e){}
+}
+const langToggle = document.getElementById('langToggle');
+if (langToggle) {
+  langToggle.addEventListener('click', () => applyLang(curLang === 'fr' ? 'en' : 'fr'));
+}
+try {
+  const saved = localStorage.getItem('vgia_lang');
+  if (saved === 'fr' || saved === 'en') applyLang(saved);
+} catch(e){}
+
+// TOC active state on scroll
+const headings = document.querySelectorAll('.doc-content h2, .doc-content h1');
+const tocLinks = document.querySelectorAll('.doc-toc a, .doc-side a');
+function onScroll() {
+  let active = null;
+  headings.forEach(h => {
+    if (h.getBoundingClientRect().top < 120) active = h.id;
+  });
+  if (active) {
+    tocLinks.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + active));
+  }
+}
+window.addEventListener('scroll', onScroll, {passive:true});
+</script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Settings — askVGIA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kalam:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
+  <link rel="stylesheet" href="/app-assets/css/style.css?v=5"/>
+  <link rel="stylesheet" href="/app-assets/css/pages.css?v=5"/>
+  <script>
+    // Apply the stored theme before first paint (same key as the landing pages)
+    try {
+      var t = localStorage.getItem("vgia_theme") || "dark";
+      document.documentElement.dataset.theme = t;
+      if (t === "light") document.addEventListener("DOMContentLoaded", function () {
+        document.body.classList.add("light-mode");
+      });
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <div class="app">
+
+    <aside class="sidebar">
+      <div class="sidebar-top">
+        <a href="/" class="logo">
+          <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="url(#sbLogoGrad)"/><path d="M11 12L16 22L21 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="sbLogoGrad" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#6366F1"/></linearGradient></defs></svg>
+          <span class="logo-text">ask<span class="lt-accent">VGIA</span></span>
+        </a>
+        <div class="sidebar-section-label">Workspace</div>
+        <nav class="sidebar-menu">
+          <a href="/app/index.html" class="menu-item"><i class="fa-solid fa-comments"></i><span class="menu-label">Ask</span></a>
+          <a href="/app/my-videos.html" class="menu-item"><i class="fa-solid fa-film"></i><span class="menu-label">My Videos</span></a>
+          <a href="/app/upload.html" class="menu-item"><i class="fa-solid fa-cloud-arrow-up"></i><span class="menu-label">Upload</span></a>
+          <a href="/app/history.html" class="menu-item"><i class="fa-solid fa-clock-rotate-left"></i><span class="menu-label">History</span></a>
+        </nav>
+        <div class="sidebar-section-label">Account</div>
+        <nav class="sidebar-menu">
+          <a href="/app/settings.html" class="menu-item active"><i class="fa-solid fa-gear"></i><span class="menu-label">Settings</span></a>
+        </nav>
+      </div>
+      <div class="sidebar-bottom">
+        <a href="/" class="menu-item logout" title="Sign out" onclick="event.preventDefault(); (async()=>{ try{ await sb.auth.signOut(); }catch(_){}; window.location='/'; })();"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="menu-label">Sign out</span></a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-title">
+          <span class="crumb">Account</span><span class="crumb-sep">/</span><h1>Settings</h1>
+        </div>
+        <div class="top-actions">
+          <button class="icon-btn" id="theme-toggle"><i class="fa-regular fa-moon"></i></button>
+          <div class="user-menu" id="user-menu">
+            <div class="user-avatar" id="user-avatar-initial">H</div>
+            <span class="user-name" id="user-name-label">Hanane</span>
+            <i class="fa-solid fa-chevron-down"></i>
+            <div class="dropdown-menu" id="user-dropdown">
+              <a href="/app/settings.html#profile"><i class="fa-solid fa-user"></i> Profile</a>
+              <a href="/app/settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div class="content-wrapper single-column">
+        <div class="page-header">
+          <h1>Settings</h1>
+          <p>Manage your profile, security, notifications and appearance.</p>
+        </div>
+
+        <div class="settings-grid">
+          <div class="settings-nav">
+            <a href="#profile" class="settings-nav-item active" data-section="profile"><i class="fa-solid fa-user"></i> Profile</a>
+            <a href="#account" class="settings-nav-item" data-section="account"><i class="fa-solid fa-shield-halved"></i> Security</a>
+            <a href="#notifications" class="settings-nav-item" data-section="notifications"><i class="fa-solid fa-bell"></i> Notifications</a>
+            <a href="#appearance" class="settings-nav-item" data-section="appearance"><i class="fa-solid fa-palette"></i> Appearance</a>
+          </div>
+
+          <div class="settings-content">
+            <!-- PROFILE -->
+            <div class="settings-section active" id="profile">
+              <h2>Profile</h2>
+              <div class="settings-card">
+                <div id="profile-alert" class="form-alert"></div>
+                <div class="avatar-upload">
+                  <div class="user-avatar-lg" id="profile-avatar-preview">H</div>
+                  <div>
+                    <h4 style="font-size:14px;font-weight:600;margin-bottom:4px;">Profile photo</h4>
+                    <p style="font-size:12.5px;color:var(--text-muted);margin-bottom:10px;">PNG or JPG, max 2 MB.</p>
+                    <div class="avatar-actions">
+                      <input type="file" id="avatar-file" accept="image/png,image/jpeg,image/webp" hidden/>
+                      <button class="btn-primary" id="avatar-change"><i class="fa-solid fa-camera"></i> Change</button>
+                      <button class="btn-filter" id="avatar-remove"><i class="fa-solid fa-trash"></i> Remove</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="profile-display-name">Full name</label>
+                  <input type="text" id="profile-display-name" class="form-input" placeholder="Your full name"/>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="profile-email">Email</label>
+                    <input type="email" id="profile-email" class="form-input" placeholder="you@email.com"/>
+                  </div>
+                  <div class="form-group">
+                    <label for="profile-username">Username</label>
+                    <input type="text" id="profile-username" class="form-input" placeholder="username"/>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="profile-bio">Bio</label>
+                  <textarea id="profile-bio" class="form-input" rows="3" placeholder="A short bio about yourself."></textarea>
+                </div>
+                <div class="form-actions">
+                  <button class="btn-primary" id="profile-save"><i class="fa-solid fa-floppy-disk"></i> Save changes</button>
+                  <button class="btn-filter" id="profile-cancel">Cancel</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- SECURITY -->
+            <div class="settings-section" id="account">
+              <h2>Security</h2>
+              <div class="settings-card">
+                <div id="password-alert" class="form-alert"></div>
+                <div class="form-group">
+                  <label>Current password</label>
+                  <input type="password" id="pw-current" placeholder="Enter current password" class="form-input"/>
+                </div>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>New password</label>
+                    <input type="password" id="pw-new" placeholder="At least 6 characters" class="form-input"/>
+                  </div>
+                  <div class="form-group">
+                    <label>Confirm</label>
+                    <input type="password" id="pw-confirm" placeholder="Re-type new password" class="form-input"/>
+                  </div>
+                </div>
+                <div class="form-actions">
+                  <button class="btn-primary" id="password-save">Update password</button>
+                </div>
+                <p style="font-size:12.5px;color:var(--text-muted);margin-top:10px;">
+                  Passwords are stored server-side, so this needs accounts turned on — see the note in <code>js/profile.js</code>.
+                </p>
+              </div>
+
+              <div class="settings-card">
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <h4>Two-factor authentication</h4>
+                    <p>Require a one-time code when signing in from a new device.</p>
+                  </div>
+                  <div class="toggle-switch" id="toggle-2fa"></div>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <h4>API access</h4>
+                    <p>Allow programmatic access to your library via personal tokens.</p>
+                  </div>
+                  <div class="toggle-switch active" id="toggle-api"></div>
+                </div>
+              </div>
+
+              <div class="settings-card danger-zone">
+                <h3><i class="fa-solid fa-triangle-exclamation"></i> Danger zone</h3>
+                <p>Permanently delete your account and all indexed videos. This cannot be undone.</p>
+                <button class="btn-danger"><i class="fa-solid fa-trash"></i> Delete account</button>
+              </div>
+            </div>
+
+            <!-- NOTIFICATIONS -->
+            <div class="settings-section" id="notifications">
+              <h2>Notifications</h2>
+              <div class="settings-card">
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <h4>Indexing complete</h4>
+                    <p>Email me when a video finishes processing.</p>
+                  </div>
+                  <div class="toggle-switch active" id="notif-email"></div>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <h4>Browser push</h4>
+                    <p>Show a desktop notification for important events.</p>
+                  </div>
+                  <div class="toggle-switch active" id="notif-push"></div>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <h4>Product updates</h4>
+                    <p>Occasional emails about new features and improvements.</p>
+                  </div>
+                  <div class="toggle-switch" id="notif-marketing"></div>
+                </div>
+              </div>
+            </div>
+
+            <!-- APPEARANCE -->
+            <div class="settings-section" id="appearance">
+              <h2>Appearance</h2>
+              <div class="settings-card">
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <h4>Dark mode</h4>
+                    <p>Switch between light and dark themes.</p>
+                  </div>
+                  <div class="toggle-switch active" id="toggle-dark"></div>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <h4>Compact sidebar</h4>
+                    <p>Show only icons in the sidebar.</p>
+                  </div>
+                  <div class="toggle-switch" id="toggle-compact"></div>
+                </div>
+                <div class="toggle-row">
+                  <div class="toggle-info">
+                    <h4>Reduced motion</h4>
+                    <p>Minimize animations and transitions.</p>
+                  </div>
+                  <div class="toggle-switch" id="toggle-motion"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/app-assets/js/supabase-client.js"></script>
+  <script src="/app-assets/js/guard.js"></script>
+  <script src="/app-assets/js/profile.js?v=6"></script>
+  <script src="/app-assets/js/main.js?v=5"></script>
+  <script>
+    // ---- Settings › Profile: load, edit, save ----
+    // Reads and writes through Profile (js/profile.js), which is the only
+    // module that knows where the data actually lives.
+
+    const $s = (id) => document.getElementById(id);
+    const FIELDS = ['display_name', 'email', 'username', 'bio'];
+    const INPUTS = {
+      display_name: 'profile-display-name',
+      email:        'profile-email',
+      username:     'profile-username',
+      bio:          'profile-bio',
+    };
+
+    let pendingAvatar = null;   // set by the file picker, committed on Save
+
+    const _timers = {};
+    function alertIn(elId, msg, isError) {
+      const el = $s(elId);
+      el.textContent = msg;
+      el.className = 'form-alert show' + (isError ? ' error' : ' success');
+      clearTimeout(_timers[elId]);
+      _timers[elId] = setTimeout(() => { el.className = 'form-alert'; }, 4000);
+    }
+    const alertBox = (msg, isError) => alertIn('profile-alert', msg, isError);
+
+    async function fillForm() {
+      const user = await Profile.load();
+      FIELDS.forEach(f => { $s(INPUTS[f]).value = user[f] || ''; });
+      // email is managed by auth; make it read-only here
+      $s('profile-email').readOnly = true;
+      pendingAvatar = null;
+      paintAvatar(user.avatar_url, user);
+    }
+
+    function paintAvatar(url, user) {
+      const el = $s('profile-avatar-preview');
+      if (url) {
+        el.style.backgroundImage = `url(${url})`;
+        el.style.backgroundSize = 'cover';
+        el.style.backgroundPosition = 'center';
+        el.textContent = '';
+      } else {
+        el.style.backgroundImage = '';
+        el.textContent = Profile.initial(user);
+      }
+    }
+
+    let pendingAvatarFile = null;   // the actual File, uploaded on Save
+
+    $s('profile-save').addEventListener('click', async () => {
+      const patch = {};
+      // email is auth-managed; do not send it to the profiles table
+      ['display_name', 'username', 'bio'].forEach(f => { patch[f] = $s(INPUTS[f]).value.trim(); });
+
+      if (!patch.display_name) { alertBox('Please enter a name.', true); return; }
+
+      try {
+        // If a new avatar file was picked, upload it first and store the URL.
+        if (pendingAvatarFile) {
+          patch.avatar_url = await Profile.uploadAvatar(pendingAvatarFile);
+        } else if (pendingAvatar === '') {
+          patch.avatar_url = '';   // avatar removed
+        }
+        await Profile.save(patch);       // persists to Supabase + repaints top bar
+        pendingAvatar = null; pendingAvatarFile = null;
+        alertBox('Profile saved.', false);
+      } catch (err) {
+        alertBox(err.message || 'Save failed.', true);
+      }
+    });
+
+    $s('profile-cancel').addEventListener('click', fillForm);
+
+    // Avatar: read as a data: URI so it survives a reload without a server.
+    $s('avatar-change').addEventListener('click', () => $s('avatar-file').click());
+    $s('avatar-file').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      if (file.size > 2 * 1024 * 1024) { alertBox('Image is larger than 2 MB.', true); return; }
+      // paintAvatar needs the real user to fall back to their initial
+      const user = await Profile.load();
+      pendingAvatarFile = file;   // uploaded to Supabase Storage on Save
+      const reader = new FileReader();
+      reader.onload = () => {
+        pendingAvatar = reader.result;   // local preview only
+        paintAvatar(pendingAvatar, user);
+        alertBox('Photo ready — click Save changes to keep it.', false);
+      };
+      reader.onerror = () => alertBox('Could not read that image.', true);
+      reader.readAsDataURL(file);
+    });
+
+    $s('avatar-remove').addEventListener('click', async () => {
+      // no user in scope here, so resolve one before repainting the initial
+      const user = await Profile.load();
+      pendingAvatar = ''; pendingAvatarFile = null;
+      paintAvatar('', user);
+      alertBox('Photo cleared — click Save changes to confirm.', false);
+    });
+
+    $s('password-save').addEventListener('click', async () => {
+      const cur  = $s('pw-current').value;
+      const np   = $s('pw-new').value;
+      const np2  = $s('pw-confirm').value;
+
+      if (np.length < 6)  { alertIn('password-alert', 'New password must be at least 6 characters.', true); return; }
+      if (np !== np2)     { alertIn('password-alert', 'The two passwords do not match.', true); return; }
+
+      try {
+        // currentPassword requires supabase-js v2.102.0+ ; harmless if the
+        // installed version ignores it. Remove if your version errors on it.
+        const { error } = await sb.auth.updateUser({ password: np, currentPassword: cur });
+        if (error) throw error;
+        $s('pw-current').value = $s('pw-new').value = $s('pw-confirm').value = '';
+        alertIn('password-alert', 'Password updated.', false);
+      } catch (err) {
+        alertIn('password-alert', err.message || 'Could not update password.', true);
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', fillForm);
+  </script>
+</body>
+</html>

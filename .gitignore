@@ -1,0 +1,46 @@
+# secrets
+.env
+.env.local
+*.env
+
+# large data / model artifacts — do NOT push these
+data/
+models/
+*.index
+*.ids
+*.pkl
+*.db
+__pycache__/
+*.pyc
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+ENV/
+node_modules/
+
+# backups
+*_backup_*/
+
+# build
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# logs
+logs/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+
+# tests cache
+.pytest_cache/
+
+# OS
+.DS_Store
+Thumbs.db

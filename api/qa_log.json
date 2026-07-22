@@ -1,0 +1,583 @@
+{
+  "2dd907ce__eH_wbN7WZw": {
+    "video_id": "2dd907ce__eH_wbN7WZw",
+    "qa": [
+      {
+        "question": "Why is the initial division into four quadrants significant for the proof?",
+        "answer": "It provides a foundational step to approximate the circle's area using a parallelogram-like shape, which evolves into a rectangle as partitions increase.",
+        "grounded_in": "both",
+        "n_frames": 13,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:42:51Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "How does the increasing number of partitions contribute to the proof's validity?",
+        "answer": "By increasing partitions, the shape approaches a rectangle, making the area calculation more accurate.",
+        "grounded_in": "both",
+        "n_frames": 13,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:43:47Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What mathematical concept is illustrated by the progression to 1,000,000 partitions?",
+        "answer": "Limit of a sum leading to the area of a circle.",
+        "grounded_in": "both",
+        "n_frames": 6,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:44:14Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "Why is the relationship between πr and r significant in the final rectangle?",
+        "answer": "The relationship shows the rectangle's dimensions match the circle's area formula.",
+        "grounded_in": "both",
+        "n_frames": 10,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:44:32Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "How does the \"unrolled\" circumference relate to the area proof?",
+        "answer": "The \"unrolled\" circumference becomes one dimension of the rectangle, πr, while the radius r is the other dimension, leading to the area formula πr².",
+        "grounded_in": "both",
+        "n_frames": 13,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:44:53Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What advantage does the color coding system provide in this proof?",
+        "answer": "Enhances visual distinction between circle and rectangle.",
+        "grounded_in": "both",
+        "n_frames": 13,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:45:17Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "How does this proof bridge basic geometry and advanced mathematics?",
+        "answer": "By showing that the area of a circle (πr²) equals the area of a rectangle (πr × r), it connects the circumference (2πr) with the radius, bridging basic geometric shapes with advanced concepts like limits and calculus.",
+        "grounded_in": "both",
+        "n_frames": 13,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:45:37Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "Why is the geometric transformation approach effective for proving the area formula?",
+        "answer": "By approximating the circle with many partitions, the area becomes equivalent to the rectangle's area, leading to πr².",
+        "grounded_in": "both",
+        "n_frames": 13,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:45:58Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What role do the perpendicular lines play in the proof's structure?",
+        "answer": "They form the dimensions of the rectangle (πr and r).",
+        "grounded_in": "both",
+        "n_frames": 13,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:46:11Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "How does the proof demonstrate the relationship between area and circumference?",
+        "answer": "The proof shows the circle's area equals the rectangle's area, πr², derived from circumference 2πr and radius r.",
+        "grounded_in": "both",
+        "n_frames": 13,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:46:35Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "Why is the iterative process of increasing partitions important?",
+        "answer": "To approximate the area of the circle as a rectangle with dimensions πr and r.",
+        "grounded_in": "both",
+        "n_frames": 6,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:46:48Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What makes this visual proof particularly valuable for education?",
+        "answer": "It connects the circle's area to a rectangle's area through intuitive geometric rearrangement.",
+        "grounded_in": "both",
+        "n_frames": 13,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:47:29Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "How does the proof validate the traditional πr² formula?",
+        "answer": "By showing the area of the rectangle equals πr², which matches the traditional formula.",
+        "grounded_in": "both",
+        "n_frames": 13,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:47:49Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What mathematical principle is demonstrated by the transformation process?",
+        "answer": "A: The area of a circle equals πr².\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "both",
+        "n_frames": 1,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:48:07Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "How does this proof method differ from algebraic proofs?",
+        "answer": "It uses geometric rearrangement rather than algebraic manipulation.",
+        "grounded_in": "both",
+        "n_frames": 13,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:48:41Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What color is the background used in the presentation?",
+        "answer": "I couldn't find any relevant passages for your question in this video.",
+        "grounded_in": "none",
+        "n_frames": 0,
+        "n_segments": 0,
+        "timestamp": "2026-06-25T13:49:07Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What are the two main colors of circles used in the demonstration?",
+        "answer": "Blue and red",
+        "grounded_in": "frames",
+        "n_frames": 12,
+        "n_segments": 0,
+        "timestamp": "2026-06-25T13:49:24Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "How many quadrants is the circle initially divided into?",
+        "answer": "4",
+        "grounded_in": "both",
+        "n_frames": 14,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:49:36Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What creates the initial cross pattern in the circle?",
+        "answer": "Splitting the circle into four parts",
+        "grounded_in": "both",
+        "n_frames": 14,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:49:49Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What is the radius of the circle labeled as?",
+        "answer": "r",
+        "grounded_in": "both",
+        "n_frames": 14,
+        "n_segments": 1,
+        "timestamp": "2026-06-25T13:50:04Z",
+        "benchmark": "video_mmlu"
+      }
+    ]
+  },
+  "db98802f_Learn_Arabic_Podcast_Nature__Simple_Arab": {
+    "video_id": "db98802f_Learn_Arabic_Podcast_Nature__Simple_Arab",
+    "qa": [
+      {
+        "question": "is there a flag in video ?",
+        "answer": "I couldn't find any relevant passages for your question in this video.",
+        "grounded_in": "none",
+        "n_frames": 0,
+        "n_segments": 0,
+        "timestamp": "2026-06-25T21:55:35Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "Give me a summary of the entire video.",
+        "answer": "The video features two people practicing Arabic speaking in a cozy room with various objects and text related to language learning.",
+        "grounded_in": "frames",
+        "n_frames": 1,
+        "n_segments": 0,
+        "timestamp": "2026-06-25T21:56:15Z",
+        "benchmark": "video_mmlu"
+      }
+    ]
+  },
+  "f6af1281_NBy1j5PZfjk": {
+    "video_id": "f6af1281_NBy1j5PZfjk",
+    "qa": [
+      {
+        "question": "what is the backgroun color ?",
+        "answer": "Black\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "segments",
+        "n_frames": 0,
+        "n_segments": 2,
+        "timestamp": "2026-06-27T22:29:27Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "what the probelm is discuss ? explain with formula",
+        "answer": "The problem discusses probability of an event with formula e/n.\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "segments",
+        "n_frames": 0,
+        "n_segments": 2,
+        "timestamp": "2026-06-27T22:30:13Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "what serie of numbers is on screen?",
+        "answer": "The series of numbers on screen is 3,4,5,6,7,8,9,10,11,12,13,14.",
+        "grounded_in": "both",
+        "n_frames": 14,
+        "n_segments": 2,
+        "timestamp": "2026-06-27T22:31:16Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "what color is the wearing the person",
+        "answer": "Light green",
+        "grounded_in": "both",
+        "n_frames": 4,
+        "n_segments": 1,
+        "timestamp": "2026-06-27T22:32:01Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "what the equation written with RED ?",
+        "answer": "N(E)/N(S)\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "both",
+        "n_frames": 2,
+        "n_segments": 3,
+        "timestamp": "2026-06-27T22:34:27Z",
+        "benchmark": "video_mmlu"
+      }
+    ]
+  },
+  "-UBLutigNMM": {
+    "video_id": "-UBLutigNMM",
+    "qa": [
+      {
+        "question": "the visualisation due to who ?",
+        "answer": "Satō Moshun and Leonardo Da Vinci",
+        "grounded_in": "frames",
+        "n_frames": 3,
+        "n_segments": 0,
+        "timestamp": "2026-06-29T11:06:34Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "what two colors in video ?",
+        "answer": "Blue and green",
+        "grounded_in": "both",
+        "n_frames": 2,
+        "n_segments": 1,
+        "timestamp": "2026-06-29T11:41:35Z",
+        "benchmark": "video_mmlu"
+      }
+    ]
+  },
+  "-1CqCz6hQ7I": {
+    "video_id": "-1CqCz6hQ7I",
+    "qa": [
+      {
+        "question": "what is the idea of video ?",
+        "answer": "To demonstrate a visual concept using a circular target-like shape.\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "segments",
+        "n_frames": 0,
+        "n_segments": 1,
+        "timestamp": "2026-06-30T21:48:56Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "what are the colors in video ?",
+        "answer": "Black, white\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "segments",
+        "n_frames": 0,
+        "n_segments": 1,
+        "timestamp": "2026-06-30T21:50:30Z",
+        "benchmark": "video_mmlu"
+      }
+    ]
+  },
+  "-O3J0FkiRsk": {
+    "video_id": "-O3J0FkiRsk",
+    "qa": [
+      {
+        "question": "giv eme the formula on 2:11",
+        "answer": "The formula at 2:11 is $ r^2 + a^2 = 36 $.",
+        "grounded_in": "both",
+        "n_frames": 45,
+        "n_segments": 9,
+        "timestamp": "2026-06-30T21:51:24Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "what is the result of the area ?",
+        "answer": "The result of the area is $ 23.04\\pi $ m².\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "both",
+        "n_frames": 11,
+        "n_segments": 5,
+        "timestamp": "2026-06-30T21:52:07Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "what is the problem written on slide ?",
+        "answer": "The problem written on the slide is: \"Rhombus has diagonals of 12m and 16m. What is the area of the circle?\"",
+        "grounded_in": "frames",
+        "n_frames": 6,
+        "n_segments": 0,
+        "timestamp": "2026-06-30T21:52:48Z",
+        "benchmark": "video_mmlu"
+      }
+    ]
+  },
+  "1cb6c59d_Disneys_Aladdin___A_Musical_Spectacular_": {
+    "video_id": "1cb6c59d_Disneys_Aladdin___A_Musical_Spectacular_",
+    "qa": [
+      {
+        "question": "What type of video is this?",
+        "answer": "A surreal, narrative-driven video with a trapped character.\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "segments",
+        "n_frames": 0,
+        "n_segments": 4,
+        "timestamp": "2026-07-01T20:16:09Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What type of video is this?\\n(A) Speech video\\n(B) News report\\n(C) Drama\\n(D) Documentary",
+        "answer": "A\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "segments",
+        "n_frames": 0,
+        "n_segments": 3,
+        "timestamp": "2026-07-01T20:16:38Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What is the first animal to appear on the stage?",
+        "answer": "camel",
+        "grounded_in": "both",
+        "n_frames": 12,
+        "n_segments": 4,
+        "timestamp": "2026-07-01T20:17:09Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What crutch is the man in the cloak holding?",
+        "answer": "A blue cloth\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "both",
+        "n_frames": 5,
+        "n_segments": 11,
+        "timestamp": "2026-07-01T20:17:46Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What crutch is the man in the cloak holding?\\n(A) Tiger head walking stick\\n(B) Dragon head crutch\\n(C) Sheep head walking stick\\n(D) Cobra crutch",
+        "answer": "B) Dragon head crutch\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "segments",
+        "n_frames": 0,
+        "n_segments": 16,
+        "timestamp": "2026-07-01T20:18:11Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What is the first kind of bird to appear on the stage?",
+        "answer": "Red bird puppet",
+        "grounded_in": "both",
+        "n_frames": 5,
+        "n_segments": 11,
+        "timestamp": "2026-07-01T20:18:47Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What color is the belt which worn by the character appear on stage first",
+        "answer": "Red",
+        "grounded_in": "both",
+        "n_frames": 6,
+        "n_segments": 10,
+        "timestamp": "2026-07-01T20:19:23Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What color pants are the first woman dancing on stage wearing?",
+        "answer": "brown",
+        "grounded_in": "both",
+        "n_frames": 11,
+        "n_segments": 5,
+        "timestamp": "2026-07-01T20:21:32Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What color pants are the first woman dancing on stage wearing?\\n(A) Blue\\n(B) Purple\\n(C) Green\\n(D) Black",
+        "answer": "A",
+        "grounded_in": "both",
+        "n_frames": 14,
+        "n_segments": 2,
+        "timestamp": "2026-07-01T20:22:06Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What color is the background of the stage when Aladdin is arrested by three men with knives?",
+        "answer": "The video does not show Aladdin being arrested by three men with knives.",
+        "grounded_in": "both",
+        "n_frames": 15,
+        "n_segments": 1,
+        "timestamp": "2026-07-01T20:22:27Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What color is the background of the stage when Aladdin is arrested by three men with knives?\\n(A) Blue and white\\n(B) Red and blue\\n(C) White and red\\n(D) Orange and red",
+        "answer": "None of the provided evidence mentions Aladdin being arrested by three men with knives. Therefore, the question cannot be answered based on the given information.",
+        "grounded_in": "both",
+        "n_frames": 12,
+        "n_segments": 4,
+        "timestamp": "2026-07-01T20:23:22Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "When the black screen appears on the stage for the first time, from the perspective of the audience, from which direction does Aladdin appear?",
+        "answer": "right",
+        "grounded_in": "both",
+        "n_frames": 12,
+        "n_segments": 4,
+        "timestamp": "2026-07-01T20:23:39Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "When the black screen appears on the stage for the first time, from the perspective of the audience, from which direction does Aladdin appear?\\n(A) Upper left corner\\n(B) Lower left corner\\n(C) Upper right corner\\n(D) Lower right corner",
+        "answer": "(B) Lower left corner\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "both",
+        "n_frames": 2,
+        "n_segments": 14,
+        "timestamp": "2026-07-01T20:24:04Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What kind of clothes does the genie wear when he appears for the second time?",
+        "answer": "White robe and red belt",
+        "grounded_in": "both",
+        "n_frames": 8,
+        "n_segments": 8,
+        "timestamp": "2026-07-01T20:24:37Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What are the actors not doing among the audience?\\n(A) Hug the audience\\n(B) Toss and catch\\n(C) Riding an elephant\\n(D) Riding horses",
+        "answer": "(C) Riding an elephant",
+        "grounded_in": "both",
+        "n_frames": 13,
+        "n_segments": 3,
+        "timestamp": "2026-07-01T20:25:36Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "\"When the Buddha statue appears, how many people are next to it?",
+        "answer": "The evidence does not mention a Buddha statue or people next to it.",
+        "grounded_in": "frames",
+        "n_frames": 1,
+        "n_segments": 0,
+        "timestamp": "2026-07-01T20:25:57Z",
+        "benchmark": "video_mmlu"
+      }
+    ]
+  },
+  "0YqZIHFmVzg": {
+    "video_id": "0YqZIHFmVzg",
+    "qa": [
+      {
+        "question": "what is theorem ?",
+        "answer": "Theorem: If n² is even, then n is even",
+        "grounded_in": "both",
+        "n_frames": 14,
+        "n_segments": 2,
+        "timestamp": "2026-07-03T22:59:44Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "what is the proof by contrapositive  ?",
+        "answer": "Proof by contrapositive is a method of proving an implication $ P(x) \\Rightarrow Q(x) $ by instead proving its contrapositive $ \\neg Q(x) \\Rightarrow \\neg P(x) $.",
+        "grounded_in": "both",
+        "n_frames": 10,
+        "n_segments": 6,
+        "timestamp": "2026-07-03T23:00:17Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "what is on screnn at 03:29?",
+        "answer": "Theorem: If n² is even, then n is even  \nProof by Contrapositive:  \nIf n is not even, n² is not even",
+        "grounded_in": "both",
+        "n_frames": 34,
+        "n_segments": 2,
+        "timestamp": "2026-07-03T23:01:17Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "what is the formulas next to Assume",
+        "answer": "The formula next to \"Assume\" is $ n = 2k_1 + 1 $.\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "both",
+        "n_frames": 14,
+        "n_segments": 2,
+        "timestamp": "2026-07-03T23:06:59Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "what is on screen at 03:09?",
+        "answer": "Theorem: If $ n^2 $ is even, then $ n $ is even  \nProof by Contrapositive:  \nIf $ n $ is not even, $ n^2 $ is not even  \nAssume $ n $ is odd  \n$ \\exists k_1 \\in \\mathbb{Z}, n = 2k_1 + 1 $  \nSo $ n^2 = (2k_1 + 1)^2 = 4k_1^2 + 4k_1 + 1 = 2(2k_1^2 + 2k_1) + 1 $  \nLet $ k_2 = 2k_1^2 + 2k_1 $.  \nSo $ n^2 = 2k_2 + 1 $  \nThus $ n^2 $ is odd.",
+        "grounded_in": "both",
+        "n_frames": 44,
+        "n_segments": 3,
+        "timestamp": "2026-07-03T23:08:59Z",
+        "benchmark": "video_mmlu"
+      }
+    ]
+  },
+  "2S1CX7bbz0o": {
+    "video_id": "2S1CX7bbz0o",
+    "qa": [
+      {
+        "question": "what is the final result ?",
+        "answer": "I couldn't find any relevant passages for your question in this video.",
+        "grounded_in": "none",
+        "n_frames": 0,
+        "n_segments": 0,
+        "timestamp": "2026-07-19T09:46:04Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "what are the exponents rules ?",
+        "answer": "When exponents are equal, bases can be equated.  \nA: When exponents are equal, bases can be equated.\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "segments",
+        "n_frames": 0,
+        "n_segments": 2,
+        "timestamp": "2026-07-19T09:49:37Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "give me the formula rule on 00:13",
+        "answer": "a^xb^x = (ab)^x",
+        "grounded_in": "both",
+        "n_frames": 22,
+        "n_segments": 5,
+        "timestamp": "2026-07-19T09:50:26Z",
+        "benchmark": "video_mmlu"
+      }
+    ]
+  },
+  "b5b7a3cf_The_Disneys_Little_Mermaid___full_show": {
+    "video_id": "b5b7a3cf_The_Disneys_Little_Mermaid___full_show",
+    "qa": [
+      {
+        "question": "What topics or themes are covered?",
+        "answer": "Themes of underwater life, theatrical performance, and emotional connections.\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "both",
+        "n_frames": 6,
+        "n_segments": 10,
+        "timestamp": "2026-07-20T17:32:45Z",
+        "benchmark": "video_mmlu"
+      }
+    ]
+  }
+}

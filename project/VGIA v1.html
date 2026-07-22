@@ -1,0 +1,1767 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>VGIA — Every Video. Instantly Searchable.</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Caveat:wght@500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0B0B14;
+    --ink-2: #1a1a2e;
+    --muted: #5a5a72;
+    --muted-2: #8a8aa0;
+    --line: #E6E6EF;
+    --bg: #ffffff;
+    --bg-soft: #F6F5FB;
+    --accent: #6366F1;      /* indigo */
+    --accent-2: #8B5CF6;    /* violet */
+    --accent-3: #A78BFA;
+    --highlight: #FEF08A;   /* yellow highlight */
+    --danger: #EF4444;
+    --success: #10B981;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    color: var(--ink);
+    background: var(--bg);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+  }
+  a { color: inherit; text-decoration: none; }
+  button { font-family: inherit; cursor: pointer; border: 0; background: none; }
+  .serif { font-family: 'Instrument Serif', serif; font-weight: 400; letter-spacing: -0.01em; }
+  .script { font-family: 'Caveat', cursive; }
+  .container { max-width: 1240px; margin: 0 auto; padding: 0 24px; }
+  .container-wide { max-width: 1360px; margin: 0 auto; padding: 0 24px; }
+  .accent { color: var(--accent); }
+  .accent-2 { color: var(--accent-2); }
+  .marker {
+    background: var(--highlight);
+    padding: 0 .18em;
+    border-radius: 4px;
+    box-decoration-break: clone;
+  }
+
+  /* ========== HEADER ========== */
+  .nav {
+    position: sticky; top: 0; z-index: 100;
+    background: rgba(255,255,255,.85);
+    backdrop-filter: saturate(180%) blur(14px);
+    -webkit-backdrop-filter: saturate(180%) blur(14px);
+    border-bottom: 1px solid rgba(11,11,20,.06);
+  }
+  .nav-inner {
+    display: flex; align-items: center; gap: 32px;
+    height: 64px;
+  }
+  .logo {
+    font-family: 'Instrument Serif', serif;
+    font-size: 26px;
+    letter-spacing: -0.02em;
+    color: var(--ink);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .logo-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    display: inline-block;
+    box-shadow: 0 0 0 3px rgba(99,102,241,.14);
+  }
+  .nav-menu {
+    display: flex; gap: 4px; align-items: center;
+    flex: 1;
+  }
+  .nav-item {
+    padding: 8px 12px; font-size: 14px; font-weight: 500;
+    color: var(--ink-2); border-radius: 8px;
+    display: inline-flex; align-items: center; gap: 4px;
+    transition: background .15s;
+  }
+  .nav-item:hover { background: var(--bg-soft); }
+  .nav-item .caret { width: 10px; height: 10px; opacity: .55; }
+  .nav-right { display: flex; align-items: center; gap: 8px; }
+  .nav-right a.link {
+    font-size: 14px; font-weight: 500; padding: 8px 12px; color: var(--ink-2);
+  }
+  .icon-btn {
+    width: 36px; height: 36px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--ink-2);
+  }
+  .icon-btn:hover { background: var(--bg-soft); }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 10px 18px; border-radius: 999px;
+    font-weight: 600; font-size: 14px;
+    transition: transform .15s ease, box-shadow .2s, background .2s;
+    cursor: pointer;
+  }
+  .btn-primary {
+    background: var(--ink); color: #fff;
+  }
+  .btn-primary:hover { transform: translateY(-1px); background: var(--ink-2); }
+  .btn-accent {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    box-shadow: 0 8px 24px -8px rgba(99,102,241,.55);
+  }
+  .btn-accent:hover { transform: translateY(-1px); box-shadow: 0 12px 32px -8px rgba(99,102,241,.7); }
+  .btn-ghost {
+    background: #fff; color: var(--ink); border: 1px solid var(--line);
+  }
+  .btn-ghost:hover { border-color: var(--ink); }
+
+  /* ========== HERO ========== */
+  .hero {
+    position: relative;
+    padding: 60px 0 120px;
+    overflow: hidden;
+  }
+  .hero-inner {
+    max-width: 1360px; margin: 0 auto; padding: 0 24px;
+    display: grid; grid-template-columns: 1fr; gap: 40px; align-items: center;
+    position: relative;
+  }
+  .hero-badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px; border-radius: 999px;
+    background: var(--bg-soft); border: 1px solid var(--line);
+    font-size: 13px; color: var(--muted); font-weight: 500;
+    margin-bottom: 24px;
+  }
+  .hero-badge .pulse {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 0 rgba(99,102,241,.6);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(99,102,241,.5); }
+    70% { box-shadow: 0 0 0 10px rgba(99,102,241,0); }
+    100% { box-shadow: 0 0 0 0 rgba(99,102,241,0); }
+  }
+  .hero-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(48px, 7vw, 104px);
+    line-height: 0.98;
+    letter-spacing: -0.03em;
+    margin: 0 0 24px;
+    color: var(--ink);
+    max-width: 14ch;
+  }
+  .hero-title em {
+    font-style: italic;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+  }
+  .hero-sub {
+    font-size: 19px; line-height: 1.55; color: var(--muted);
+    max-width: 52ch; margin: 0 0 32px;
+  }
+  .hero-ctas { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .hero-cta-note { font-size: 13px; color: var(--muted-2); }
+  .hero-top { display: grid; grid-template-columns: 1.05fr .95fr; gap: 40px; align-items: center; }
+  @media (max-width: 900px) { .hero-top { grid-template-columns: 1fr; } }
+
+  /* Video card creative frame */
+  .hero-video-wrap {
+    position: relative;
+    aspect-ratio: 4/5;
+    max-height: 620px;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 40px 80px -30px rgba(11,11,20,.25), 0 12px 32px -12px rgba(99,102,241,.25);
+    background: var(--bg-soft);
+    transform: rotate(-1.5deg);
+  }
+  .hero-video-wrap video {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+  }
+  .hero-video-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(180deg, rgba(11,11,20,0) 40%, rgba(11,11,20,.55) 100%);
+    pointer-events: none;
+  }
+  .hero-video-caption {
+    position: absolute; left: 20px; right: 20px; bottom: 20px;
+    color: #fff; display: flex; align-items: center; gap: 12px;
+    z-index: 2;
+  }
+  .hero-play-btn {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: #fff; color: var(--ink);
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(0,0,0,.2);
+  }
+  .hero-video-caption .txt {
+    font-size: 14px; font-weight: 600;
+  }
+  .hero-video-caption .txt small {
+    display: block; font-weight: 400; opacity: .85; font-size: 12px;
+  }
+  /* Floating chips */
+  .float-chip {
+    position: absolute; z-index: 3;
+    background: #fff; border-radius: 14px;
+    padding: 10px 14px; font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; gap: 10px;
+    box-shadow: 0 20px 40px -12px rgba(11,11,20,.18), 0 4px 12px rgba(11,11,20,.06);
+    border: 1px solid rgba(11,11,20,.05);
+  }
+  .float-chip .ico {
+    width: 28px; height: 28px; border-radius: 8px;
+    display: inline-flex; align-items: center; justify-content: center;
+    color: #fff;
+  }
+  .chip-1 { top: 8%; left: -8%; transform: rotate(-4deg); animation: float 6s ease-in-out infinite; }
+  .chip-2 { top: 40%; right: -12%; transform: rotate(3deg); animation: float 7s ease-in-out infinite reverse; }
+  .chip-3 { bottom: 8%; left: -6%; transform: rotate(2deg); animation: float 5.5s ease-in-out infinite; }
+  @keyframes float {
+    0%,100% { transform: translateY(0) rotate(var(--r, -4deg)); }
+    50% { transform: translateY(-10px) rotate(var(--r, -4deg)); }
+  }
+  .chip-1 { --r: -4deg; }
+  .chip-2 { --r: 3deg; }
+  .chip-3 { --r: 2deg; }
+
+  .hero-video-col { position: relative; }
+
+  /* Blob bg */
+  .hero-blob {
+    position: absolute;
+    width: 780px; height: 780px;
+    right: -240px; top: -180px;
+    background: radial-gradient(closest-side, rgba(139,92,246,.22), rgba(99,102,241,.10) 40%, transparent 70%);
+    filter: blur(20px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .hero-blob-2 {
+    position: absolute;
+    width: 500px; height: 500px;
+    left: -180px; bottom: -160px;
+    background: radial-gradient(closest-side, rgba(99,102,241,.15), transparent 70%);
+    filter: blur(20px);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ========== SECTION heading ========== */
+  .section-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 12px; border-radius: 999px;
+    background: rgba(99,102,241,.09); color: var(--accent);
+    font-size: 12px; font-weight: 600;
+    letter-spacing: 0.02em;
+    margin-bottom: 20px;
+  }
+  .section-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(36px, 4.5vw, 60px);
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    margin: 0 0 16px;
+  }
+  .section-sub {
+    font-size: 17px; color: var(--muted); line-height: 1.55;
+    max-width: 640px; margin: 0 auto;
+  }
+  .section-head {
+    text-align: center; margin-bottom: 56px;
+  }
+
+  /* ========== MODULES ========== */
+  .modules {
+    padding: 100px 0 120px;
+    background: linear-gradient(180deg, #fff 0%, var(--bg-soft) 100%);
+    position: relative;
+  }
+  .modules-grid {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 28px 20px;
+    max-width: 1000px; margin: 0 auto;
+  }
+  @media (max-width: 900px) { .modules-grid { grid-template-columns: repeat(3, 1fr); } }
+  @media (max-width: 520px) { .modules-grid { grid-template-columns: repeat(2, 1fr); } }
+  .module {
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+    text-align: center;
+    padding: 8px;
+    position: relative;
+    cursor: pointer;
+    transition: transform .2s;
+  }
+  .module:hover { transform: translateY(-4px); }
+  .module-ico {
+    width: 60px; height: 60px; border-radius: 16px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: #fff; box-shadow: 0 6px 18px -4px rgba(11,11,20,.08), 0 2px 4px rgba(11,11,20,.04);
+    border: 1px solid rgba(11,11,20,.04);
+  }
+  .module-dot {
+    position: absolute; bottom: -10px;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.18);
+  }
+  .module-label { font-size: 13px; font-weight: 600; color: var(--ink-2); }
+  .modules-soon {
+    text-align: center; margin-top: 60px;
+    font-size: 13px; color: var(--muted); letter-spacing: 0.02em;
+  }
+  .modules-soon-chips {
+    display: inline-flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; justify-content: center;
+  }
+  .soon-chip {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 14px; border-radius: 999px;
+    background: #fff; border: 1px solid var(--line);
+    font-size: 13px; color: var(--ink-2); font-weight: 500;
+  }
+  .modules-see-all {
+    display: block; margin: 32px auto 0;
+    text-align: center;
+    color: var(--accent); font-weight: 600; font-size: 14px;
+  }
+
+  /* ========== VIDEO CARDS (hover) ========== */
+  .video-strip {
+    background: var(--ink);
+    color: #fff;
+    padding: 100px 0 120px;
+    position: relative;
+  }
+  .video-strip .section-title { color: #fff; }
+  .video-strip .section-sub { color: rgba(255,255,255,.65); }
+  .vcards {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    max-width: 1200px; margin: 0 auto;
+  }
+  @media (max-width: 900px) { .vcards { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 620px) { .vcards { grid-template-columns: 1fr; } }
+  .vcard {
+    background: #14141F;
+    border: 1px solid rgba(255,255,255,.08);
+    border-radius: 16px;
+    overflow: hidden;
+    display: flex; flex-direction: column;
+    transition: transform .3s, border-color .3s;
+  }
+  .vcard:hover { transform: translateY(-4px); border-color: rgba(139,92,246,.5); }
+  .vcard-media {
+    aspect-ratio: 16/10;
+    position: relative;
+    overflow: hidden;
+    background: #0a0a12;
+  }
+  .vcard-media video, .vcard-media img.poster {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    transition: transform .5s;
+  }
+  .vcard:hover .vcard-media video { transform: scale(1.03); }
+  .vcard-play {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; opacity: .9;
+    pointer-events: none;
+    transition: opacity .3s;
+  }
+  .vcard:hover .vcard-play { opacity: 0; }
+  .vcard-play-circle {
+    width: 56px; height: 56px; border-radius: 50%;
+    background: rgba(0,0,0,.55); backdrop-filter: blur(4px);
+    display: inline-flex; align-items: center; justify-content: center;
+    border: 1px solid rgba(255,255,255,.2);
+  }
+  .vcard-body { padding: 22px; }
+  .vcard-title { font-size: 18px; font-weight: 700; margin: 0 0 8px; }
+  .vcard-desc { font-size: 14px; color: rgba(255,255,255,.62); line-height: 1.55; margin: 0 0 16px; min-height: 60px; }
+  .vcard-cta {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: 999px;
+    background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14);
+    font-size: 13px; font-weight: 600; color: #fff;
+    transition: background .2s;
+  }
+  .vcard-cta:hover { background: rgba(139,92,246,.2); border-color: var(--accent-2); }
+  .vcard-tag {
+    position: absolute; top: 12px; left: 12px;
+    padding: 4px 10px; border-radius: 999px;
+    background: rgba(0,0,0,.55); backdrop-filter: blur(6px);
+    color: #fff; font-size: 11px; font-weight: 600;
+    letter-spacing: 0.04em; text-transform: uppercase;
+    z-index: 2;
+  }
+
+  /* ========== PROBLEM / SOLUTION HORIZONTAL ========== */
+  .ps-section {
+    position: relative;
+    background: #fff;
+  }
+  .ps-intro {
+    padding: 120px 0 60px;
+    text-align: center;
+  }
+  .ps-track {
+    position: relative;
+    height: 220vh; /* scroll room */
+  }
+  .ps-sticky {
+    position: sticky; top: 0;
+    height: 100vh;
+    overflow: hidden;
+    display: flex; align-items: center;
+  }
+  .ps-rail {
+    display: flex;
+    gap: 32px;
+    padding: 0 8vw;
+    will-change: transform;
+  }
+  .ps-panel {
+    flex: 0 0 min(880px, 90vw);
+    height: 78vh;
+    border-radius: 24px;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+  }
+  .ps-panel.problem {
+    background: #0B0B14;
+    color: #fff;
+  }
+  .ps-panel.solution {
+    background: #F6F5FB;
+    color: var(--ink);
+    border: 1px solid var(--line);
+  }
+  .ps-panel-inner {
+    padding: 48px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    width: 100%;
+    gap: 24px;
+  }
+  .ps-panel.problem .ps-panel-inner {
+    background:
+      linear-gradient(180deg, rgba(11,11,20,.2) 0%, rgba(11,11,20,.85) 100%),
+      url('https://images.pexels.com/photos/4778611/pexels-photo-4778611.jpeg?auto=compress&cs=tinysrgb&w=1200') center/cover;
+  }
+  .ps-panel h3 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(32px, 3.4vw, 52px);
+    line-height: 1.05; letter-spacing: -0.02em;
+    margin: 0 0 20px; max-width: 18ch;
+  }
+  .ps-panel h3 em { font-style: italic; color: var(--accent-3); }
+  .ps-panel.solution h3 em { color: var(--accent); }
+  .ps-panel p {
+    font-size: 16px; line-height: 1.55;
+    opacity: .85; max-width: 42ch;
+  }
+  .ps-thoughts {
+    position: absolute; top: 40px; right: 40px;
+    display: flex; gap: 12px;
+  }
+  .ps-thought {
+    background: #fff; color: var(--ink);
+    border-radius: 999px;
+    padding: 12px 16px;
+    font-size: 12px; font-weight: 600;
+    display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 10px 24px rgba(0,0,0,.25);
+    animation: bob 3s ease-in-out infinite;
+  }
+  .ps-thought:nth-child(2) { animation-delay: .4s; }
+  .ps-thought:nth-child(3) { animation-delay: .8s; }
+  @keyframes bob {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .ps-features {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    margin-top: 8px;
+  }
+  .ps-feature {
+    background: #fff; border: 1px solid var(--line);
+    border-radius: 14px; padding: 14px 16px;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 14px; font-weight: 600;
+  }
+  .ps-feature .ico {
+    width: 32px; height: 32px; border-radius: 8px;
+    background: rgba(99,102,241,.10);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: var(--accent);
+  }
+  .ps-check {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 15px; margin-bottom: 8px;
+  }
+  .ps-check .c {
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 11px;
+  }
+  .ps-panel .mock {
+    position: absolute; right: -30px; bottom: -30px;
+    width: 60%; max-width: 460px;
+    border-radius: 16px; overflow: hidden;
+    box-shadow: 0 30px 60px -20px rgba(11,11,20,.4);
+    transform: rotate(-3deg);
+    border: 8px solid #fff;
+    background: #fff;
+  }
+  .ps-panel.solution .mock {
+    right: -20px; bottom: -20px;
+    transform: rotate(2deg);
+  }
+  .ps-panel .mock img { width: 100%; display: block; }
+  .ps-progress {
+    position: absolute; left: 50%; transform: translateX(-50%);
+    bottom: 24px;
+    display: flex; gap: 8px;
+    z-index: 10;
+  }
+  .ps-progress .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(11,11,20,.15);
+    transition: all .3s;
+  }
+  .ps-progress .dot.active { background: var(--accent); width: 24px; border-radius: 4px; }
+
+  /* ========== WITH / WITHOUT TOGGLE ========== */
+  .ww-section {
+    padding: 140px 0 160px;
+    background: linear-gradient(180deg, #fff, var(--bg-soft));
+    position: relative;
+    overflow: hidden;
+  }
+  .ww-toggle-wrap {
+    display: flex; justify-content: center; margin: 32px 0 60px;
+  }
+  .ww-toggle {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px; border-radius: 999px;
+    background: #fff; border: 1px solid var(--line);
+    box-shadow: 0 4px 14px rgba(11,11,20,.06);
+    position: relative;
+  }
+  .ww-toggle .thumb {
+    position: absolute;
+    top: 4px; bottom: 4px;
+    width: calc(50% - 4px);
+    left: 4px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    transition: transform .5s cubic-bezier(.6,.05,.05,1);
+    z-index: 0;
+  }
+  .ww-toggle.without .thumb {
+    transform: translateX(100%);
+    background: linear-gradient(135deg, #EF4444, #F97316);
+  }
+  .ww-opt {
+    position: relative; z-index: 1;
+    padding: 10px 20px; border-radius: 999px;
+    font-size: 14px; font-weight: 600;
+    color: var(--muted);
+    transition: color .3s;
+    display: inline-flex; align-items: center; gap: 8px;
+    min-width: 130px; justify-content: center;
+  }
+  .ww-toggle.with .ww-opt.with,
+  .ww-toggle.without .ww-opt.without {
+    color: #fff;
+  }
+  .ww-scroll-note {
+    text-align: center; font-size: 12px; color: var(--muted-2);
+    margin-top: 8px; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+  .ww-stage {
+    position: relative;
+    max-width: 1000px; margin: 0 auto;
+    aspect-ratio: 16/10;
+    border-radius: 24px;
+    overflow: hidden;
+    background: #fff;
+    box-shadow: 0 30px 80px -30px rgba(11,11,20,.2);
+  }
+  .ww-layer {
+    position: absolute; inset: 0;
+    transition: opacity .6s, transform .8s;
+    padding: 48px;
+  }
+  .ww-layer.without {
+    opacity: 0; transform: scale(1.02);
+    background:
+      radial-gradient(circle at 20% 30%, rgba(239,68,68,.06), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(249,115,22,.06), transparent 40%),
+      #fff;
+  }
+  .ww-layer.with {
+    opacity: 1; transform: scale(1);
+    background:
+      radial-gradient(circle at 20% 30%, rgba(99,102,241,.08), transparent 40%),
+      radial-gradient(circle at 80% 70%, rgba(139,92,246,.06), transparent 40%),
+      #fff;
+  }
+  .ww-active .ww-layer.without { opacity: 1; transform: scale(1); }
+  .ww-active .ww-layer.with { opacity: 0; transform: scale(1.02); }
+
+  /* WITHOUT layout: chaotic */
+  .chaos-item {
+    position: absolute;
+    background: #fff;
+    border: 1px solid rgba(239,68,68,.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 12px; font-weight: 600;
+    color: var(--ink-2);
+    display: flex; align-items: center; gap: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,.06);
+    transform-origin: center;
+  }
+  .chaos-note {
+    position: absolute;
+    background: #FEE2E2;
+    color: #B91C1C;
+    padding: 6px 12px; border-radius: 6px;
+    font-family: 'Caveat', cursive; font-size: 18px; font-weight: 600;
+    transform: rotate(var(--r, -3deg));
+    box-shadow: 0 4px 10px rgba(0,0,0,.06);
+  }
+  .chaos-scribble {
+    position: absolute; pointer-events: none;
+    color: rgba(239,68,68,.5);
+    stroke-width: 2; fill: none;
+  }
+  /* WITH layout: organized modules grid */
+  .with-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+    height: 100%;
+    align-content: center;
+  }
+  .with-tile {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px;
+    display: flex; flex-direction: column; align-items: flex-start; gap: 10px;
+    box-shadow: 0 4px 14px rgba(11,11,20,.05);
+    transition: transform .3s, box-shadow .3s;
+  }
+  .with-tile:hover { transform: translateY(-3px); box-shadow: 0 12px 24px rgba(99,102,241,.12); }
+  .with-tile .ico {
+    width: 36px; height: 36px; border-radius: 10px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(139,92,246,.12));
+    color: var(--accent);
+  }
+  .with-tile .lbl { font-size: 13px; font-weight: 700; color: var(--ink); }
+  .with-tile .sub { font-size: 11px; color: var(--muted); }
+  .with-connect {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%,-50%);
+    background: #fff;
+    padding: 14px 22px; border-radius: 14px;
+    box-shadow: 0 20px 40px rgba(99,102,241,.18);
+    border: 1px solid rgba(99,102,241,.2);
+    font-weight: 600; font-size: 13px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+  }
+  .with-connect small { font-size: 11px; color: var(--muted); font-weight: 500; }
+
+  /* ========== TESTIMONIALS ========== */
+  .testis {
+    padding: 120px 0;
+    background: #fff;
+  }
+  .testis-perf {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 8px 16px; border-radius: 999px;
+    background: rgba(99,102,241,.08); color: var(--accent);
+    font-size: 13px; font-weight: 600;
+    margin-bottom: 40px;
+  }
+  .testi-grid {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+    margin-top: 20px;
+  }
+  @media (max-width: 900px) { .testi-grid { grid-template-columns: 1fr; } }
+  .testi {
+    background: #fff;
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 28px;
+    display: flex; flex-direction: column; gap: 16px;
+    transition: transform .2s, box-shadow .2s, border-color .2s;
+  }
+  .testi:hover { transform: translateY(-4px); border-color: rgba(99,102,241,.4); box-shadow: 0 20px 40px -20px rgba(99,102,241,.2); }
+  .testi-head { display: flex; align-items: center; justify-content: space-between; }
+  .testi-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    background: rgba(99,102,241,.09);
+    color: var(--accent);
+    font-size: 12px; font-weight: 600;
+  }
+  .testi-beta {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 4px 10px; border-radius: 999px;
+    background: var(--bg-soft);
+    color: var(--muted); font-size: 11px; font-weight: 600;
+  }
+  .testi-beta::before {
+    content: ""; width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent);
+  }
+  .testi-quote-mark {
+    font-family: 'Instrument Serif', serif;
+    font-size: 44px; line-height: 0.8; color: var(--accent);
+    opacity: .7;
+  }
+  .testi-quote {
+    font-size: 15px; line-height: 1.55; color: var(--ink-2);
+    flex: 1;
+  }
+  .testi-stars { color: #F59E0B; letter-spacing: 3px; font-size: 15px; }
+  .testi-person {
+    display: flex; align-items: center; gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .testi-avatar {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff; font-weight: 700; font-size: 14px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .testi-avatar.orange { background: linear-gradient(135deg, #F97316, #EF4444); }
+  .testi-avatar.green { background: linear-gradient(135deg, #10B981, #059669); }
+  .testi-name { font-weight: 700; font-size: 14px; }
+  .testi-role { font-size: 12px; color: var(--muted); }
+  .testi-org { font-size: 12px; color: var(--muted-2); }
+  .testis-cta {
+    text-align: center; margin-top: 40px;
+    font-size: 14px; color: var(--muted);
+  }
+  .testis-cta .pulse {
+    display: inline-block; width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent); margin-right: 8px; vertical-align: middle;
+  }
+  .testis-cta a { color: var(--accent); font-weight: 600; }
+
+  /* ========== FAQ + CONTACT ========== */
+  .faq-section {
+    padding: 120px 0;
+    background: var(--bg-soft);
+  }
+  .faq-head { text-align: center; margin-bottom: 60px; }
+  .faq-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 60px;
+    max-width: 1100px; margin: 0 auto;
+  }
+  @media (max-width: 900px) { .faq-grid { grid-template-columns: 1fr; gap: 40px; } }
+  .faq-side h4 { font-size: 20px; font-weight: 700; margin: 0 0 20px; }
+  .faq-item {
+    padding: 20px 0;
+    border-bottom: 1px solid var(--line);
+    cursor: pointer;
+  }
+  .faq-item-head {
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 15px; font-weight: 600;
+  }
+  .faq-item .caret {
+    transition: transform .3s;
+  }
+  .faq-item.open .caret { transform: rotate(180deg); }
+  .faq-item-body {
+    max-height: 0; overflow: hidden;
+    transition: max-height .35s, margin-top .3s, opacity .3s;
+    opacity: 0;
+    font-size: 14px; color: var(--muted); line-height: 1.6;
+  }
+  .faq-item.open .faq-item-body {
+    max-height: 200px; margin-top: 12px; opacity: 1;
+  }
+  .support-direct {
+    margin-top: 32px;
+  }
+  .support-buttons {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px;
+  }
+  .support-btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 14px; border-radius: 12px;
+    background: #fff; border: 1px solid var(--line);
+    font-size: 14px; font-weight: 600; color: var(--ink);
+  }
+  .support-btn:hover { border-color: var(--accent); }
+  .support-info {
+    margin-top: 24px; font-size: 13px; color: var(--muted);
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .contact-card {
+    background: #fff; border: 1px solid var(--line); border-radius: 18px;
+    padding: 32px;
+  }
+  .contact-card h4 { font-size: 20px; font-weight: 700; margin: 0 0 20px; }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 13px; font-weight: 600; color: var(--ink-2); margin-bottom: 6px; }
+  .field input, .field textarea {
+    width: 100%; padding: 12px 14px;
+    border-radius: 10px; border: 1px solid var(--line);
+    background: #fff; font: inherit; font-size: 14px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
+  }
+  .field input:focus, .field textarea:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(99,102,241,.14);
+  }
+  .field textarea { resize: vertical; min-height: 100px; }
+  .contact-submit {
+    width: 100%;
+    padding: 14px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff; font-weight: 700; font-size: 15px;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    box-shadow: 0 10px 24px -8px rgba(99,102,241,.5);
+  }
+
+  /* ========== FOOTER ========== */
+  .footer {
+    background: #0B0B14;
+    color: rgba(255,255,255,.7);
+    padding: 80px 0 40px;
+  }
+  .footer-top {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 40px;
+    padding-bottom: 60px;
+    border-bottom: 1px solid rgba(255,255,255,.08);
+  }
+  @media (max-width: 720px) { .footer-top { grid-template-columns: 1fr; } }
+  .footer-block h5 {
+    font-size: 22px; font-weight: 700; color: #fff; margin: 0 0 14px;
+    font-family: 'Instrument Serif', serif;
+    letter-spacing: -0.01em;
+  }
+  .footer-block p { font-size: 14px; line-height: 1.6; margin: 0 0 18px; max-width: 42ch; }
+  .footer-cols {
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 32px;
+    padding: 60px 0 40px;
+  }
+  @media (max-width: 900px) { .footer-cols { grid-template-columns: repeat(2, 1fr); } }
+  .footer-col h6 {
+    font-size: 12px; font-weight: 700; color: #fff;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    margin: 0 0 16px;
+  }
+  .footer-col ul { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
+  .footer-col a { font-size: 13.5px; color: rgba(255,255,255,.6); transition: color .15s; }
+  .footer-col a:hover { color: #fff; }
+  .footer-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    padding-top: 32px; border-top: 1px solid rgba(255,255,255,.08);
+    font-size: 12.5px;
+    flex-wrap: wrap; gap: 16px;
+  }
+  .footer-socials { display: flex; gap: 12px; }
+  .footer-socials a {
+    width: 34px; height: 34px; border-radius: 50%;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.08);
+    display: inline-flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,.7);
+  }
+  .footer-socials a:hover { background: rgba(255,255,255,.1); color: #fff; }
+
+  /* ========== REVEAL ANIMATION ========== */
+  .reveal {
+    opacity: 0; transform: translateY(24px);
+    transition: opacity .8s, transform .8s;
+  }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+  .reveal[data-delay="1"] { transition-delay: .1s; }
+  .reveal[data-delay="2"] { transition-delay: .2s; }
+  .reveal[data-delay="3"] { transition-delay: .3s; }
+  .reveal[data-delay="4"] { transition-delay: .4s; }
+</style>
+</head>
+<body>
+
+<!-- ================== HEADER ================== -->
+<nav class="nav">
+  <div class="container-wide nav-inner">
+    <a href="#" class="logo"><span class="logo-dot"></span>vgia</a>
+    <div class="nav-menu">
+      <a class="nav-item" href="#">Product <svg class="caret" viewBox="0 0 12 12" fill="none"><path d="M3 4.5 6 7.5 9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="nav-item" href="#">Use cases <svg class="caret" viewBox="0 0 12 12" fill="none"><path d="M3 4.5 6 7.5 9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="nav-item" href="#">Enterprise <svg class="caret" viewBox="0 0 12 12" fill="none"><path d="M3 4.5 6 7.5 9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="nav-item" href="#">Learn <svg class="caret" viewBox="0 0 12 12" fill="none"><path d="M3 4.5 6 7.5 9 4.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="nav-item" href="#">Pricing</a>
+      <a class="nav-item" href="#">What's new</a>
+    </div>
+    <div class="nav-right">
+      <a class="link" href="#">Contact sales</a>
+      <a class="btn btn-accent" href="#">Try VGIA <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <button class="icon-btn" aria-label="Search"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <button class="icon-btn" aria-label="Menu"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+      <button class="icon-btn" aria-label="Account"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.8"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg></button>
+    </div>
+  </div>
+</nav>
+
+<!-- ================== HERO ================== -->
+<section class="hero">
+  <div class="hero-blob"></div>
+  <div class="hero-blob-2"></div>
+  <div class="hero-inner">
+    <div class="hero-top">
+      <div class="reveal in">
+        <div class="hero-badge"><span class="pulse"></span> Now in Beta · Made in Algeria</div>
+        <h1 class="hero-title">Every Video.<br/><em>Instantly</em><br/>Searchable.</h1>
+        <p class="hero-sub">VGIA understands what is said, shown, and written inside every video — so you find the exact moment you need, in any language, in seconds.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-accent" href="#">Try VGIA <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+          <a class="btn btn-ghost" href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><polygon points="6,4 20,12 6,20" fill="currentColor"/></svg> See how it works</a>
+        </div>
+        <div class="hero-cta-note" style="margin-top:14px">Free during Beta · No credit card required</div>
+      </div>
+      <div class="hero-video-col reveal in" data-delay="2">
+        <div class="hero-video-wrap">
+          <video autoplay muted loop playsinline poster="https://images.pexels.com/photos/3945313/pexels-photo-3945313.jpeg?auto=compress&cs=tinysrgb&w=800">
+            <source src="https://videos.pexels.com/video-files/3129957/3129957-uhd_2560_1440_30fps.mp4" type="video/mp4">
+          </video>
+          <div class="hero-video-overlay"></div>
+          <div class="hero-video-caption">
+            <div class="hero-play-btn">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,4 20,12 6,20"/></svg>
+            </div>
+            <div class="txt">Watch demo — 42s<small>See VGIA find any moment</small></div>
+          </div>
+        </div>
+        <!-- Floating chips -->
+        <div class="float-chip chip-1">
+          <span class="ico" style="background:linear-gradient(135deg,#6366F1,#8B5CF6)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </span>
+          <span>Timestamp <span style="color:var(--accent)">1:17:35</span></span>
+        </div>
+        <div class="float-chip chip-2">
+          <span class="ico" style="background:linear-gradient(135deg,#10B981,#059669)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 6h16M4 12h16M4 18h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </span>
+          <span>Transcript found</span>
+        </div>
+        <div class="float-chip chip-3">
+          <span class="ico" style="background:linear-gradient(135deg,#F59E0B,#F97316)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2 2 22h20L12 2Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          </span>
+          <span>OCR · Frame · Speech</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== MODULES ================== -->
+<section class="modules">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="section-eyebrow">✦ Integrated ecosystem</div>
+      <h2 class="section-title serif"><em style="font-style:italic">Pas un logiciel.</em> <span class="marker">Un système qui travaille pour vous.</span></h2>
+      <p class="section-sub">Modules interconnectés qui communiquent entre eux pour comprendre et rechercher n'importe quelle vidéo — automatiquement.</p>
+    </div>
+
+    <div class="modules-grid reveal" data-delay="1">
+      <!-- Row 1 -->
+      <div class="module">
+        <div class="module-ico" style="background:linear-gradient(135deg,#FFF7ED,#FFEDD5)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v10H4z" stroke="#F97316" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 20h8M12 16v4" stroke="#F97316" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div class="module-label">Transcription</div>
+      </div>
+      <div class="module">
+        <div class="module-ico" style="background:linear-gradient(135deg,#FDF4FF,#FAE8FF)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" stroke="#A855F7" stroke-width="1.8"/><path d="M8 14l2.5-3 3 3.5L16 11" stroke="#A855F7" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="module-label">OCR Frames</div>
+        <span class="module-dot"></span>
+      </div>
+      <div class="module">
+        <div class="module-ico" style="background:linear-gradient(135deg,#ECFDF5,#D1FAE5)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M3 12h4l3-8 4 16 3-8h4" stroke="#10B981" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="module-label">Speech AI</div>
+      </div>
+      <div class="module">
+        <div class="module-ico" style="background:linear-gradient(135deg,#EFF6FF,#DBEAFE)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="8" r="3" stroke="#3B82F6" stroke-width="1.8"/><circle cx="16" cy="16" r="3" stroke="#3B82F6" stroke-width="1.8"/><circle cx="16" cy="8" r="2" stroke="#3B82F6" stroke-width="1.8"/><path d="M11 8h3M10 11l4 4" stroke="#3B82F6" stroke-width="1.8"/></svg>
+        </div>
+        <div class="module-label">Knowledge Graph</div>
+        <span class="module-dot"></span>
+      </div>
+      <div class="module">
+        <div class="module-ico" style="background:linear-gradient(135deg,#FEF2F2,#FEE2E2)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="#EF4444" stroke-width="1.8"/><path d="m20 20-3.5-3.5" stroke="#EF4444" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div class="module-label">Search</div>
+      </div>
+      <!-- Row 2 -->
+      <div class="module">
+        <div class="module-ico" style="background:linear-gradient(135deg,#F5F3FF,#EDE9FE)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M12 3 3 8l9 5 9-5-9-5Z" stroke="#8B5CF6" stroke-width="1.8" stroke-linejoin="round"/><path d="m3 16 9 5 9-5M3 12l9 5 9-5" stroke="#8B5CF6" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="module-label">Scholar</div>
+      </div>
+      <div class="module">
+        <div class="module-ico" style="background:linear-gradient(135deg,#F0FDF4,#DCFCE7)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="#22C55E" stroke-width="1.8"/><path d="M4 9h16M9 9v11" stroke="#22C55E" stroke-width="1.8"/></svg>
+        </div>
+        <div class="module-label">Library</div>
+        <span class="module-dot"></span>
+      </div>
+      <div class="module">
+        <div class="module-ico" style="background:linear-gradient(135deg,#FFF7ED,#FED7AA)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M9 2v6M15 2v6M4 10h16M6 6h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2Z" stroke="#EA580C" stroke-width="1.8"/></svg>
+        </div>
+        <div class="module-label">Timeline</div>
+      </div>
+      <div class="module">
+        <div class="module-ico" style="background:linear-gradient(135deg,#EFF6FF,#BFDBFE)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="7" r="3" stroke="#2563EB" stroke-width="1.8"/><circle cx="17" cy="10" r="2" stroke="#2563EB" stroke-width="1.8"/><path d="M3 20c1-4 4-6 6-6s5 2 6 6M14 20c.5-2 2-3 3-3s2.5 1 3 3" stroke="#2563EB" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div class="module-label">Team Notes</div>
+        <span class="module-dot"></span>
+      </div>
+      <div class="module">
+        <div class="module-ico" style="background:linear-gradient(135deg,#FCE7F3,#F9A8D4)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v12H4z" stroke="#DB2777" stroke-width="1.8"/><path d="M12 4v14M4 12h16" stroke="#DB2777" stroke-width="1.8"/></svg>
+        </div>
+        <div class="module-label">Highlights</div>
+      </div>
+      <!-- Row 3 -->
+      <div class="module">
+        <div class="module-ico" style="background:linear-gradient(135deg,#ECFEFF,#A5F3FC)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="18" height="12" rx="2" stroke="#0891B2" stroke-width="1.8"/><path d="M8 10h8M8 14h5" stroke="#0891B2" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div class="module-label">Reports</div>
+      </div>
+      <div class="module">
+        <div class="module-ico" style="background:linear-gradient(135deg,#E0F2FE,#7DD3FC)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#0284C7" stroke-width="1.8"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9M12 3c-3 3-4 6-4 9s1 6 4 9" stroke="#0284C7" stroke-width="1.8"/></svg>
+        </div>
+        <div class="module-label">Translate</div>
+      </div>
+      <div class="module">
+        <div class="module-ico" style="background:linear-gradient(135deg,#F0FDFA,#99F6E4)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M4 8h16v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8Z" stroke="#0D9488" stroke-width="1.8"/><path d="M8 4v4M16 4v4M4 12h16" stroke="#0D9488" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </div>
+        <div class="module-label">Delivery API</div>
+      </div>
+    </div>
+
+    <div class="modules-soon reveal">
+      Prochainement
+      <div class="modules-soon-chips">
+        <span class="soon-chip">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="16" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M8 2v4M16 2v4M3 10h18" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Live Broadcast
+        </span>
+        <span class="soon-chip">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M7 7h4M7 12h10M7 17h7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Video Editor
+        </span>
+      </div>
+    </div>
+    <a href="#" class="modules-see-all">Voir tous les modules →</a>
+  </div>
+</section>
+
+<!-- ================== VIDEO STRIP (hover to play) ================== -->
+<section class="video-strip">
+  <div class="container">
+    <div class="section-head reveal">
+      <h2 class="section-title serif" style="color:#fff">The platform that powers <em style="background:linear-gradient(135deg,#A78BFA,#67E8F9);-webkit-background-clip:text;background-clip:text;color:transparent;font-style:italic">any video</em> strategy.</h2>
+      <p class="section-sub">Podcasts, cours, documentaires, films, contenu médical — VGIA les rend tous instantanément recherchables. Passez la souris pour voir.</p>
+    </div>
+
+    <div class="vcards reveal" data-delay="1">
+      <div class="vcard">
+        <div class="vcard-media">
+          <span class="vcard-tag">Podcast</span>
+          <video muted loop playsinline preload="none"
+            poster="https://images.pexels.com/photos/6953876/pexels-photo-6953876.jpeg?auto=compress&cs=tinysrgb&w=800"
+            data-src="https://videos.pexels.com/video-files/4881457/4881457-uhd_2560_1440_30fps.mp4"></video>
+          <div class="vcard-play"><div class="vcard-play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg></div></div>
+        </div>
+        <div class="vcard-body">
+          <h3 class="vcard-title">Podcast shorts</h3>
+          <p class="vcard-desc">Turn 3-hour podcasts into searchable transcripts, chapter markers, and social-ready clips — automatically.</p>
+          <a href="#" class="vcard-cta">Explore podcasts <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+
+      <div class="vcard">
+        <div class="vcard-media">
+          <span class="vcard-tag">Education</span>
+          <video muted loop playsinline preload="none"
+            poster="https://images.pexels.com/photos/8617715/pexels-photo-8617715.jpeg?auto=compress&cs=tinysrgb&w=800"
+            data-src="https://videos.pexels.com/video-files/3195394/3195394-uhd_3840_2160_25fps.mp4"></video>
+          <div class="vcard-play"><div class="vcard-play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg></div></div>
+        </div>
+        <div class="vcard-body">
+          <h3 class="vcard-title">History & lectures</h3>
+          <p class="vcard-desc">Ask a question about any lecture — VGIA jumps to the exact minute, with the slide and transcript quoted.</p>
+          <a href="#" class="vcard-cta">Explore lectures <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+
+      <div class="vcard">
+        <div class="vcard-media">
+          <span class="vcard-tag">Medical</span>
+          <video muted loop playsinline preload="none"
+            poster="https://images.pexels.com/photos/4021815/pexels-photo-4021815.jpeg?auto=compress&cs=tinysrgb&w=800"
+            data-src="https://videos.pexels.com/video-files/8376370/8376370-uhd_2732_1440_25fps.mp4"></video>
+          <div class="vcard-play"><div class="vcard-play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg></div></div>
+        </div>
+        <div class="vcard-body">
+          <h3 class="vcard-title">Medical training</h3>
+          <p class="vcard-desc">Search surgical footage by procedure, instrument or anatomical term. Cite the exact frame in every report.</p>
+          <a href="#" class="vcard-cta">Explore medical <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+
+      <div class="vcard">
+        <div class="vcard-media">
+          <span class="vcard-tag">Cinema</span>
+          <video muted loop playsinline preload="none"
+            poster="https://images.pexels.com/photos/7991579/pexels-photo-7991579.jpeg?auto=compress&cs=tinysrgb&w=800"
+            data-src="https://videos.pexels.com/video-files/7710243/7710243-uhd_2560_1440_25fps.mp4"></video>
+          <div class="vcard-play"><div class="vcard-play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg></div></div>
+        </div>
+        <div class="vcard-body">
+          <h3 class="vcard-title">Movies & archives</h3>
+          <p class="vcard-desc">Every dialogue, sign, and scene indexed. Find the moment a character says a line — across an entire filmography.</p>
+          <a href="#" class="vcard-cta">Explore cinema <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+
+      <div class="vcard">
+        <div class="vcard-media">
+          <span class="vcard-tag">News</span>
+          <video muted loop playsinline preload="none"
+            poster="https://images.pexels.com/photos/6953868/pexels-photo-6953868.jpeg?auto=compress&cs=tinysrgb&w=800"
+            data-src="https://videos.pexels.com/video-files/8419127/8419127-uhd_2560_1440_25fps.mp4"></video>
+          <div class="vcard-play"><div class="vcard-play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg></div></div>
+        </div>
+        <div class="vcard-body">
+          <h3 class="vcard-title">News & journalism</h3>
+          <p class="vcard-desc">Monitor coverage across languages. Get alerts when a keyword, person or place appears — with source clips.</p>
+          <a href="#" class="vcard-cta">Explore news <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+
+      <div class="vcard">
+        <div class="vcard-media">
+          <span class="vcard-tag">Sports</span>
+          <video muted loop playsinline preload="none"
+            poster="https://images.pexels.com/photos/8007412/pexels-photo-8007412.jpeg?auto=compress&cs=tinysrgb&w=800"
+            data-src="https://videos.pexels.com/video-files/4761791/4761791-uhd_2560_1440_25fps.mp4"></video>
+          <div class="vcard-play"><div class="vcard-play-circle"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><polygon points="6,4 20,12 6,20"/></svg></div></div>
+        </div>
+        <div class="vcard-body">
+          <h3 class="vcard-title">Sports & events</h3>
+          <p class="vcard-desc">Auto-tag every play, goal or timeout. Build highlight reels from hours of match footage in one query.</p>
+          <a href="#" class="vcard-cta">Explore sports <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== PROBLEM / SOLUTION SIDE-BY-SIDE ================== -->
+<section class="ps-section">
+  <div class="ps-intro">
+    <div class="container reveal">
+      <div class="section-eyebrow" style="background:rgba(139,92,246,.10);color:var(--accent-2)">✦ La réalité</div>
+      <h2 class="section-title serif">En Algérie, on a l'<em style="font-style:italic;color:var(--accent-2)">ambition</em>…<br/>il manquait juste les <span class="marker">bons outils</span>.</h2>
+      <p class="section-sub">VGIA change cette réalité. Scrollez pour découvrir le problème — et sa solution — côte à côte.</p>
+    </div>
+  </div>
+
+  <div class="ps-track" id="psTrack">
+    <div class="ps-sticky">
+      <div class="ps-rail" id="psRail">
+        <!-- Problem panel -->
+        <div class="ps-panel problem">
+          <div class="ps-panel-inner">
+            <div>
+              <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;opacity:.7;margin-bottom:12px;">❊ Le problème</div>
+              <h3>Finding the right moment in long videos is <em>slow and frustrating.</em></h3>
+              <p>You spend hours watching, skipping, and taking notes… just to miss the part you needed. Content in Arabic, French or English gets lost between apps and languages.</p>
+            </div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:12px 14px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#A78BFA" stroke-width="2"/><path d="M12 7v5l3 2" stroke="#A78BFA" stroke-width="2" stroke-linecap="round"/></svg>
+                <div><div style="font-size:13px;font-weight:700">Very long videos</div><div style="font-size:11px;opacity:.7">Courses can be hours</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:12px 14px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><polygon points="6,4 20,12 6,20" stroke="#A78BFA" stroke-width="2" stroke-linejoin="round"/></svg>
+                <div><div style="font-size:13px;font-weight:700">Hard to navigate</div><div style="font-size:11px;opacity:.7">Manual scanning</div></div>
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:12px 14px;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v14H4z" stroke="#A78BFA" stroke-width="2"/><path d="m8 12 3 3 5-6" stroke="#A78BFA" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <div><div style="font-size:13px;font-weight:700">Info gets lost</div><div style="font-size:11px;opacity:.7">Details slip away</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="ps-thoughts">
+            <div class="ps-thought">🕐 Hours of content</div>
+            <div class="ps-thought">⏩ Endless skipping</div>
+            <div class="ps-thought">❓ No answers</div>
+          </div>
+        </div>
+
+        <!-- Solution panel -->
+        <div class="ps-panel solution">
+          <div class="ps-panel-inner">
+            <div>
+              <div style="font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--accent);font-weight:700;margin-bottom:12px;">◆ La solution VGIA</div>
+              <h3>Get precise answers with the <em>exact moment.</em></h3>
+              <p>VGIA understands what is <b>said, shown, and written</b> in the video — and gives you accurate, timestamped answers, with the source frame quoted every single time.</p>
+              <div style="margin-top:20px">
+                <div class="ps-check"><span class="c">✓</span> Precise, sourced answers</div>
+                <div class="ps-check"><span class="c">✓</span> Timestamped to the second</div>
+                <div class="ps-check"><span class="c">✓</span> With visual evidence</div>
+                <div class="ps-check"><span class="c">✓</span> In Arabic, French or English</div>
+              </div>
+            </div>
+            <div class="ps-features">
+              <div class="ps-feature">
+                <span class="ico">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </span>
+                Multimodal search
+              </div>
+              <div class="ps-feature">
+                <span class="ico">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6" r="2" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="6" r="2" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="18" r="2" stroke="currentColor" stroke-width="2"/><path d="M8 7l8 0M7 8l4 8M17 8l-4 8" stroke="currentColor" stroke-width="1.8"/></svg>
+                </span>
+                Knowledge graph
+              </div>
+              <div class="ps-feature">
+                <span class="ico">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9M12 3c-3 3-4 6-4 9s1 6 4 9" stroke="currentColor" stroke-width="2"/></svg>
+                </span>
+                Cross-language
+              </div>
+              <div class="ps-feature">
+                <span class="ico">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="m9 12 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                Source verification
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="ps-progress">
+        <div class="dot active" id="psDot1"></div>
+        <div class="dot" id="psDot2"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== WITH / WITHOUT ================== -->
+<section class="ww-section" id="wwSection">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="section-eyebrow">✦ Comparez votre quotidien</div>
+      <h2 class="section-title serif" id="wwTitle">
+        <span id="wwTitleWith">La <em style="font-style:italic;color:var(--accent)">clarté</em> avec <span class="marker">VGIA</span>.</span>
+        <span id="wwTitleWithout" style="display:none">La <em style="font-style:italic;color:#EF4444">réalité</em> sans <span style="background:#FEE2E2;color:#B91C1C;padding:0 .18em;border-radius:4px">VGIA</span>…</h2>
+      <p class="section-sub" id="wwSub">Vidéos organisées, requêtes précises, réponses sourcées — tout au même endroit.</p>
+    </div>
+
+    <div class="ww-toggle-wrap reveal">
+      <div class="ww-toggle with" id="wwToggle">
+        <div class="thumb"></div>
+        <button class="ww-opt with">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.5 5 5.5.8-4 3.9.9 5.5L12 14.5 7.1 17.2l1-5.5L4 7.8 9.5 7z" fill="currentColor"/></svg>
+          Avec VGIA
+        </button>
+        <button class="ww-opt without">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 8v5M12 16.5v.5M4.5 19h15L12 5z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Sans VGIA
+        </button>
+      </div>
+    </div>
+    <div class="ww-scroll-note reveal">Scrollez pour basculer automatiquement ↓</div>
+
+    <div class="ww-stage" id="wwStage" style="margin-top:40px">
+      <!-- WITHOUT layer -->
+      <div class="ww-layer without">
+        <svg class="chaos-scribble" style="top:20%;left:15%;width:200px;height:100px" viewBox="0 0 200 100"><path d="M10,50 Q50,10 90,50 T170,50" stroke="currentColor" fill="none"/></svg>
+        <svg class="chaos-scribble" style="top:60%;right:15%;width:180px;height:80px" viewBox="0 0 180 80"><path d="M10,40 C40,10 80,60 100,30 S160,40 170,20" stroke="currentColor" fill="none"/></svg>
+        <svg class="chaos-scribble" style="top:40%;left:45%;width:120px;height:120px" viewBox="0 0 120 120"><path d="M10,60 Q60,10 110,60 M20,50 Q60,90 100,50" stroke="currentColor" fill="none"/></svg>
+
+        <div class="chaos-note" style="top:8%;left:10%;--r:-4deg">Dossier perdu…</div>
+        <div class="chaos-item" style="top:24%;left:8%;transform:rotate(-3deg)">📁 Excel v3-final</div>
+        <div class="chaos-note" style="top:15%;right:8%;--r:3deg">Où est cette vidéo ?</div>
+        <div class="chaos-item" style="top:30%;right:6%;transform:rotate(4deg)">📼 course_2023.mp4</div>
+        <div class="chaos-note" style="top:50%;left:5%;--r:-6deg">Stock introuvable ?</div>
+        <div class="chaos-item" style="top:66%;left:14%;transform:rotate(-2deg)">💬 WhatsApp notes</div>
+        <div class="chaos-note" style="top:78%;left:32%;--r:4deg">Retard de livraison !</div>
+        <div class="chaos-item" style="top:52%;right:22%;transform:rotate(3deg)">📧 Gmail thread</div>
+        <div class="chaos-item" style="top:68%;right:8%;transform:rotate(-3deg)">📋 Post-its perdus</div>
+        <div class="chaos-note" style="top:80%;right:10%;--r:5deg">Historique flou…</div>
+        <div class="chaos-item" style="top:38%;left:35%;transform:rotate(2deg)">🗂️ Drive folder #47</div>
+        <div class="chaos-item" style="top:20%;left:38%;transform:rotate(-2deg)">📞 Téléphone</div>
+      </div>
+
+      <!-- WITH layer -->
+      <div class="ww-layer with">
+        <div class="with-grid">
+          <div class="with-tile">
+            <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 6h16v10H4z" stroke="currentColor" stroke-width="2"/><path d="M8 20h8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+            <div class="lbl">Transcription</div>
+            <div class="sub">99.2% accuracy</div>
+          </div>
+          <div class="with-tile">
+            <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+            <div class="lbl">Search</div>
+            <div class="sub">Instant results</div>
+          </div>
+          <div class="with-tile">
+            <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="16" r="3" stroke="currentColor" stroke-width="2"/><path d="m10 10 4 4" stroke="currentColor" stroke-width="2"/></svg></span>
+            <div class="lbl">Knowledge</div>
+            <div class="sub">Auto-linked</div>
+          </div>
+          <div class="with-tile">
+            <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2"/><path d="M3 12h18" stroke="currentColor" stroke-width="2"/></svg></span>
+            <div class="lbl">Multi-language</div>
+            <div class="sub">FR · AR · EN</div>
+          </div>
+          <div class="with-tile">
+            <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="2" stroke="currentColor" stroke-width="2"/><path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+            <div class="lbl">Reports</div>
+            <div class="sub">Sourced quotes</div>
+          </div>
+          <div class="with-tile">
+            <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3 3 8l9 5 9-5-9-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg></span>
+            <div class="lbl">Library</div>
+            <div class="sub">Every clip indexed</div>
+          </div>
+          <div class="with-tile">
+            <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="7" r="3" stroke="currentColor" stroke-width="2"/><path d="M3 20c1-4 4-6 6-6s5 2 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+            <div class="lbl">Team</div>
+            <div class="sub">Shared context</div>
+          </div>
+          <div class="with-tile">
+            <span class="ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v16H4z" stroke="currentColor" stroke-width="2"/><path d="M4 10h16M10 4v16" stroke="currentColor" stroke-width="2"/></svg></span>
+            <div class="lbl">Dashboard</div>
+            <div class="sub">Real-time</div>
+          </div>
+        </div>
+        <div class="with-connect">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 2l2.5 5 5.5.8-4 3.9.9 5.5L12 14.5 7.1 17.2l1-5.5L4 7.8 9.5 7z" fill="url(#grad)"/><defs><linearGradient id="grad" x1="0" x2="24" y1="0" y2="24"><stop offset="0" stop-color="#6366F1"/><stop offset="1" stop-color="#8B5CF6"/></linearGradient></defs></svg>
+          C'est ça votre quotidien avec VGIA
+          <small>Tout en 1 seul endroit</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== TESTIMONIALS ================== -->
+<section class="testis">
+  <div class="container">
+    <div class="section-head reveal">
+      <div class="testis-perf">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" fill="currentColor"/></svg>
+        Performance optimisée — Réponse moyenne : 1.2s
+      </div>
+      <div class="section-eyebrow">Témoignages</div>
+      <h2 class="section-title serif">Ce que disent nos <span class="marker">premiers utilisateurs</span></h2>
+      <p class="section-sub">Retours authentiques de nos utilisateurs Beta en Algérie et à l'international.</p>
+    </div>
+
+    <div class="testi-grid">
+      <div class="testi reveal" data-delay="1">
+        <div class="testi-head">
+          <span class="testi-badge">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 3 3 8l9 5 9-5-9-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+            Recherche
+          </span>
+          <span class="testi-beta">Beta</span>
+        </div>
+        <div class="testi-quote-mark">"</div>
+        <p class="testi-quote">"VGIA a transformé ma thèse. J'ai indexé plus de 200 heures d'interviews en darija et français. Retrouver une citation exacte prend maintenant 3 secondes au lieu de plusieurs jours."</p>
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-person">
+          <div class="testi-avatar">SH</div>
+          <div>
+            <div class="testi-name">Sara Hamidi</div>
+            <div class="testi-role">Doctorante en Sociologie</div>
+            <div class="testi-org">Université d'Alger 2</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi reveal" data-delay="2">
+        <div class="testi-head">
+          <span class="testi-badge" style="background:rgba(239,68,68,.09);color:#EF4444">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5c0-4 3-7 7-7s7 3 7 7-7 8-7 8-7-4-7-8Z" stroke="currentColor" stroke-width="2"/></svg>
+            Médical
+          </span>
+          <span class="testi-beta">Beta</span>
+        </div>
+        <div class="testi-quote-mark">"</div>
+        <p class="testi-quote">"Notre CHU utilise VGIA pour indexer les enregistrements chirurgicaux. Les résidents retrouvent une technique précise en tapant simplement son nom. Un gain énorme pour la formation."</p>
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-person">
+          <div class="testi-avatar orange">YM</div>
+          <div>
+            <div class="testi-name">Dr. Yacine Merabet</div>
+            <div class="testi-role">Chef de Service Chirurgie</div>
+            <div class="testi-org">CHU Oran</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="testi reveal" data-delay="3">
+        <div class="testi-head">
+          <span class="testi-badge" style="background:rgba(16,185,129,.09);color:#059669">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v6a8 8 0 0 1-16 0V4Z" stroke="currentColor" stroke-width="2"/></svg>
+            Média
+          </span>
+          <span class="testi-beta">Beta</span>
+        </div>
+        <div class="testi-quote-mark">"</div>
+        <p class="testi-quote">"En tant que producteur podcast, VGIA me fait gagner 15 h par semaine. Le clip social est prêt en 2 minutes, timestamps et sous-titres inclus. Nos équipes ne peuvent plus s'en passer."</p>
+        <div class="testi-stars">★★★★★</div>
+        <div class="testi-person">
+          <div class="testi-avatar green">NB</div>
+          <div>
+            <div class="testi-name">Nadir Boudiaf</div>
+            <div class="testi-role">Producteur & Journaliste</div>
+            <div class="testi-org">Studio Casbah Media, Alger</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="testis-cta">
+      <span class="pulse"></span> Vous utilisez VGIA ? <a href="#">Partagez votre expérience →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================== FAQ + CONTACT ================== -->
+<section class="faq-section">
+  <div class="container">
+    <div class="faq-head reveal">
+      <div class="section-eyebrow">⌘ Support</div>
+      <h2 class="section-title serif">Une <span class="marker">question</span> ?</h2>
+      <p class="section-sub">Notre équipe est disponible pour vous accompagner. Contactez-nous directement ou consultez notre FAQ.</p>
+    </div>
+
+    <div class="faq-grid">
+      <div class="faq-side">
+        <h4>Questions fréquentes</h4>
+        <div class="faq-item">
+          <div class="faq-item-head">La Beta est-elle vraiment gratuite ?
+            <svg class="caret" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="faq-item-body">Oui, 100% gratuite pendant toute la durée de la Beta. Aucune carte de crédit requise, aucun engagement.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-item-head">Mes données sont-elles sécurisées ?
+            <svg class="caret" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="faq-item-body">Vos vidéos sont chiffrées de bout en bout (AES-256), stockées sur des serveurs souverains, et jamais utilisées pour entraîner nos modèles.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-item-head">Quelles langues sont supportées ?
+            <svg class="caret" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="faq-item-body">Français, Arabe standard, Darija algérienne, Anglais, Espagnol, et 40+ autres langues — avec recherche cross-langue.</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-item-head">Puis-je exporter mes données ?
+            <svg class="caret" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="faq-item-body">À tout moment, en un clic — vidéos, transcripts, index et métadonnées, aux formats standards (VTT, SRT, JSON, CSV).</div>
+        </div>
+        <div class="faq-item">
+          <div class="faq-item-head">Combien de temps dure la Beta ?
+            <svg class="caret" width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="faq-item-body">Jusqu'à fin 2026. Tous les utilisateurs Beta bénéficieront d'un tarif préférentiel à vie lors du lancement commercial.</div>
+        </div>
+
+        <div class="support-direct">
+          <h4>Support direct</h4>
+          <div class="support-buttons">
+            <a class="support-btn" href="#">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 1 1 4 6.9L4 20l1.1-4A8 8 0 0 1 4 12Z" stroke="#25D366" stroke-width="2" stroke-linejoin="round"/></svg>
+              WhatsApp
+            </a>
+            <a class="support-btn" href="#">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="m3 7 9 6 9-6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+              Email
+            </a>
+          </div>
+          <div class="support-info">
+            <div style="display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 5c0-1 1-2 2-2h2l2 5-2 1a11 11 0 0 0 5 5l1-2 5 2v2c0 1-1 2-2 2A16 16 0 0 1 4 5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg> +213 554 94 95 12</div>
+            <div style="display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 22s7-7 7-13a7 7 0 1 0-14 0c0 6 7 13 7 13Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="2"/></svg> Sidi Yahia, Alger 16035 DZ</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="contact-card">
+        <h4>Envoyez-nous un message</h4>
+        <div class="field">
+          <label>Nom complet</label>
+          <input type="text" placeholder="Votre nom">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" placeholder="votre@email.dz">
+        </div>
+        <div class="field">
+          <label>Message</label>
+          <textarea placeholder="Comment pouvons-nous vous aider ?"></textarea>
+        </div>
+        <button class="contact-submit">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 1 1 4 6.9L4 20l1.1-4A8 8 0 0 1 4 12Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          Envoyer via WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================== FOOTER ================== -->
+<footer class="footer">
+  <div class="container-wide">
+    <div class="footer-top">
+      <div class="footer-block">
+        <h5>Try VGIA</h5>
+        <p>Turn any video library into a searchable knowledge base. Free during Beta, no credit card required.</p>
+        <a class="btn btn-accent" href="#">Try VGIA <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
+      <div class="footer-block">
+        <h5>Assistance 24h/24 · 7j/7</h5>
+        <p>Notre équipe d'assistance est en ligne à toute heure. Vous obtiendrez une réponse humaine, pas un chatbot. Support en français, arabe et anglais.</p>
+        <a class="btn btn-ghost" style="background:rgba(255,255,255,.06);color:#fff;border-color:rgba(255,255,255,.16)" href="#">Contact assistance <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      </div>
+    </div>
+
+    <div class="footer-cols">
+      <div class="footer-col">
+        <h6>Produit</h6>
+        <ul>
+          <li><a href="#">Vue d'ensemble</a></li>
+          <li><a href="#">Recherche vidéo</a></li>
+          <li><a href="#">Transcription</a></li>
+          <li><a href="#">Knowledge graph</a></li>
+          <li><a href="#">OCR frames</a></li>
+          <li><a href="#">API</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h6>Solutions</h6>
+        <ul>
+          <li><a href="#">Éducation</a></li>
+          <li><a href="#">Médical</a></li>
+          <li><a href="#">Podcasts</a></li>
+          <li><a href="#">Médias</a></li>
+          <li><a href="#">Recherche académique</a></li>
+          <li><a href="#">Enterprise</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h6>Ressources</h6>
+        <ul>
+          <li><a href="#">Documentation</a></li>
+          <li><a href="#">Guides</a></li>
+          <li><a href="#">API reference</a></li>
+          <li><a href="#">Statut</a></li>
+          <li><a href="#">Changelog</a></li>
+          <li><a href="#">Blog</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h6>Entreprise</h6>
+        <ul>
+          <li><a href="#">À propos</a></li>
+          <li><a href="#">Carrières</a></li>
+          <li><a href="#">Presse</a></li>
+          <li><a href="#">Partenaires</a></li>
+          <li><a href="#">Contact</a></li>
+          <li><a href="#">Made in Algeria 🇩🇿</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h6>Légal</h6>
+        <ul>
+          <li><a href="#">Confidentialité</a></li>
+          <li><a href="#">Conditions</a></li>
+          <li><a href="#">Cookies</a></li>
+          <li><a href="#">RGPD</a></li>
+          <li><a href="#">Sécurité</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div style="display:flex;align-items:center;gap:16px">
+        <div class="logo" style="color:#fff"><span class="logo-dot"></span>vgia</div>
+        <span>© 2026 VGIA · Every video, instantly searchable.</span>
+      </div>
+      <div class="footer-socials">
+        <a href="#" aria-label="Twitter"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.9 4H22l-7.4 8.5L23 20h-6.5l-5.1-6.6L5.5 20H2.5l7.9-9L2 4h6.7l4.6 6.1L18.9 4Zm-1.1 14.1h1.7L7.3 5.8H5.5l12.3 12.3Z"/></svg></a>
+        <a href="#" aria-label="LinkedIn"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M4.98 3.5A2.5 2.5 0 1 1 5 8.5a2.5 2.5 0 0 1-.02-5ZM3 9h4v12H3zM9 9h3.8v1.7c.55-1 1.9-2 3.9-2 4.2 0 5 2.75 5 6.32V21h-4v-5.2c0-1.24-.02-2.83-1.73-2.83-1.73 0-2 1.35-2 2.74V21H9V9Z"/></svg></a>
+        <a href="#" aria-label="YouTube"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M22 8s-.2-1.5-.8-2.2c-.75-.85-1.6-.85-2-.9C16.4 4.6 12 4.6 12 4.6s-4.4 0-7.2.3c-.4.05-1.25.05-2 .9C2.2 6.5 2 8 2 8S1.8 9.75 1.8 11.5v1c0 1.75.2 3.5.2 3.5s.2 1.5.8 2.2c.75.85 1.75.82 2.2.92 1.6.15 6.9.3 7 .3 0 0 4.4 0 7.2-.3.4-.05 1.25-.05 2-.9.6-.7.8-2.2.8-2.2s.2-1.75.2-3.5v-1C22.2 9.75 22 8 22 8Zm-12 7.6V8.4L15.5 12l-5.5 3.6Z"/></svg></a>
+        <a href="#" aria-label="Instagram"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5Zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7Zm10.5 1.5a1 1 0 1 1 0 2 1 1 0 0 1 0-2ZM12 7a5 5 0 1 1 0 10 5 5 0 0 1 0-10Zm0 2a3 3 0 1 0 0 6 3 3 0 0 0 0-6Z"/></svg></a>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ========== Scroll reveal ========== */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('in');
+      io.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12, rootMargin: '0px 0px -60px 0px' });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ========== Video hover play (vcards) ========== */
+document.querySelectorAll('.vcard').forEach(card => {
+  const video = card.querySelector('video');
+  if (!video) return;
+  const src = video.dataset.src;
+  let loaded = false;
+  card.addEventListener('mouseenter', () => {
+    if (!loaded && src) {
+      const s = document.createElement('source');
+      s.src = src; s.type = 'video/mp4';
+      video.appendChild(s);
+      video.load();
+      loaded = true;
+    }
+    const p = video.play();
+    if (p) p.catch(() => {});
+  });
+  card.addEventListener('mouseleave', () => {
+    video.pause();
+    video.currentTime = 0;
+  });
+});
+
+/* ========== Problem/Solution horizontal scroll ========== */
+(function() {
+  const track = document.getElementById('psTrack');
+  const rail  = document.getElementById('psRail');
+  const dot1  = document.getElementById('psDot1');
+  const dot2  = document.getElementById('psDot2');
+  if (!track || !rail) return;
+
+  function onScroll() {
+    const rect = track.getBoundingClientRect();
+    const total = track.offsetHeight - window.innerHeight;
+    const passed = Math.min(Math.max(-rect.top, 0), total);
+    const progress = total > 0 ? passed / total : 0;
+
+    const railW = rail.scrollWidth;
+    const viewW = window.innerWidth;
+    const maxShift = Math.max(railW - viewW, 0);
+    rail.style.transform = `translateX(${-progress * maxShift}px)`;
+
+    if (progress > 0.5) {
+      dot1.classList.remove('active');
+      dot2.classList.add('active');
+    } else {
+      dot2.classList.remove('active');
+      dot1.classList.add('active');
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll);
+  onScroll();
+})();
+
+/* ========== With/Without scroll toggle ========== */
+(function(){
+  const section = document.getElementById('wwSection');
+  const stage = document.getElementById('wwStage');
+  const toggle = document.getElementById('wwToggle');
+  const titleWith = document.getElementById('wwTitleWith');
+  const titleWithout = document.getElementById('wwTitleWithout');
+  const sub = document.getElementById('wwSub');
+  if (!section || !toggle) return;
+
+  const optWith = toggle.querySelector('.ww-opt.with');
+  const optWithout = toggle.querySelector('.ww-opt.without');
+
+  function setState(state) {
+    if (state === 'without') {
+      toggle.classList.remove('with'); toggle.classList.add('without');
+      stage.classList.add('ww-active');
+      titleWith.style.display = 'none';
+      titleWithout.style.display = 'inline';
+      sub.textContent = "Fichiers éparpillés, vidéos oubliées, réponses introuvables — l'ambition freinée par le chaos.";
+    } else {
+      toggle.classList.remove('without'); toggle.classList.add('with');
+      stage.classList.remove('ww-active');
+      titleWith.style.display = 'inline';
+      titleWithout.style.display = 'none';
+      sub.textContent = "Vidéos organisées, requêtes précises, réponses sourcées — tout au même endroit.";
+    }
+  }
+
+  optWith.addEventListener('click', () => setState('with'));
+  optWithout.addEventListener('click', () => setState('without'));
+
+  // Scroll-driven toggle
+  let lastState = 'with';
+  function onScroll() {
+    const rect = section.getBoundingClientRect();
+    const middle = window.innerHeight / 2;
+    const sectionCenter = rect.top + rect.height / 2;
+    // When scrolled past midpoint of section, flip to WITH; while entering, show WITHOUT
+    if (rect.top < window.innerHeight * 0.4 && rect.top > -rect.height * 0.4) {
+      // We are inside the section — decide by scroll position
+      const progress = 1 - (rect.top + rect.height) / (window.innerHeight + rect.height);
+      const state = progress > 0.5 ? 'with' : 'without';
+      if (state !== lastState) { setState(state); lastState = state; }
+    }
+  }
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
+})();
+
+/* ========== FAQ accordion ========== */
+document.querySelectorAll('.faq-item').forEach(item => {
+  item.addEventListener('click', () => item.classList.toggle('open'));
+});
+</script>
+</body>
+</html>

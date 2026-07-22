@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reset password — AskVGIA</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background:#0f1117; color:#e5e7eb;
+           display:flex; align-items:center; justify-content:center; min-height:100vh; margin:0; }
+    .card { background:#171a21; border:1px solid #262a33; border-radius:16px;
+            padding:32px; width:340px; box-shadow:0 20px 60px -20px rgba(0,0,0,.6); }
+    h1 { font-size:20px; margin:0 0 6px; }
+    p  { font-size:13px; color:#9ca3af; margin:0 0 20px; }
+    label { font-size:12px; color:#9ca3af; display:block; margin-bottom:6px; }
+    input { width:100%; box-sizing:border-box; padding:11px 12px; border-radius:10px;
+            border:1px solid #2c313b; background:#0f1117; color:#e5e7eb; font-size:14px; margin-bottom:14px; }
+    button { width:100%; padding:12px; border:0; border-radius:10px; cursor:pointer;
+             background:linear-gradient(135deg,#6366f1,#8b5cf6); color:#fff; font-size:14px; font-weight:600; }
+    .msg { font-size:13px; margin-top:14px; text-align:center; }
+    .msg.err { color:#f87171; } .msg.ok { color:#34d399; }
+    a { color:#a5b4fc; font-size:13px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Set a new password</h1>
+    <p>Enter a new password for your AskVGIA account.</p>
+
+    <div id="form">
+      <label for="np">New password</label>
+      <input id="np" type="password" placeholder="8+ characters" />
+      <label for="np2">Confirm password</label>
+      <input id="np2" type="password" placeholder="Repeat password" />
+      <button id="go">Update password</button>
+    </div>
+
+    <div class="msg" id="msg"></div>
+    <p style="text-align:center; margin-top:16px;"><a href="/login.html">Back to login</a></p>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/app-assets/js/supabase-client.js"></script>
+  <script>
+    const msg = document.getElementById('msg');
+    function show(t, ok) { msg.textContent = t; msg.className = 'msg ' + (ok ? 'ok' : 'err'); }
+
+    // When the user arrives via the reset email link, supabase-js fires a
+    // PASSWORD_RECOVERY event and creates a temporary recovery session.
+    let ready = false;
+    sb.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') ready = true;
+    });
+
+    document.getElementById('go').addEventListener('click', async () => {
+      const p1 = document.getElementById('np').value;
+      const p2 = document.getElementById('np2').value;
+      if (p1.length < 6) return show('Password must be at least 6 characters.', false);
+      if (p1 !== p2)     return show('Passwords do not match.', false);
+
+      const { error } = await sb.auth.updateUser({ password: p1 });
+      if (error) return show(error.message, false);
+
+      show('Password updated. Redirecting to login…', true);
+      setTimeout(() => window.location = '/login.html', 1500);
+    });
+  </script>
+</body>
+</html>
