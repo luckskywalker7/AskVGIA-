@@ -531,6 +531,60 @@
         "n_segments": 3,
         "timestamp": "2026-07-03T23:08:59Z",
         "benchmark": "video_mmlu"
+      },
+      {
+        "question": "شرح مفهوم",
+        "answer": "لم أجد أي مقاطع ذات صلة بسؤالك في هذا الفيديو.",
+        "grounded_in": "none",
+        "n_frames": 0,
+        "n_segments": 0,
+        "timestamp": "2026-07-22T15:34:39Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "expliquer moi le ceoncept de math",
+        "answer": "I couldn't find any relevant passages for your question in this video.",
+        "grounded_in": "none",
+        "n_frames": 0,
+        "n_segments": 0,
+        "timestamp": "2026-07-22T15:39:08Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "expliquer moi le ceoncept de math",
+        "answer": "Le concept de contrapositive en mathématiques consiste à prouver que P(x) => Q(x) en démontrant au lieu de cela que ~Q(x) => ~P(x). C'est une méthode de preuve logique utilisée pour établir la validité d'une implication.",
+        "grounded_in": "both",
+        "n_frames": 12,
+        "n_segments": 4,
+        "timestamp": "2026-07-22T16:08:44Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "Explícame el concepto de matemáticas.",
+        "answer": "El video no aborda el concepto general de matemáticas.\n\n⚠️ *Note: low-confidence answer — consider checking the video directly.*",
+        "grounded_in": "segments",
+        "n_frames": 0,
+        "n_segments": 4,
+        "timestamp": "2026-07-22T16:20:53Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "شرح مفهوم",
+        "answer": "لم أجد أي مقاطع ذات صلة بسؤالك في هذا الفيديو.",
+        "grounded_in": "none",
+        "n_frames": 0,
+        "n_segments": 0,
+        "timestamp": "2026-07-22T16:21:48Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "Give me a summary of the entire video.",
+        "answer": "The video presents a proof by contrapositive in discrete mathematics.",
+        "grounded_in": "segments",
+        "n_frames": 0,
+        "n_segments": 1,
+        "timestamp": "2026-07-22T16:22:16Z",
+        "benchmark": "video_mmlu"
       }
     ]
   },
@@ -576,6 +630,38 @@
         "n_frames": 6,
         "n_segments": 10,
         "timestamp": "2026-07-20T17:32:45Z",
+        "benchmark": "video_mmlu"
+      }
+    ]
+  },
+  "eUJ_wcAy00E": {
+    "video_id": "eUJ_wcAy00E",
+    "qa": [
+      {
+        "question": "what is the math concept on this video ?",
+        "answer": "I couldn't find any relevant passages for your question in this video.",
+        "grounded_in": "none",
+        "n_frames": 0,
+        "n_segments": 0,
+        "timestamp": "2026-07-22T15:32:52Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "What are the main points discussed in this video?",
+        "answer": "I couldn't find any relevant passages for your question in this video.",
+        "grounded_in": "none",
+        "n_frames": 0,
+        "n_segments": 0,
+        "timestamp": "2026-07-22T15:33:14Z",
+        "benchmark": "video_mmlu"
+      },
+      {
+        "question": "شرح مفهوم",
+        "answer": "شرح مفهوم  \nA: نسبت مساحت ها به نسبت قائده ها است.\n\n⚠️ *ملاحظة: لم أجد مقاطع قوية — قد لا تكون الإجابة دقيقة.*",
+        "grounded_in": "segments",
+        "n_frames": 0,
+        "n_segments": 4,
+        "timestamp": "2026-07-22T15:33:42Z",
         "benchmark": "video_mmlu"
       }
     ]

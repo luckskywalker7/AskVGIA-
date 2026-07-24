@@ -127,7 +127,10 @@
 <body>
   <div class="app">
 
-    <aside class="sidebar">
+    <aside class="sidebar" id="sidebar">
+      <button class="sidebar-toggle" id="sidebar-toggle" title="Toggle sidebar">
+        <i class="fa-solid fa-chevron-left" id="sidebar-toggle-icon"></i>
+      </button>
       <div class="sidebar-top">
         <a href="/" class="logo">
           <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="url(#sbLogoGrad)"/><path d="M11 12L16 22L21 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="sbLogoGrad" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#6366F1"/></linearGradient></defs></svg>
@@ -158,8 +161,8 @@
         <div class="top-actions">
           <button class="icon-btn" id="theme-toggle"><i class="fa-regular fa-moon"></i></button>
           <div class="user-menu" id="user-menu">
-            <div class="user-avatar" id="user-avatar-initial">H</div>
-            <span class="user-name" id="user-name-label">Hanane</span>
+            <div class="user-avatar" id="user-avatar-initial"></div>
+            <span class="user-name" id="user-name-label"></span>
             <i class="fa-solid fa-chevron-down"></i>
             <div class="dropdown-menu" id="user-dropdown">
               <a href="/app/settings.html#profile"><i class="fa-solid fa-user"></i> Profile</a>

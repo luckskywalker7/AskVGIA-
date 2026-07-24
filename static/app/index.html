@@ -11,43 +11,7 @@
   <link rel="stylesheet" href="/app-assets/css/style.css?v=5"/>
   <link rel="stylesheet" href="/app-assets/css/pages.css?v=5"/>
   <style>
-    /* ── Sidebar collapse ── */
-    .sidebar-toggle {
-      position: absolute;
-      top: 22px;
-      right: -14px;
-      width: 28px;
-      height: 28px;
-      border-radius: 50%;
-      background: var(--bg-card);
-      border: 1px solid var(--border-color);
-      color: var(--text-muted);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 60;
-      transition: background 0.2s, color 0.2s, transform 0.3s;
-      font-size: 11px;
-    }
-    .sidebar-toggle:hover { background: var(--brand-dim); color: var(--brand-light); }
-
-    /* Collapsed state */
-    .sidebar.collapsed { width: 64px; }
-    .sidebar.collapsed .menu-label,
-    .sidebar.collapsed .logo-text,
-    .sidebar.collapsed .sidebar-section-label { opacity: 0; pointer-events: none; width: 0; overflow: hidden; }
-    .sidebar.collapsed .menu-item { justify-content: center; padding: 11px; }
-    .sidebar.collapsed .logo { justify-content: center; padding-left: 0; padding-right: 0; }
-    .sidebar.collapsed .logo svg { margin: 0 auto; }
-    .sidebar.collapsed #sidebar-toggle-icon { transform: rotate(180deg); }
-    .sidebar.collapsed + .main { margin-left: 64px; }
-
-    /* Smooth transitions */
-    .sidebar, .sidebar .menu-label, .sidebar .logo-text, .sidebar .sidebar-section-label,
-    .sidebar .menu-item, .sidebar .logo, .main {
-      transition: width 0.25s ease, margin-left 0.25s ease, opacity 0.2s ease, padding 0.25s ease;
-    }
+    /* Sidebar collapse styles now live in shared css/style.css */
 
     /* ── Page-specific extras ── */
 
@@ -364,8 +328,8 @@
             <i class="fa-regular fa-moon"></i>
           </button>
           <div class="user-menu" id="user-menu">
-            <div class="user-avatar" id="user-avatar-initial">H</div>
-            <span class="user-name" id="user-name-label">Hanane</span>
+            <div class="user-avatar" id="user-avatar-initial"></div>
+            <span class="user-name" id="user-name-label"></span>
             <i class="fa-solid fa-chevron-down"></i>
             <div class="dropdown-menu" id="user-dropdown">
               <a href="/app/settings.html#profile"><i class="fa-solid fa-user"></i> Profile</a>

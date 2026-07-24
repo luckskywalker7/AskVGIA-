@@ -83,29 +83,37 @@
    LIGHT MODE
    ────────────────────────────────────────────────────────── */
 body.light-mode {
-  /* surfaces — --bg / --bg-soft / --card-bg / --input-bg from project/login.html */
-  --bg-primary:        #EFECF9;
-  --bg-elevated:       #E4E0F4;
-  --bg-card:           rgba(255, 255, 255, 0.88);
+  /* surfaces — clean, near-white cool neutral (was a heavy lavender that
+     read as a purple wash under the brand glows) */
+  --bg-primary:        #F5F6FA;
+  --bg-elevated:       #ECEEF5;
+  --bg-card:           rgba(255, 255, 255, 0.94);
   --bg-card-solid:     #FFFFFF;
-  --bg-card-hover:     rgba(99, 102, 241, 0.08);
+  --bg-card-hover:     rgba(99, 102, 241, 0.07);
   --bg-input:          #FFFFFF;
 
-  /* borders — --card-border / --line */
-  --border-color:      rgba(11, 11, 20, 0.08);
-  --border-light:      #E5E5EF;
-  --border-strong:     rgba(11, 11, 20, 0.18);
+  /* borders / dividers */
+  --border-color:      rgba(17, 18, 43, 0.09);
+  --border-light:      #E3E5EF;
+  --border-strong:     rgba(17, 18, 43, 0.18);
 
-  /* ink — --ink / --ink-2 / --muted */
-  --text-primary:      #0B0B14;
-  --text-secondary:    #1a1a2e;
-  --text-muted:        #64748B;
-  --text-faint:        #a8a4be;
+  /* ink — kept high-contrast on the light ground */
+  --text-primary:      #101223;
+  --text-secondary:    #3A3F57;
+  --text-muted:        #5F6678;
+  --text-faint:        #9AA0B2;
 
   --brand-dim:         rgba(99, 102, 241, 0.10);
   --brand-tint:        rgba(99, 102, 241, 0.06);
   --brand-border:      rgba(99, 102, 241, 0.28);
 }
+
+/* Light-mode: elements that use the pale brand-light as *text* need the
+   deeper brand hue to stay legible on white surfaces. */
+body.light-mode .menu-item.active i,
+body.light-mode .transcript-time,
+body.light-mode .q-icon { color: var(--brand); }
+body.light-mode ::selection { background: rgba(99, 102, 241, 0.22); color: var(--text-primary); }
 
 /* ──────────────────────────────────────────────────────────
    BASE
@@ -144,8 +152,8 @@ body::before {
 }
 body.light-mode::before {
   background:
-    radial-gradient(ellipse 900px 500px at 8% 100%, rgba(99, 102, 241, 0.22), transparent 55%),
-    radial-gradient(ellipse 700px 500px at 95% 5%,  rgba(139, 92, 246, 0.18), transparent 55%);
+    radial-gradient(ellipse 820px 460px at 6% 100%, rgba(99, 102, 241, 0.09), transparent 62%),
+    radial-gradient(ellipse 620px 440px at 96% 3%,  rgba(139, 92, 246, 0.07), transparent 62%);
 }
 .background-glow { display: none; }
 
@@ -179,7 +187,8 @@ body.light-mode::before {
   z-index: 50;
 }
 body.light-mode .sidebar {
-  background: rgba(255, 255, 255, 0.75);
+  background: rgba(255, 255, 255, 0.86);
+  border-right-color: var(--border-color);
 }
 
 .sidebar-top,
@@ -311,7 +320,7 @@ body.light-mode .menu-item:hover { background: rgba(0, 0, 0, 0.04); }
   top: 0;
   z-index: 40;
 }
-body.light-mode .topbar { background: rgba(255, 255, 255, 0.75); }
+body.light-mode .topbar { background: rgba(255, 255, 255, 0.86); }
 
 .topbar-title {
   display: flex;
@@ -970,4 +979,50 @@ body.light-mode .transcript-item:hover { background: rgba(0,0,0,0.025); }
     top: 0;
   }
   .top-links { display: none; }
+}
+
+/* ============================================================
+   SIDEBAR COLLAPSE  (shared across every app page)
+   ============================================================ */
+.sidebar-toggle {
+  position: absolute;
+  top: 22px;
+  right: -14px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bg-card-solid);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 60;
+  box-shadow: var(--shadow-sm);
+  transition: background 0.2s, color 0.2s, transform 0.3s;
+  font-size: 11px;
+}
+.sidebar-toggle:hover { background: var(--brand-dim); color: var(--brand-light); }
+body.light-mode .sidebar-toggle:hover { color: var(--brand); }
+
+.sidebar.collapsed { width: 64px; }
+.sidebar.collapsed .menu-label,
+.sidebar.collapsed .logo-text,
+.sidebar.collapsed .sidebar-section-label { opacity: 0; pointer-events: none; width: 0; overflow: hidden; }
+.sidebar.collapsed .menu-item { justify-content: center; padding: 11px; }
+.sidebar.collapsed .logo { justify-content: center; padding-left: 0; padding-right: 0; }
+.sidebar.collapsed .logo svg { margin: 0 auto; }
+.sidebar.collapsed #sidebar-toggle-icon { transform: rotate(180deg); }
+.sidebar.collapsed + .main { margin-left: 64px; }
+
+/* Smooth transitions for the collapse */
+.sidebar,
+.sidebar .menu-label,
+.sidebar .logo-text,
+.sidebar .sidebar-section-label,
+.sidebar .menu-item,
+.sidebar .logo,
+.main {
+  transition: width 0.25s ease, margin-left 0.25s ease, opacity 0.2s ease, padding 0.25s ease;
 }

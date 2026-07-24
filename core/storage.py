@@ -1043,7 +1043,13 @@ class VideoStore:
                     "original_text": original_text,
                     "search_text": search_text,
                     "start_time": self._get(chunk, "start_time", 0.0),
-                    "end_time": self._get(chunk, "end_time", 0.0),
+                    # VisualChunk names its end field `end_timestamp` (see
+                    # core/vision_indexer.py VisualChunk), so reading only
+                    # `end_time` silently stored 0.0 for every visual chunk.
+                    "end_time": (
+                        self._get(chunk, "end_time", None)
+                        or self._get(chunk, "end_timestamp", 0.0)
+                    ),
                     "language": language,
                     "speaker": str(self._get(chunk, "speaker", "SPEAKER_00") or "SPEAKER_00"),
                     "topic": str(self._get(chunk, "topic", "general")),
@@ -1143,7 +1149,7 @@ class VideoStore:
             return cached[:effective_limit]
 
         qvec = np.array(dense_vec, dtype=np.float32)
-        candidate_k = max(effective_limit * 5, 100)
+        candidate_k = max(effective_limit * 5, 2000)
 
         # Detect query language
         query_lang = language or detect_language(query_text)

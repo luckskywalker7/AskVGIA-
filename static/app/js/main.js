@@ -236,4 +236,19 @@ settingToggles.forEach(toggle => {
   });
 });
 
+// --- Sidebar collapse toggle (shared across every app page) ---
+// Targets the sidebar by class so it works whether or not the page sets an id.
+// The collapsed state is remembered per browser via localStorage.
+const sidebarEl = document.querySelector('.sidebar');
+const sidebarToggleBtn = document.getElementById('sidebar-toggle');
+if (sidebarEl && sidebarToggleBtn) {
+  if (localStorage.getItem('sidebarCollapsed') === '1') {
+    sidebarEl.classList.add('collapsed');
+  }
+  sidebarToggleBtn.addEventListener('click', () => {
+    const collapsed = sidebarEl.classList.toggle('collapsed');
+    localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0');
+  });
+}
+
 console.log('ASKVGIA Dashboard Loaded');

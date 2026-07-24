@@ -60,7 +60,6 @@ class AuthDB:
         self._db_path = str(Path(storage_dir) / "users.db")
         self._avatars_dir = str(Path(avatars_dir))
         self._init_db()
-        self._ensure_default_user()
 
     # ── init ─────────────────────────────────────────────────────────
 
@@ -95,16 +94,10 @@ class AuthDB:
             conn.commit()
 
     def _ensure_default_user(self) -> None:
-        with _connect(self._db_path) as conn:
-            exists = conn.execute("SELECT id FROM users LIMIT 1").fetchone()
-        if exists is None:
-            self.create_user(
-                username="hanane",
-                display_name="Hanane",
-                email="hanane@askvgia.local",
-                password="hanane2026",
-            )
-            logger.info("AuthDB: default user 'hanane' created (password: hanane2026)")
+        # Intentionally a no-op. The old seeded "hanane" demo account was removed
+        # because it surfaced as a hard-coded name in the dashboard. Accounts now
+        # come only from real sign-ups (Supabase auth on the frontend).
+        return
 
     # ── user CRUD ─────────────────────────────────────────────────────
 

@@ -1445,20 +1445,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   // Ask send button
-  // Sidebar collapse toggle
-  const sidebarEl   = document.getElementById('sidebar');
-  const toggleBtn   = document.getElementById('sidebar-toggle');
-  const mainEl      = document.querySelector('.main');
-  if (sidebarEl && toggleBtn) {
-    // Restore saved state — only add class, never set inline style (CSS handles margin)
-    if (localStorage.getItem('sidebarCollapsed') === '1') {
-      sidebarEl.classList.add('collapsed');
-    }
-    toggleBtn.addEventListener('click', () => {
-      const collapsed = sidebarEl.classList.toggle('collapsed');
-      localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0');
-    });
-  }
+  // Sidebar collapse toggle now lives in main.js (loaded on every page) so it
+  // works on Settings too. Handled there to avoid binding the click twice.
 
   // Clear chat button
   const clearChatBtn = $('chat-clear-btn');
