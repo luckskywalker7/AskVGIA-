@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kalam:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-  <link rel="stylesheet" href="/app-assets/css/style.css?v=5"/>
-  <link rel="stylesheet" href="/app-assets/css/pages.css?v=5"/>
+  <link rel="stylesheet" href="/app-assets/css/style.css?v=11"/>
+  <link rel="stylesheet" href="/app-assets/css/pages.css?v=11"/>
   <style>
     .history-toolbar {
       display: flex; align-items: center; justify-content: space-between;
@@ -232,7 +232,7 @@
       </button>
       <div class="sidebar-top">
         <a href="/" class="logo">
-          <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="url(#sbLogoGrad)"/><path d="M11 12L16 22L21 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="sbLogoGrad" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#6366F1"/></linearGradient></defs></svg>
+          <img src="/app-assets/img/askvgia-mark-128.png" alt="askVGIA" class="logo-mark" width="34" height="34"/>
           <span class="logo-text">ask<span class="lt-accent">VGIA</span></span>
         </a>
         <div class="sidebar-section-label">Workspace</div>
@@ -248,7 +248,7 @@
         </nav>
       </div>
       <div class="sidebar-bottom">
-        <a href="/" class="menu-item logout" title="Sign out" onclick="event.preventDefault(); (async()=>{ try{ await sb.auth.signOut(); }catch(_){}; window.location='/'; })();"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="menu-label">Sign out</span></a>
+        <a href="/" class="menu-item logout" title="Sign out" onclick="event.preventDefault(); confirmSignOut();"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="menu-label">Sign out</span></a>
       </div>
     </aside>
 
@@ -274,7 +274,7 @@
       <div class="content-wrapper single-column">
         <div class="page-header">
           <h1>History</h1>
-          <p>Your past questions and AI answers. Entries are auto-deleted after 3 days for your privacy.</p>
+          <p>Your past questions and AI answers. Entries are auto-deleted after 7 days for your privacy.</p>
         </div>
 
         <div class="history-toolbar">
@@ -299,8 +299,8 @@
   <script src="/app-assets/js/supabase-client.js"></script>
   <script src="/app-assets/js/guard.js"></script>
   <script src="/app-assets/js/profile.js?v=6"></script>
-  <script src="/app-assets/js/main.js?v=5"></script>
-  <script src="/app-assets/js/api.js?v=5"></script>
+  <script src="/app-assets/js/main.js?v=7"></script>
+  <script src="/app-assets/js/api.js?v=12"></script>
   <script>
   function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function timeAgo(ts) {
@@ -314,12 +314,19 @@
     if (h < 24)  return h + 'h ago';
     return Math.floor(h / 24) + 'd ago';
   }
+  // Must match the retention window in the ask_history RLS policy
+  // (05_history_peruser.sql) — Supabase stops returning a row once it is this
+  // old, so a badge promising more time than that would be a lie.
+  const TTL_DAYS = 7;
   function ttlLabel(ts) {
     const tsMs = ts < 1e12 ? ts * 1000 : ts;
-    const days = (Date.now() - tsMs) / (24 * 60 * 60 * 1000);
-    if (days < 1)   return { cls: 'fresh',    label: 'expires in ~' + Math.ceil(3 - days) + 'd' };
-    if (days < 2)   return { cls: 'aging',    label: 'expires tomorrow' };
-    return              { cls: 'expiring', label: 'expires today' };
+    const left = TTL_DAYS - (Date.now() - tsMs) / (24 * 60 * 60 * 1000);
+    if (left <= 0)  return { cls: 'expiring', label: 'expired' };
+    if (left < 1)   return { cls: 'expiring', label: 'expires today' };
+    if (left < 2)   return { cls: 'aging',    label: 'expires tomorrow' };
+    // Rounded (and marked "~"), so an entry saved a minute ago reads "7d" to
+    // match the stated policy instead of the 6d that truncating would give.
+    return              { cls: 'fresh',    label: 'expires in ~' + Math.round(left) + 'd' };
   }
 
   let _activeFilter = 'all';
@@ -390,7 +397,7 @@
             </div>
           </div>
           <div class="history-actions">
-            <button class="btn-expand" onclick="toggleExpand(${item.id})">
+            <button class="btn-expand" onclick="toggleExpand('${esc(item.id)}')">
               <i class="fa-solid fa-chevron-down" id="exp-icon-${item.id}"></i> More
             </button>
             <button class="btn-goto" title="Open this video"

@@ -6,10 +6,10 @@
   <title>Dashboard — askVGIA</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kalam:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kalam:wght@400;700&family=JetBrains+Mono:wght@400;500&family=Noto+Kufi+Arabic:wght@400;500;600&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-  <link rel="stylesheet" href="/app-assets/css/style.css?v=5"/>
-  <link rel="stylesheet" href="/app-assets/css/pages.css?v=5"/>
+  <link rel="stylesheet" href="/app-assets/css/style.css?v=11"/>
+  <link rel="stylesheet" href="/app-assets/css/pages.css?v=11"/>
   <style>
     /* Sidebar collapse styles now live in shared css/style.css */
 
@@ -21,7 +21,7 @@
       flex-direction: column;
       gap: 12px;
       margin-top: 4px;
-      max-height: 520px;
+      max-height: 620px;
       overflow-y: auto;
       padding-right: 4px;
       scroll-behavior: smooth;
@@ -42,25 +42,41 @@
       background: rgba(167,139,250,0.10);
       border: 1px solid rgba(167,139,250,0.22);
       border-radius: 12px;
-      font-size: 13px;
+      font-size: 14.5px;
+      font-weight: 600;
+      line-height: 1.55;
       color: var(--text-primary);
     }
-    .chat-question i { color: #a78bfa; margin-top: 2px; flex-shrink: 0; }
+    .chat-question i { color: #a78bfa; margin-top: 3px; flex-shrink: 0; }
 
-    /* AI answer bubble */
+    /* AI answer bubble — this is the one block of sustained reading in the
+       app, so it gets real body-copy treatment rather than UI-label sizing. */
     .ask-answer {
-      padding: 14px 16px;
+      padding: 18px 20px;
       background: var(--brand-dim);
       border: 1px solid var(--brand-border);
       border-radius: 12px;
-      font-size: 13.5px;
-      line-height: 1.7;
+      font-size: 15.5px;
+      /* 500, not 450 — the loaded family is static (400/500/600/700/800),
+         so an in-between weight would snap unpredictably per browser. */
+      font-weight: 500;
+      line-height: 1.75;
+      letter-spacing: 0.003em;
       color: var(--text-primary);
     }
+    /* Keeps the model's paragraph breaks — see _proseHTML() in api.js. */
+    .ask-answer .answer-prose {
+      white-space: pre-wrap;
+      overflow-wrap: break-word;
+    }
+    .ask-answer .answer-prose:not(:last-child) { margin-bottom: 12px; }
+    /* Cap the measure: past ~78 characters the eye loses the line return. */
+    .ask-answer .answer-prose { max-width: 68ch; }
+    .ask-answer strong, .ask-answer b { font-weight: 700; }
     .ask-answer .answer-video-ref {
-      font-size: 11.5px;
+      font-size: 12.5px;
       color: var(--text-muted);
-      margin-top: 8px;
+      margin-top: 10px;
       display: flex;
       align-items: center;
       gap: 6px;
@@ -73,7 +89,8 @@
       border: 1px solid var(--brand-border);
       border-radius: 6px;
       padding: 1px 7px;
-      font-size: 11px;
+      font-size: 12.5px;
+      font-weight: 600;
       color: var(--brand-light);
       cursor: pointer;
       margin: 0 2px;
@@ -259,16 +276,7 @@
       </button>
       <div class="sidebar-top">
         <a href="/" class="logo">
-          <svg width="26" height="26" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <rect x="2" y="2" width="28" height="28" rx="8" fill="url(#sbLogoGrad)"/>
-            <path d="M11 12L16 22L21 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
-            <defs>
-              <linearGradient id="sbLogoGrad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-                <stop offset="0%" stop-color="#A78BFA"/>
-                <stop offset="100%" stop-color="#6366F1"/>
-              </linearGradient>
-            </defs>
-          </svg>
+          <img src="/app-assets/img/askvgia-mark-128.png" alt="askVGIA" class="logo-mark" width="34" height="34"/>
           <span class="logo-text">ask<span class="lt-accent">VGIA</span></span>
         </a>
 
@@ -302,7 +310,7 @@
       </div>
 
       <div class="sidebar-bottom">
-        <a href="/" class="menu-item logout" title="Sign out" onclick="event.preventDefault(); (async()=>{ try{ await sb.auth.signOut(); }catch(_){}; window.location='/'; })();"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="menu-label">Sign out</span></a>
+        <a href="/" class="menu-item logout" title="Sign out" onclick="event.preventDefault(); confirmSignOut();"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="menu-label">Sign out</span></a>
       </div>
     </aside>
 
@@ -388,6 +396,7 @@
             <div class="video-player" id="video-player">
               <img src="https://images.unsplash.com/photo-1544531586-fde5298cdd40?w=960&h=540&fit=crop" alt="Select a video" class="video-thumb" id="video-thumb"/>
               <video id="video-el" style="display:none;width:100%;border-radius:12px;" controls></video>
+              <iframe id="yt-el" style="display:none;width:100%;aspect-ratio:16/9;border:0;border-radius:12px" allow="accelerometer;autoplay;encrypted-media;picture-in-picture" allowfullscreen></iframe>
               <div class="video-overlay" id="video-overlay">
                 <div class="play-overlay">
                   <button class="play-btn-big" id="play-btn"><i class="fa-solid fa-play"></i></button>
@@ -467,21 +476,23 @@
 
           <div class="suggested-section">
             <div class="suggested-title">Try one of these</div>
-            <div class="question-card" data-question="What are the main points discussed in this video?">
+            <!-- One per language — the answer comes back in the language you ask in,
+                 which is the point: the index itself is cross-lingual. -->
+            <div class="question-card" data-question="ما هي النقاط الرئيسية التي نوقشت في هذا الفيديو؟" data-lang="ar">
               <div class="q-icon"><i class="fa-solid fa-list-ul"></i></div>
-              <span class="q-text">Main points discussed in this video</span>
+              <span class="q-text" dir="rtl" lang="ar">ما هي النقاط الرئيسية في هذا الفيديو؟</span>
             </div>
-            <div class="question-card" data-question="What are the key conclusions or takeaways?">
+            <div class="question-card" data-question="Quelles sont les conclusions et les points clés à retenir ?" data-lang="fr">
               <div class="q-icon"><i class="fa-solid fa-lightbulb"></i></div>
-              <span class="q-text">Key conclusions and takeaways</span>
+              <span class="q-text" lang="fr">Conclusions et points clés à retenir</span>
             </div>
-            <div class="question-card" data-question="Give me a summary of the entire video.">
+            <div class="question-card" data-question="Résume-moi الفيديو بالكامل" data-lang="mix">
               <div class="q-icon"><i class="fa-solid fa-file-lines"></i></div>
-              <span class="q-text">Summarize the entire video</span>
+              <span class="q-text">Résume-moi <span dir="rtl" lang="ar">الفيديو بالكامل</span></span>
             </div>
-            <div class="question-card" data-question="What topics or themes are covered?">
+            <div class="question-card" data-question="What topics or themes are covered?" data-lang="en">
               <div class="q-icon"><i class="fa-solid fa-tags"></i></div>
-              <span class="q-text">Topics and themes covered</span>
+              <span class="q-text" lang="en">Topics and themes covered</span>
             </div>
           </div>
 
@@ -497,12 +508,14 @@
 
   <input type="file" id="file-input" accept="video/*" style="display:none"/>
 
+  <script src="https://www.youtube.com/iframe_api"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/app-assets/js/supabase-client.js"></script>
   <script src="/app-assets/js/guard.js"></script>
   <script src="/app-assets/js/profile.js?v=6"></script>
-  <script src="/app-assets/js/main.js?v=5"></script>
-  <script src="/app-assets/js/api.js?v=5"></script>
+  <script src="/app-assets/js/main.js?v=7"></script>
+  <script src="/app-assets/js/api.js?v=13"></script>
+  <script src="/app-assets/js/graph-render.js?v=1"></script>
 </body>
 </html>

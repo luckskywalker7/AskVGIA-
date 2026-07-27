@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kalam:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-  <link rel="stylesheet" href="/app-assets/css/style.css?v=5"/>
-  <link rel="stylesheet" href="/app-assets/css/pages.css?v=5"/>
+  <link rel="stylesheet" href="/app-assets/css/style.css?v=11"/>
+  <link rel="stylesheet" href="/app-assets/css/pages.css?v=11"/>
   <style>
     /* Two-column intake: drop + YouTube */
     .intake-grid {
@@ -163,6 +163,96 @@
     }
     .yt-btn:hover { background: #818CF8; transform: translateY(-1px); }
     .yt-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+    /* GPU note — collapsed by default, opens on hover, focus or click */
+    .gpu-note {
+      position: relative;
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 0 0 26px;
+      padding: 12px 16px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border-color);
+      background: var(--bg-card);
+      cursor: pointer;
+      outline: none;
+      transition: border-color .18s ease, background .18s ease;
+    }
+    .gpu-note:hover,
+    .gpu-note:focus-visible,
+    .gpu-note.open { border-color: var(--brand-border); background: var(--bg-card-hover); }
+
+    .gpu-note-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      text-transform: uppercase;
+      background: var(--warn-bg);
+      border: 1px solid rgba(251,191,36,0.28);
+      color: var(--warn);
+      flex-shrink: 0;
+    }
+    .gpu-note-lead {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -0.1px;
+    }
+    .gpu-note-caret {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--text-muted);
+      transition: transform .22s ease;
+    }
+    .gpu-note:hover .gpu-note-caret,
+    .gpu-note.open .gpu-note-caret { transform: rotate(180deg); color: var(--brand-light); }
+
+    /* grid-rows trick: animates from nothing to auto height */
+    .gpu-note-detail {
+      flex-basis: 100%;
+      display: grid;
+      grid-template-rows: 0fr;
+      opacity: 0;
+      transition: grid-template-rows .28s ease, opacity .22s ease;
+    }
+    .gpu-note:hover .gpu-note-detail,
+    .gpu-note:focus-visible .gpu-note-detail,
+    .gpu-note.open .gpu-note-detail { grid-template-rows: 1fr; opacity: 1; }
+    .gpu-note-detail > * { overflow: hidden; }
+    .gpu-note-detail p {
+      font-size: 12.5px;
+      font-weight: 500;
+      line-height: 1.6;
+      color: var(--text-secondary);
+      padding-top: 10px;
+      max-width: 74ch;
+    }
+    .gpu-note-specs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      padding-top: 10px;
+    }
+    .gpu-note-specs span {
+      font-size: 11px;
+      font-family: var(--font-mono);
+      padding: 3px 9px;
+      border-radius: 7px;
+      background: var(--bg-input);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .gpu-note-specs i { color: var(--brand-light); font-size: 10px; }
 
     /* Processing queue */
     .jobs-section { margin-top: 8px; }
@@ -339,7 +429,7 @@
       </button>
       <div class="sidebar-top">
         <a href="/" class="logo">
-          <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="url(#sbLogoGrad)"/><path d="M11 12L16 22L21 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="sbLogoGrad" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#6366F1"/></linearGradient></defs></svg>
+          <img src="/app-assets/img/askvgia-mark-128.png" alt="askVGIA" class="logo-mark" width="34" height="34"/>
           <span class="logo-text">ask<span class="lt-accent">VGIA</span></span>
         </a>
         <div class="sidebar-section-label">Workspace</div>
@@ -355,7 +445,7 @@
         </nav>
       </div>
       <div class="sidebar-bottom">
-        <a href="/" class="menu-item logout" title="Sign out" onclick="event.preventDefault(); (async()=>{ try{ await sb.auth.signOut(); }catch(_){}; window.location='/'; })();"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="menu-label">Sign out</span></a>
+        <a href="/" class="menu-item logout" title="Sign out" onclick="event.preventDefault(); confirmSignOut();"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="menu-label">Sign out</span></a>
       </div>
     </aside>
 
@@ -415,6 +505,26 @@
           </div>
         </div>
 
+        <div class="gpu-note" id="gpu-note" tabindex="0" role="button" aria-expanded="false"
+             title="What happens when you upload">
+          <span class="gpu-note-badge"><i class="fa-solid fa-microchip"></i> Requires GPU</span>
+          <span class="gpu-note-lead">Ingestion runs locally on your machine</span>
+          <i class="fa-solid fa-chevron-down gpu-note-caret"></i>
+          <div class="gpu-note-detail">
+            <p>
+              Transcription, frame analysis and on-screen OCR all run through local models,
+              so a CUDA-capable GPU is required and processing time scales with the length of
+              the video. Nothing is sent to a third-party transcription service.
+            </p>
+            <div class="gpu-note-specs">
+              <span><i class="fa-solid fa-waveform-lines"></i> Speech → transcript</span>
+              <span><i class="fa-solid fa-eye"></i> Frames → vision</span>
+              <span><i class="fa-solid fa-font"></i> Slides → OCR</span>
+              <span><i class="fa-solid fa-diagram-project"></i> Entities → graph</span>
+            </div>
+          </div>
+        </div>
+
         <div class="jobs-section" id="jobs-section">
           <div class="jobs-title">
             Processing queue
@@ -435,8 +545,8 @@
   <script src="/app-assets/js/supabase-client.js"></script>
   <script src="/app-assets/js/guard.js"></script>
   <script src="/app-assets/js/profile.js?v=6"></script>
-  <script src="/app-assets/js/main.js?v=5"></script>
-  <script src="/app-assets/js/api.js?v=5"></script>
+  <script src="/app-assets/js/main.js?v=7"></script>
+  <script src="/app-assets/js/api.js?v=12"></script>
   <script>
   const API_BASE = '';
 
@@ -752,6 +862,21 @@
     if (!s) return '';
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
+
+  // GPU note: hover/focus opens it via CSS; click pins it open, which is the
+  // only way it works on touch, where there is no hover.
+  (function () {
+    const note = document.getElementById('gpu-note');
+    if (!note) return;
+    const toggle = () => {
+      const open = note.classList.toggle('open');
+      note.setAttribute('aria-expanded', open ? 'true' : 'false');
+    };
+    note.addEventListener('click', toggle);
+    note.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); }
+    });
+  })();
   </script>
 </body>
 </html>

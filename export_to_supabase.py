@@ -49,12 +49,12 @@ VIDEOS = {
     "b5438048_The_benefits_of_doing_nothing____6_Minut":("Y681hXWwhQY", "The benefits of doing nothing - 6 Minute English", False),
     "dc28b907_MIT_Introduction_to_Deep_Learning__2025_":("alfdI7S6wCY", "MIT Introduction to Deep Learning 2025", True),   # frame-capped
     "db98802f_Learn_Arabic_Podcast_Nature__Simple_Arab":("iTuheortQL0", "Learn Arabic Podcast - Nature (Simple Arabic)", False),
-    "cSj82GG6MX4": ("cSj82GG6MX4", "", False),
-    "cXhSXGyC5F4": ("cXhSXGyC5F4", "", False),
-    "j7qVcc6X8g4": ("j7qVcc6X8g4", "", False),
-    "0YqZIHFmVzg": ("0YqZIHFmVzg", "", False),
-    "-O3J0FkiRsk": ("-O3J0FkiRsk", "", False),
-    "dxmm__4p-I8": ("dxmm__4p-I8", "", False),
+    "cSj82GG6MX4": ("cSj82GG6MX4", "How to Find the Rank of a Matrix (with echelon form) | Linear Algebra", False),
+    "cXhSXGyC5F4": ("cXhSXGyC5F4", "Cool Math Challenge", False),
+    "j7qVcc6X8g4": ("j7qVcc6X8g4", "Negating a Conditional Statement", False),
+    "0YqZIHFmVzg": ("0YqZIHFmVzg", "Proof by Contrapositive | Method & First Example", False),
+    "-O3J0FkiRsk": ("-O3J0FkiRsk", "Is there an easier way?", False),
+    "dxmm__4p-I8": ("dxmm__4p-I8", "Surprise Ending to this Puzzle", False),
 }
 
 BATCH = 200          # rows per insert

@@ -1,0 +1,77 @@
+# Keep the cloud image/deploy small. The cloud service (qa_service.py) reads
+# EVERYTHING from Supabase — it must never ship the local index, graph, frames
+# or source videos.
+
+# ── secrets ──────────────────────────────────────────────────────────
+.env
+.env.local
+*.env
+
+# ── local pipeline data (the big stuff) ──────────────────────────────
+# `data/` with no leading slash matches api/data/ and data/ at any depth.
+data/
+api/data/
+models/
+frames/
+**/frames/
+*.index
+*.ids
+*.pkl
+*.db
+*.sqlite
+*.sqlite3
+*.faiss
+*.npy
+*.npz
+
+# ── media ────────────────────────────────────────────────────────────
+*.mp4
+*.mkv
+*.mov
+*.avi
+*.webm
+*.wav
+*.mp3
+*.m4a
+
+# ── python ───────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.venv/
+venv/
+env/
+ENV/
+*.egg-info/
+dist/
+build/
+.eggs/
+.pytest_cache/
+
+# ── the local system: not needed by the cloud service ────────────────
+# qa_service.py imports none of these. Excluding them keeps the deploy light
+# and guarantees the cloud build can't accidentally pull heavy ML deps.
+core/
+config/
+scripts/
+tests/
+docs/
+results/
+chunk_ids/
+requirements.txt
+
+# ── repo noise ───────────────────────────────────────────────────────
+.git/
+.github/
+.idea/
+.vscode/
+*.iml
+node_modules/
+logs/
+*_backup_*/
+*.srcmap.json
+*.md
+!README.md
+.DS_Store
+Thumbs.db

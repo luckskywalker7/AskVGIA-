@@ -4,12 +4,36 @@
 *.env
 
 # large data / model artifacts — do NOT push these
+# NOTE: `data/` has no leading slash, so it already matches BOTH ./data/ and
+# ./api/data/ at any depth (~14.6 GB combined on this machine). Verified with
+# `git check-ignore -v api/data/frames/x.jpg`.
 data/
+api/data/
 models/
 *.index
 *.ids
 *.pkl
 *.db
+*.sqlite
+*.sqlite3
+*.faiss
+*.npy
+*.npz
+
+# extracted frames — the cloud app gets frame URLs from Supabase, never files
+frames/
+**/frames/
+*_frames/
+
+# source media — never belongs in the repo
+*.mp4
+*.mkv
+*.mov
+*.avi
+*.webm
+*.wav
+*.mp3
+*.m4a
 __pycache__/
 *.pyc
 *.py[cod]

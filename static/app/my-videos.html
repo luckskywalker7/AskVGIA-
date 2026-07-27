@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kalam:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-  <link rel="stylesheet" href="/app-assets/css/style.css?v=5"/>
-  <link rel="stylesheet" href="/app-assets/css/pages.css?v=5"/>
+  <link rel="stylesheet" href="/app-assets/css/style.css?v=11"/>
+  <link rel="stylesheet" href="/app-assets/css/pages.css?v=11"/>
   <style>
     /* states */
     .empty-state, .loading-state, .error-state {
@@ -133,7 +133,7 @@
       </button>
       <div class="sidebar-top">
         <a href="/" class="logo">
-          <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="url(#sbLogoGrad)"/><path d="M11 12L16 22L21 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="sbLogoGrad" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#6366F1"/></linearGradient></defs></svg>
+          <img src="/app-assets/img/askvgia-mark-128.png" alt="askVGIA" class="logo-mark" width="34" height="34"/>
           <span class="logo-text">ask<span class="lt-accent">VGIA</span></span>
         </a>
         <div class="sidebar-section-label">Workspace</div>
@@ -149,7 +149,7 @@
         </nav>
       </div>
       <div class="sidebar-bottom">
-        <a href="/" class="menu-item logout" title="Sign out" onclick="event.preventDefault(); (async()=>{ try{ await sb.auth.signOut(); }catch(_){}; window.location='/'; })();"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="menu-label">Sign out</span></a>
+        <a href="/" class="menu-item logout" title="Sign out" onclick="event.preventDefault(); confirmSignOut();"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="menu-label">Sign out</span></a>
       </div>
     </aside>
 
@@ -236,8 +236,8 @@
   <script src="/app-assets/js/supabase-client.js"></script>
   <script src="/app-assets/js/guard.js"></script>
   <script src="/app-assets/js/profile.js?v=6"></script>
-  <script src="/app-assets/js/main.js?v=5"></script>
-  <script src="/app-assets/js/api.js?v=5"></script>
+  <script src="/app-assets/js/main.js?v=7"></script>
+  <script src="/app-assets/js/api.js?v=12"></script>
   <script>
   (function () {
     const grid       = document.getElementById('videos-grid');
@@ -271,7 +271,9 @@
     function cleanVideoLabel(s) {
       let clean = String(s || '').replace(/^[0-9a-f]{8,}\s+/i, '');
       clean = clean.replace(/YTDown[\s.]?com\s*/gi, '');
-      clean = clean.replace(/\.[^/.]+$/, '');
+      // Only known media extensions — titles come from YouTube now, and a blind
+      // /\.[^.]+$/ ate real endings ("… | 6.S191" → "… | 6", "M. Sid Ali …" → "M")
+      clean = clean.replace(/\.(mp4|mkv|webm|mov|avi|m4v|mpe?g|mp3|m4a|wav)$/i, '');
       return clean.trim() || s;
     }
 
@@ -287,8 +289,9 @@
       const rawTags = (v.topics?.length ? v.topics : v.keywords?.length ? v.keywords : v.filter_tags) || [];
       const tags = rawTags.slice(0, 3).map(t => `<span class="tag">${esc(t)}</span>`).join('');
 
-      const thumbContent = v.thumbnail_url
-        ? `<img src="${esc(v.thumbnail_url)}" alt="${title}"
+      const poster = videoThumbUrl(v);
+      const thumbContent = poster
+        ? `<img src="${esc(poster)}" alt="${title}" loading="lazy"
                style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;"
                onerror="this.style.display='none'"/>`
         : `<div class="vid-thumb-placeholder" data-video-id="${id}"
@@ -365,7 +368,7 @@
 
     async function loadThumbnails(videos) {
       for (const v of videos) {
-        if (v.thumbnail_url) continue;
+        if (videoThumbUrl(v)) continue;   // already has a poster — nothing to extract
         const videoId = v.video_id || v.id;
         const placeholder = grid.querySelector(`.vid-thumb-placeholder[data-video-id="${CSS.escape(videoId)}"]`);
         if (!placeholder) continue;

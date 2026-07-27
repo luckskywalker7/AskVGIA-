@@ -49,6 +49,7 @@
   --accent-purple-light:  var(--brand-light);
   --accent-indigo:        #4F46E5;
   --accent-glow:          rgba(99, 102, 241, 0.20);
+  --marker:               #FEF08A;   /* highlight yellow */
 
   /* state */
   --success:    #34d399;
@@ -83,29 +84,40 @@
    LIGHT MODE
    ────────────────────────────────────────────────────────── */
 body.light-mode {
-  /* surfaces — clean, near-white cool neutral (was a heavy lavender that
-     read as a purple wash under the brand glows) */
-  --bg-primary:        #F5F6FA;
-  --bg-elevated:       #ECEEF5;
-  --bg-card:           rgba(255, 255, 255, 0.94);
+  /* surfaces */
+  --bg-primary:        #F1F3F9;   /* body */
+  --bg-elevated:       #E4E8F1;   /* elevated */
+  --bg-card:           #FFFFFF;   /* card */
   --bg-card-solid:     #FFFFFF;
-  --bg-card-hover:     rgba(99, 102, 241, 0.07);
+  --bg-card-hover:     rgba(79, 70, 229, 0.06);
   --bg-input:          #FFFFFF;
 
-  /* borders / dividers */
-  --border-color:      rgba(17, 18, 43, 0.09);
-  --border-light:      #E3E5EF;
-  --border-strong:     rgba(17, 18, 43, 0.18);
+  /* borders / dividers — derived from the ink so they stay in the same family */
+  --border-color:      rgba(15, 23, 42, 0.10);
+  --border-light:      #E4E8F1;
+  --border-strong:     rgba(15, 23, 42, 0.20);
 
-  /* ink — kept high-contrast on the light ground */
-  --text-primary:      #101223;
-  --text-secondary:    #3A3F57;
-  --text-muted:        #5F6678;
-  --text-faint:        #9AA0B2;
+  /* ink */
+  --text-primary:      #0F172A;   /* primary */
+  --text-secondary:    #1E293B;   /* secondary */
+  --text-muted:        #64748B;   /* muted */
+  --text-faint:        #94A3B8;
 
-  --brand-dim:         rgba(99, 102, 241, 0.10);
-  --brand-tint:        rgba(99, 102, 241, 0.06);
-  --brand-border:      rgba(99, 102, 241, 0.28);
+  /* accents — indigo leads, violet is the lighter partner */
+  --brand:             #4F46E5;   /* indigo */
+  --brand-light:       #7C3AED;   /* violet */
+  --brand-dim:         rgba(79, 70, 229, 0.10);
+  --brand-tint:        rgba(79, 70, 229, 0.06);
+  --brand-border:      rgba(79, 70, 229, 0.28);
+  --accent-indigo:     #4F46E5;
+  --accent-glow:       rgba(79, 70, 229, 0.20);
+  --marker:            #FEF08A;   /* highlight yellow */
+
+  /* shadows have to be far lighter on a pale ground or they read as dirt */
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 8px 24px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.12);
+  --shadow-brand: 0 8px 32px rgba(79, 70, 229, 0.28);
 }
 
 /* Light-mode: elements that use the pale brand-light as *text* need the
@@ -113,7 +125,10 @@ body.light-mode {
 body.light-mode .menu-item.active i,
 body.light-mode .transcript-time,
 body.light-mode .q-icon { color: var(--brand); }
-body.light-mode ::selection { background: rgba(99, 102, 241, 0.22); color: var(--text-primary); }
+body.light-mode ::selection { background: var(--marker); color: var(--text-primary); }
+/* highlighted search hits / marked text use the marker yellow */
+body.light-mode mark,
+body.light-mode .marker { background: var(--marker); color: var(--text-primary); }
 
 /* ──────────────────────────────────────────────────────────
    BASE
@@ -135,18 +150,30 @@ a { color: inherit; }
 button { font-family: inherit; }
 input, textarea, select { font-family: inherit; }
 
+/* Settings › Appearance › Reduced motion. Set on <body> by main.js from the
+   stored preference, so it applies on every page, not just where you set it. */
+body.reduced-motion *,
+body.reduced-motion *::before,
+body.reduced-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+
 ::selection { background: rgba(99, 102, 241, 0.4); color: #fff; }
 
 /* ──────────────────────────────────────────────────────────
-   ATMOSPHERIC GLOWS (same two washes as project/login.html)
+   ATMOSPHERIC GLOWS — light mode only.
+   On the dark ground the two corner washes read as stray light
+   blooms (top-right / bottom-left) rather than atmosphere, so
+   dark mode renders flat.
    ────────────────────────────────────────────────────────── */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background:
-    radial-gradient(ellipse 900px 500px at 8% 100%, rgba(99, 102, 241, 0.32), transparent 55%),
-    radial-gradient(ellipse 700px 500px at 95% 5%,  rgba(139, 92, 246, 0.22), transparent 55%);
+  background: none;
   pointer-events: none;
   z-index: 0;
 }
@@ -212,6 +239,24 @@ body.light-mode .sidebar {
   width: 26px; height: 26px;
   flex-shrink: 0;
   filter: drop-shadow(0 4px 12px rgba(99, 102, 241, 0.45));
+}
+/* Brand mark (project/assets lockup, emblem only). The artwork is navy + blue,
+   which disappears on the dark sidebar — so it sits on a white chip that reads
+   as a deliberate badge in both themes. */
+.logo-mark {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  object-fit: contain;
+  background: #FFFFFF;
+  border-radius: 10px;
+  padding: 3px;
+  box-shadow: 0 4px 14px rgba(79, 70, 229, 0.30);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.logo:hover .logo-mark {
+  transform: translateY(-1px) scale(1.04);
+  box-shadow: 0 6px 18px rgba(79, 70, 229, 0.42);
 }
 /* Brand mark uses the same Kalam face as the landing / login header */
 .logo-text {
@@ -454,15 +499,18 @@ body.light-mode .topbar { background: rgba(255, 255, 255, 0.86); }
    ============================================================ */
 .content-wrapper {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 380px;
+  /* --ask-w is set by the drag handle in main.js and restored from
+     localStorage, so the ask column keeps the width you chose. */
+  grid-template-columns: minmax(0, 1fr) var(--ask-w, 440px);
   gap: 24px;
   padding: 16px 32px 40px;
   position: relative;
   z-index: 1;
 }
 .content-wrapper.single-column {
+  /* No max-width: the video grid, history list and settings should use the
+     full width of the main column instead of hugging the left edge. */
   grid-template-columns: minmax(0, 1fr);
-  max-width: 1240px;
 }
 
 /* ============================================================
@@ -607,6 +655,43 @@ body.light-mode .topbar { background: rgba(255, 255, 255, 0.86); }
   align-items: center;
   justify-content: center;
   background: linear-gradient(180deg, rgba(0,0,0,0.0) 50%, rgba(0,0,0,0.45) 100%);
+}
+
+/* Shown over the poster when YouTube refuses to embed a video
+   (api.js showYouTubeFallback) — replaces YouTube's grey error box. */
+.yt-fallback {
+  position: absolute;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 20px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(5, 4, 16, 0.35) 0%, rgba(5, 4, 16, 0.78) 100%);
+}
+.yt-watch-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  background: #FF0033;
+  color: #fff;
+  font-size: 14px;
+  font-weight: 650;
+  text-decoration: none;
+  box-shadow: 0 10px 28px -10px rgba(255, 0, 51, 0.9);
+  transition: transform .16s ease, background .16s ease;
+}
+.yt-watch-btn:hover { background: #e6002e; transform: translateY(-1px) scale(1.02); }
+.yt-watch-btn i { font-size: 17px; }
+.yt-fallback-note {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.72);
+  max-width: 320px;
+  line-height: 1.5;
 }
 .play-overlay {
   opacity: 0;
@@ -763,6 +848,85 @@ body.light-mode .transcript-item:hover { background: rgba(0,0,0,0.025); }
 }
 
 /* ============================================================
+   TIMELINE TAB — a scrollable rail of moments
+   ============================================================ */
+#timeline {
+  max-height: 460px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-behavior: smooth;
+  padding: 4px 10px 4px 2px;
+  /* fade out at the scroll edges rather than cutting content dead */
+  mask-image: linear-gradient(to bottom, transparent 0, #000 16px, #000 calc(100% - 16px), transparent 100%);
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand-border) transparent;
+}
+#timeline::-webkit-scrollbar { width: 6px; }
+#timeline::-webkit-scrollbar-track { background: transparent; }
+#timeline::-webkit-scrollbar-thumb { background: var(--brand-border); border-radius: 99px; }
+#timeline::-webkit-scrollbar-thumb:hover { background: var(--brand); }
+
+#timeline .transcript-item {
+  position: relative;
+  display: block;
+  padding: 10px 12px 10px 38px;
+  margin-bottom: 2px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.16s ease;
+}
+/* the connecting rail */
+#timeline .transcript-item::before {
+  content: '';
+  position: absolute;
+  left: 17px;
+  top: 0;
+  bottom: -2px;
+  width: 2px;
+  background: var(--border-light);
+}
+#timeline .transcript-item:first-child::before { top: 16px; }
+#timeline .transcript-item:last-child::before  { bottom: calc(100% - 16px); }
+/* the moment dot */
+#timeline .transcript-item::after {
+  content: '';
+  position: absolute;
+  left: 12px;
+  top: 11px;
+  width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  background: var(--bg-card-solid);
+  border: 2px solid var(--brand);
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+}
+#timeline .transcript-item:hover {
+  background: var(--brand-tint);
+  border-color: var(--brand-border);
+  transform: translateX(2px);
+}
+#timeline .transcript-item:hover::after {
+  transform: scale(1.32);
+  background: var(--brand);
+  box-shadow: 0 0 0 5px var(--brand-dim);
+}
+#timeline .transcript-time {
+  display: inline-block;
+  min-width: 0;
+  padding: 1px 8px;
+  margin-bottom: 3px;
+  border-radius: 6px;
+  font-size: 11px;
+  background: var(--brand-dim);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+#timeline .transcript-item:hover .transcript-time {
+  background: var(--brand);
+  color: #fff;
+}
+#timeline .transcript-text { font-size: 13px; }
+
+/* ============================================================
    ASK PANEL (right column)
    ============================================================ */
 .ask-panel {
@@ -778,6 +942,41 @@ body.light-mode .transcript-item:hover { background: rgba(0,0,0,0.025); }
   height: fit-content;
   backdrop-filter: blur(12px);
 }
+
+/* Drag handle on the panel's left edge — widens/narrows the ask column.
+   It sits in the 24px grid gap, so it never overlaps panel content.
+   Double-click resets to the default width (main.js). */
+.ask-resize {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: -13px;
+  width: 10px;
+  cursor: col-resize;
+  background: transparent;
+  touch-action: none;
+  z-index: 3;
+}
+.ask-resize::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 3px;
+  height: 32px;
+  border-radius: 3px;
+  background: var(--border-color);
+  transition: background .18s ease, height .18s ease;
+}
+.ask-resize:hover::after,
+.ask-resize.dragging::after {
+  background: var(--brand);
+  height: 64px;
+}
+/* While dragging, stop the pointer selecting text across the page. */
+body.ask-resizing,
+body.ask-resizing * { user-select: none !important; cursor: col-resize !important; }
 
 .ask-header h2 {
   font-size: 17px;
@@ -880,6 +1079,17 @@ body.light-mode .transcript-item:hover { background: rgba(0,0,0,0.025); }
   font-size: 12.5px;
   color: var(--text-secondary);
   line-height: 1.4;
+  min-width: 0;
+}
+/* RTL controls the bidi ordering; the row itself still reads left-to-right,
+   so keep the Arabic starting next to its icon like every other suggestion. */
+.q-text[dir="rtl"] { text-align: left; }
+/* Plus Jakarta Sans has no Arabic coverage — without this the RTL suggestions
+   fall back to whatever the OS picks and sit at the wrong optical size. */
+.q-text[lang="ar"],
+.q-text [lang="ar"] {
+  font-family: 'Noto Kufi Arabic', 'Segoe UI', Tahoma, sans-serif;
+  font-size: 12px;
 }
 
 .ask-footer {
@@ -972,12 +1182,14 @@ body.light-mode .transcript-item:hover { background: rgba(0,0,0,0.025); }
    ============================================================ */
 @media (max-width: 900px) {
   .content-wrapper {
+    /* one column — override any width the drag handle stored */
     grid-template-columns: minmax(0, 1fr);
   }
   .ask-panel {
     position: relative;
     top: 0;
   }
+  .ask-resize { display: none; }
   .top-links { display: none; }
 }
 
@@ -1012,7 +1224,143 @@ body.light-mode .sidebar-toggle:hover { color: var(--brand); }
 .sidebar.collapsed .sidebar-section-label { opacity: 0; pointer-events: none; width: 0; overflow: hidden; }
 .sidebar.collapsed .menu-item { justify-content: center; padding: 11px; }
 .sidebar.collapsed .logo { justify-content: center; padding-left: 0; padding-right: 0; }
-.sidebar.collapsed .logo svg { margin: 0 auto; }
+.sidebar.collapsed .logo svg,
+.sidebar.collapsed .logo-mark { margin: 0 auto; }
+
+/* ============================================================
+   BRAND BANNER  (settings header — centred hero, not a wide bar)
+   ============================================================ */
+/* Settings sits in two columns so the brand card rides alongside the
+   options instead of pushing them below the fold. */
+.settings-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 250px;
+  gap: 24px;
+  align-items: start;
+}
+@media (max-width: 1180px) {
+  .settings-layout { grid-template-columns: minmax(0, 1fr); }
+  .brand-banner { position: static !important; max-width: 620px; }
+}
+
+.brand-banner {
+  position: sticky;
+  top: 78px;
+  isolation: isolate;
+  overflow: hidden;
+  padding: 18px 16px 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 9px;
+  border-radius: 18px;
+  border: 1px solid var(--brand-border);
+  background: var(--bg-card);
+  box-shadow: var(--shadow-lg);
+  animation: bbRise 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* slow aurora behind the content */
+.brand-banner::before {
+  content: '';
+  position: absolute;
+  inset: -45%;
+  z-index: -1;
+  background:
+    radial-gradient(circle at 30% 32%, rgba(79, 70, 229, 0.30), transparent 46%),
+    radial-gradient(circle at 68% 62%, rgba(124, 58, 237, 0.24), transparent 46%);
+  animation: bbDrift 16s ease-in-out infinite alternate;
+}
+/* a light sweep that crosses every so often */
+.brand-banner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 45%;
+  z-index: -1;
+  background: linear-gradient(100deg, transparent, rgba(255, 255, 255, 0.10), transparent);
+  animation: bbSheen 7s ease-in-out 1.2s infinite;
+}
+
+.brand-banner-logo {
+  width: 100%;
+  max-width: 152px;
+  height: auto;
+  background: #FFFFFF;
+  border-radius: 13px;
+  padding: 9px 12px;
+  box-shadow: 0 12px 28px -16px rgba(79, 70, 229, 0.75);
+  animation: bbFloat 6s ease-in-out infinite;
+}
+
+.brand-banner-copy h2 {
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+  color: var(--text-primary);
+  margin-bottom: 5px;
+  line-height: 1.32;
+}
+.brand-banner-copy p {
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--text-muted);
+}
+
+.brand-chips {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 2px;
+}
+.brand-chip {
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--brand-dim);
+  border: 1px solid var(--brand-border);
+  color: var(--brand-light);
+  animation: bbChip 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: transform 0.16s ease, background 0.16s ease;
+}
+.brand-chip:hover { transform: translateY(-2px); background: var(--brand-tint); }
+/* stagger them in after the card has landed */
+.brand-chip:nth-child(1) { animation-delay: 0.30s; }
+.brand-chip:nth-child(2) { animation-delay: 0.38s; }
+.brand-chip:nth-child(3) { animation-delay: 0.46s; }
+.brand-chip:nth-child(4) { animation-delay: 0.54s; }
+.brand-chip:nth-child(5) { animation-delay: 0.62s; }
+body.light-mode .brand-chip { color: var(--brand); }
+
+@keyframes bbRise {
+  from { opacity: 0; transform: translateY(18px) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes bbChip {
+  from { opacity: 0; transform: translateY(9px); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes bbFloat {
+  50% { transform: translateY(-7px); }
+}
+@keyframes bbDrift {
+  from { transform: translate3d(-4%, -3%, 0) scale(1); }
+  to   { transform: translate3d(5%, 4%, 0) scale(1.12); }
+}
+@keyframes bbSheen {
+  0%       { left: -50%; opacity: 0; }
+  18%      { opacity: 1; }
+  45%, 100% { left: 115%; opacity: 0; }
+}
+
+@media (max-width: 720px) {
+  .brand-banner { padding: 30px 22px 26px; border-radius: 20px; }
+  .brand-banner-logo { width: 190px; }
+}
 .sidebar.collapsed #sidebar-toggle-icon { transform: rotate(180deg); }
 .sidebar.collapsed + .main { margin-left: 64px; }
 
@@ -1025,4 +1373,207 @@ body.light-mode .sidebar-toggle:hover { color: var(--brand); }
 .sidebar .logo,
 .main {
   transition: width 0.25s ease, margin-left 0.25s ease, opacity 0.2s ease, padding 0.25s ease;
+}
+
+/* ============================================================
+   CONFIRM DIALOG  (sign out — built by main.js, shared by every page)
+   ============================================================ */
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 7, 26, 0.62);
+  backdrop-filter: blur(7px);
+  opacity: 0;
+  animation: confirmFade .22s ease forwards;
+}
+.confirm-overlay.closing { animation: confirmFadeOut .16s ease forwards; }
+
+.confirm-card {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  padding: 30px 28px 24px;
+  width: 90%;
+  max-width: 380px;
+  text-align: center;
+  transform: scale(.86) translateY(14px);
+  opacity: 0;
+  animation: confirmPop .34s cubic-bezier(.34, 1.56, .64, 1) .04s forwards;
+}
+.confirm-overlay.closing .confirm-card { animation: confirmPopOut .16s ease forwards; }
+
+/* the little waving door icon */
+.confirm-icon {
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 16px;
+  border-radius: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--brand-light);
+  background: var(--brand-dim);
+  border: 1px solid var(--brand-border);
+  animation: confirmWave 1.9s ease-in-out .38s infinite;
+}
+.confirm-card h3 {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin-bottom: 7px;
+  color: var(--text-primary);
+}
+.confirm-card p {
+  font-size: 13.5px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  margin-bottom: 22px;
+}
+.confirm-actions { display: flex; gap: 10px; }
+.confirm-actions button {
+  flex: 1;
+  border-radius: 11px;
+  padding: 11px 16px;
+  font-size: 13.5px;
+  font-weight: 650;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform .14s ease, background .16s ease, border-color .16s ease;
+}
+.confirm-actions button:active { transform: scale(.96); }
+.confirm-no {
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+}
+.confirm-no:hover { background: var(--bg-card-hover); border-color: var(--brand-border); }
+.confirm-yes {
+  background: var(--brand);
+  border: 1px solid var(--brand);
+  color: #fff;
+  box-shadow: 0 6px 18px -8px var(--brand);
+}
+.confirm-yes:hover { background: #818CF8; transform: translateY(-1px); }
+
+@keyframes confirmFade    { to { opacity: 1; } }
+@keyframes confirmFadeOut { from { opacity: 1; } to { opacity: 0; } }
+@keyframes confirmPop     { to { transform: scale(1) translateY(0); opacity: 1; } }
+@keyframes confirmPopOut  { to { transform: scale(.94) translateY(6px); opacity: 0; } }
+@keyframes confirmWave {
+  0%, 62%, 100% { transform: rotate(0deg); }
+  70%  { transform: rotate(-11deg); }
+  78%  { transform: rotate(9deg); }
+  86%  { transform: rotate(-6deg); }
+  93%  { transform: rotate(3deg); }
+}
+
+/* Respect a reduced-motion preference — no bounce, no waving. */
+@media (prefers-reduced-motion: reduce) {
+  .confirm-overlay,
+  .confirm-card,
+  .confirm-icon { animation-duration: .01ms; animation-iteration-count: 1; }
+}
+
+/* ──────────────────────────────────────────────────────────
+   LIGHT MODE — COLOUR ON THE INTERACTIVE LAYER ONLY
+
+   Surfaces and body copy stay exactly as they are; the colour goes on
+   the things you click. Everything here is scoped to body.light-mode,
+   so dark mode is untouched.
+   ────────────────────────────────────────────────────────── */
+body.light-mode {
+  --c-indigo: #4F46E5;
+  --c-violet: #7C3AED;
+  --c-teal:   #0D9488;
+  --c-amber:  #D97706;
+  --c-rose:   #E11D48;
+}
+
+/* --- primary buttons: flat fill -> gradient + coloured shadow --- */
+body.light-mode .btn-upload,
+body.light-mode .ask-send-btn,
+body.light-mode .confirm-yes {
+  background: linear-gradient(135deg, var(--c-violet), var(--c-indigo));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 4px 14px -2px rgba(79, 70, 229, 0.45);
+}
+body.light-mode .btn-upload:hover,
+body.light-mode .ask-send-btn:hover,
+body.light-mode .confirm-yes:hover {
+  background: linear-gradient(135deg, #8B5CF6, #6366F1);
+  box-shadow: 0 8px 22px -4px rgba(79, 70, 229, 0.55);
+}
+
+/* --- tabs: coloured underline plus a tinted active pill --- */
+body.light-mode .tab.active {
+  color: var(--c-indigo);
+  background: linear-gradient(180deg, rgba(79, 70, 229, 0.09), rgba(79, 70, 229, 0.03));
+  border-radius: 10px 10px 0 0;
+}
+body.light-mode .tab.active::after {
+  height: 3px;
+  left: 10px;
+  right: 10px;
+  background: linear-gradient(90deg, var(--c-violet), var(--c-indigo));
+}
+body.light-mode .tab:hover { color: var(--c-violet); }
+
+/* --- suggestion chips: one hue per language, matching its tag ---
+   Keyed off data-lang, not position: .suggested-title is also a child of
+   .suggested-section, so nth-of-type would be off by one. */
+body.light-mode .question-card[data-lang="ar"]  .q-icon { background: rgba(13, 148, 136, 0.12); color: var(--c-teal); }
+body.light-mode .question-card[data-lang="fr"]  .q-icon { background: rgba(217, 119, 6, 0.12);  color: var(--c-amber); }
+body.light-mode .question-card[data-lang="mix"] .q-icon { background: rgba(124, 58, 237, 0.12); color: var(--c-violet); }
+body.light-mode .question-card[data-lang="en"]  .q-icon { background: rgba(225, 29, 72, 0.12);  color: var(--c-rose); }
+
+body.light-mode .question-card:hover {
+  transform: translateX(2px);
+  box-shadow: 0 4px 14px -6px rgba(15, 23, 42, 0.25);
+}
+body.light-mode .question-card[data-lang="ar"]:hover  { border-color: rgba(13, 148, 136, 0.45); background: rgba(13, 148, 136, 0.05); }
+body.light-mode .question-card[data-lang="fr"]:hover  { border-color: rgba(217, 119, 6, 0.45);  background: rgba(217, 119, 6, 0.05); }
+body.light-mode .question-card[data-lang="mix"]:hover { border-color: rgba(124, 58, 237, 0.45); background: rgba(124, 58, 237, 0.05); }
+body.light-mode .question-card[data-lang="en"]:hover  { border-color: rgba(225, 29, 72, 0.45);  background: rgba(225, 29, 72, 0.05); }
+
+/* --- sidebar: the active item gets a tinted rail rather than a flat one --- */
+body.light-mode .menu-item.active {
+  background: linear-gradient(90deg, rgba(79, 70, 229, 0.12), rgba(124, 58, 237, 0.04));
+  color: var(--c-indigo);
+}
+body.light-mode .menu-item.active::before {
+  background: linear-gradient(180deg, var(--c-violet), var(--c-indigo));
+}
+body.light-mode .menu-item:hover { color: var(--c-violet); }
+
+/* --- secondary / icon buttons: neutral at rest, brand-tinted on hover --- */
+body.light-mode .icon-btn:hover,
+body.light-mode .sidebar-toggle:hover {
+  background: rgba(79, 70, 229, 0.10);
+  border-color: rgba(79, 70, 229, 0.30);
+  color: var(--c-indigo);
+}
+
+/* --- brand chips / badges: keep the tint but sharpen the ink --- */
+body.light-mode .brand-chip {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.10), rgba(79, 70, 229, 0.06));
+  border-color: rgba(79, 70, 229, 0.28);
+  color: var(--c-indigo);
+}
+body.light-mode .brand-chip:hover {
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.18), rgba(79, 70, 229, 0.10));
+  border-color: rgba(79, 70, 229, 0.45);
+}
+
+/* --- the destructive control stays unmistakably destructive --- */
+body.light-mode .icon-btn-more:hover {
+  background: rgba(225, 29, 72, 0.10);
+  border-color: rgba(225, 29, 72, 0.35);
+  color: var(--c-rose);
 }

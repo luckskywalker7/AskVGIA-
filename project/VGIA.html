@@ -1169,6 +1169,12 @@
     background: var(--accent); margin-right: 8px; vertical-align: middle;
   }
   .testis-cta a { color: var(--accent); font-weight: 600; }
+  .testis-cta a:hover { text-decoration: underline; }
+  /* the "share your experience" link jumps straight to the contact section
+     below — offset the target so the fixed nav doesn't cover its heading. */
+  html { scroll-behavior: smooth; }
+  #contact { scroll-margin-top: 90px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
 
   /* ========== FAQ + CONTACT ========== */
   .faq-section {
@@ -1342,7 +1348,7 @@
       <a class="nav-item" href="whats-new.html" data-i18n="whatsnew">What's new</a>
     </div>
     <div class="nav-right">
-      <a class="link" href="#footerContact" data-i18n="contact_us">Contact us</a>
+      <a class="link" href="mailto:askvgia@gmail.com" data-mailto data-i18n="contact_us">Contact us</a>
       <button class="lang-toggle" id="langToggle" title="Switch language">
         <span class="globe"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M3 12h18M12 3c3 3 4 6 4 9s-1 6-4 9M12 3c-3 3-4 6-4 9s1 6 4 9" stroke="currentColor" stroke-width="1.8"/></svg></span>
         <span id="langLabel">FR</span>
@@ -1844,9 +1850,9 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M13 2 3 14h7l-1 8 10-12h-7l1-8Z" fill="currentColor"/></svg>
         <span data-i18n="perf_opt">Performance optimisée</span>
       </div>
-      <div class="section-eyebrow">Témoignages</div>
-      <h2 class="section-title serif">Ce que disent nos <span class="marker">premiers utilisateurs</span></h2>
-      <p class="section-sub">Retours authentiques de nos utilisateurs Beta en Algérie et à l'international.</p>
+      <div class="section-eyebrow" data-i18n="testi_eyebrow">Témoignages</div>
+      <h2 class="section-title serif" data-i18n="testi_title">Ce que disent nos <span class="marker">premiers utilisateurs</span></h2>
+      <p class="section-sub" data-i18n="testi_sub">Retours authentiques de nos utilisateurs Beta en Algérie et à l'international.</p>
     </div>
 
     <div class="testi-grid">
@@ -1854,7 +1860,7 @@
         <div class="testi-head">
           <span class="testi-badge">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M12 3 3 8l9 5 9-5-9-5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-            Recherche
+            <span data-i18n="testi_tag_research">Recherche</span>
           </span>
           <span class="testi-beta">Beta</span>
         </div>
@@ -1865,8 +1871,8 @@
           <div class="testi-avatar">SH</div>
           <div>
             <div class="testi-name">Sara Hamidi</div>
-            <div class="testi-role">Doctorante en Sociologie</div>
-            <div class="testi-org">Université d'Alger 2</div>
+            <div class="testi-role" data-i18n="testi_1_role">Doctorante en Informatique</div>
+            <div class="testi-org" data-i18n="testi_1_org">Université d'Alger 2</div>
           </div>
         </div>
       </div>
@@ -1875,19 +1881,19 @@
         <div class="testi-head">
           <span class="testi-badge" style="background:rgba(239,68,68,.09);color:#EF4444">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4.5 12.5c0-4 3-7 7-7s7 3 7 7-7 8-7 8-7-4-7-8Z" stroke="currentColor" stroke-width="2"/></svg>
-            Médical
+            <span data-i18n="testi_tag_medical">Médical</span>
           </span>
           <span class="testi-beta">Beta</span>
         </div>
         <div class="testi-quote-mark">"</div>
-        <p class="testi-quote" data-i18n="testi_2">"Notre CHU utilise VGIA pour indexer les enregistrements chirurgicaux. Les résidents retrouvent une technique précise en tapant simplement son nom. Un gain énorme pour la formation."</p>
+        <p class="testi-quote" data-i18n="testi_2">"J'utilise VGIA pour indexer et réviser mes cours magistraux. Des heures de vidéos deviennent cherchables : je retrouve n'importe quelle notion en tapant simplement son nom. Réviser avant un examen n'a jamais été aussi rapide."</p>
         <div class="testi-stars">★★★★★</div>
         <div class="testi-person">
           <div class="testi-avatar orange">YM</div>
           <div>
-            <div class="testi-name">Dr. Yacine Merabet</div>
-            <div class="testi-role">Chef de Service Chirurgie</div>
-            <div class="testi-org">CHU Oran</div>
+            <div class="testi-name">Yacine Merabet</div>
+            <div class="testi-role" data-i18n="testi_2_role">Étudiant en Médecine</div>
+            <div class="testi-org" data-i18n="testi_2_org">Faculté de Médecine, Université d'Oran 1</div>
           </div>
         </div>
       </div>
@@ -1896,7 +1902,7 @@
         <div class="testi-head">
           <span class="testi-badge" style="background:rgba(16,185,129,.09);color:#059669">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M4 4h16v6a8 8 0 0 1-16 0V4Z" stroke="currentColor" stroke-width="2"/></svg>
-            Média
+            <span data-i18n="testi_tag_media">Média</span>
           </span>
           <span class="testi-beta">Beta</span>
         </div>
@@ -1907,21 +1913,22 @@
           <div class="testi-avatar green">NB</div>
           <div>
             <div class="testi-name">Nadir Boudiaf</div>
-            <div class="testi-role">Producteur & Journaliste</div>
-            <div class="testi-org">Studio Casbah Media, Alger</div>
+            <div class="testi-role" data-i18n="testi_3_role">Producteur & Journaliste</div>
+            <div class="testi-org" data-i18n="testi_3_org">Studio Casbah Media, Alger</div>
           </div>
         </div>
       </div>
     </div>
 
     <div class="testis-cta">
-      <span class="pulse"></span> Vous utilisez VGIA ? <a href="#">Partagez votre expérience →</a>
+      <span class="pulse"></span> <span data-i18n="testi_cta_lead">Vous utilisez VGIA ?</span>
+      <a href="#contact" data-i18n="testi_cta_link">Partagez votre expérience →</a>
     </div>
   </div>
 </section>
 
 <!-- ================== FAQ + CONTACT ================== -->
-<section class="faq-section">
+<section class="faq-section" id="contact">
   <div class="container">
     <div class="faq-head reveal">
       <div class="section-eyebrow">⌘ <span data-i18n="support">Support</span></div>
@@ -1966,17 +1973,18 @@
         <div class="support-direct">
           <h4 data-i18n="support_direct">Support direct</h4>
           <div class="support-buttons">
-            <a class="support-btn" href="#">
+            <a class="support-btn" id="supportWa" href="#" target="_blank" rel="noopener noreferrer">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 1 1 4 6.9L4 20l1.1-4A8 8 0 0 1 4 12Z" stroke="#25D366" stroke-width="2" stroke-linejoin="round"/></svg>
               WhatsApp
             </a>
-            <a class="support-btn" href="#">
+            <a class="support-btn" id="supportMail" href="#" target="_blank" rel="noopener noreferrer">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="m3 7 9 6 9-6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
               Email
             </a>
           </div>
           <div class="support-info">
             <div style="display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 5c0-1 1-2 2-2h2l2 5-2 1a11 11 0 0 0 5 5l1-2 5 2v2c0 1-1 2-2 2A16 16 0 0 1 4 5Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg> +213 799 94 05 03</div>
+            <div style="display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="m3 7 9 6 9-6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg> <a href="mailto:askvgia@gmail.com" style="color:inherit">askvgia@gmail.com</a></div>
             <div style="display:flex;align-items:center;gap:8px"><svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 22s7-7 7-13a7 7 0 1 0-14 0c0 6 7 13 7 13Z" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="2"/></svg> Bir El Djir, Oran DZ</div>
           </div>
         </div>
@@ -1986,19 +1994,19 @@
         <h4 data-i18n="send_msg">Envoyez-nous un message</h4>
         <div class="field">
           <label data-i18n="f_name">Nom complet</label>
-          <input type="text" data-i18n-ph="f_name_ph" placeholder="Votre nom">
+          <input type="text" id="cfName" data-i18n-ph="f_name_ph" placeholder="Votre nom">
         </div>
         <div class="field">
           <label data-i18n="f_email">Email</label>
-          <input type="email" data-i18n-ph="f_email_ph" placeholder="votre@email.dz">
+          <input type="email" id="cfEmail" data-i18n-ph="f_email_ph" placeholder="votre@email.dz">
         </div>
         <div class="field">
           <label data-i18n="f_message">Message</label>
-          <textarea data-i18n-ph="f_msg_ph" placeholder="Comment pouvons-nous vous aider ?"></textarea>
+          <textarea id="cfMessage" data-i18n-ph="f_msg_ph" placeholder="Comment pouvons-nous vous aider ?"></textarea>
         </div>
-        <button class="contact-submit">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 12a8 8 0 1 1 4 6.9L4 20l1.1-4A8 8 0 0 1 4 12Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
-          <span data-i18n="send_wa">Envoyer via WhatsApp</span>
+        <button class="contact-submit" id="contactSubmit">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><rect x="3" y="5" width="18" height="14" rx="2" stroke="currentColor" stroke-width="2"/><path d="m3 7 9 6 9-6" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          <span data-i18n="send_wa">Envoyer via Email</span>
         </button>
       </div>
     </div>
@@ -2017,7 +2025,7 @@
       <div class="footer-block">
         <h5 data-i18n="foot_help_h">Assistance 24h/24 · 7j/7</h5>
         <p data-i18n="foot_help_p">Notre équipe d'assistance est en ligne à toute heure. Vous obtiendrez une réponse humaine, pas un chatbot. Support en français, arabe et anglais.</p>
-        <a class="btn btn-ghost" style="background:rgba(255,255,255,.06);color:#fff;border-color:rgba(255,255,255,.16)" href="#footerContact"><span data-i18n="contact_assist">Contact assistance</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <a class="btn btn-ghost" style="background:rgba(255,255,255,.06);color:#fff;border-color:rgba(255,255,255,.16)" href="mailto:askvgia@gmail.com" data-mailto><span data-i18n="contact_assist">Contact assistance</span> <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M5 12h14M13 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
       </div>
     </div>
 
@@ -2058,7 +2066,7 @@
         <ul>
           <li><a href="#" data-i18n="fc_about">À propos</a></li>
           <li><a href="#" data-i18n="fc_careers">Carrières</a></li>
-          <li><a href="#footerContact" data-i18n="fc_contact">Contact</a></li>
+          <li><a href="mailto:askvgia@gmail.com" data-mailto data-i18n="fc_contact">Contact</a></li>
           <li><a href="#" data-i18n="fc_made">Made in Algeria 🇩🇿</a></li>
         </ul>
       </div>
@@ -2295,7 +2303,7 @@ document.querySelectorAll('.faq-item').forEach(item => {
       support_direct: 'Support direct',
       send_msg: 'Envoyez-nous un message',
       f_name: 'Nom complet', f_email: 'Email', f_message: 'Message',
-      send_wa: 'Envoyer via WhatsApp',
+      send_wa: 'Envoyer via Email',
       foot_try_h: 'Essayer VGIA',
       foot_try_p: 'Transformez toute bibliothèque vidéo en base de connaissances cherchable. Gratuit pendant la Beta, sans carte bancaire.',
       foot_help_h: 'Assistance 24h/24 · 7j/7',
@@ -2309,9 +2317,18 @@ document.querySelectorAll('.faq-item').forEach(item => {
       fr_docs: 'Documentation', fr_guides: 'Guides', fr_api: 'Référence API', fr_status: 'Statut',
       fc_about: 'À propos', fc_careers: 'Carrières', fc_contact: 'Contact', fc_made: 'Made in Algeria 🇩🇿',
       login: 'Se connecter', signup: 'Inscription',
+      testi_eyebrow: 'Témoignages',
+      testi_title: 'Ce que disent nos <span class="marker">premiers utilisateurs</span>',
+      testi_sub: 'Retours authentiques de nos utilisateurs Beta en Algérie et à l\'international.',
+      testi_tag_research: 'Recherche', testi_tag_medical: 'Médical', testi_tag_media: 'Média',
+      testi_cta_lead: 'Vous utilisez VGIA ?',
+      testi_cta_link: 'Partagez votre expérience →',
       testi_1: '"VGIA a transformé ma thèse. J\'ai indexé plus de 200 heures d\'interviews en darija et français. Retrouver une citation exacte prend maintenant 3 secondes au lieu de plusieurs jours."',
-      testi_2: '"Notre CHU utilise VGIA pour indexer les enregistrements chirurgicaux. Les résidents retrouvent une technique précise en tapant simplement son nom. Un gain énorme pour la formation."',
+      testi_1_role: 'Doctorante en Informatique', testi_1_org: 'Université d\'Alger 2',
+      testi_2: '"J\'utilise VGIA pour indexer et réviser mes cours magistraux. Des heures de vidéos deviennent cherchables : je retrouve n\'importe quelle notion en tapant simplement son nom. Réviser avant un examen n\'a jamais été aussi rapide."',
+      testi_2_role: 'Étudiant en Médecine', testi_2_org: 'Faculté de Médecine, Université d\'Oran 1',
       testi_3: '"En tant que producteur podcast, VGIA me fait gagner 15 h par semaine. Le clip social est prêt en 2 minutes, timestamps et sous-titres inclus. Nos équipes ne peuvent plus s\'en passer."',
+      testi_3_role: 'Producteur & Journaliste', testi_3_org: 'Studio Casbah Media, Alger',
       f_name_ph: 'Votre nom', f_email_ph: 'votre@email.dz', f_msg_ph: 'Comment pouvons-nous vous aider ?',
     },
     en: {
@@ -2368,7 +2385,7 @@ document.querySelectorAll('.faq-item').forEach(item => {
       support_direct: 'Direct support',
       send_msg: 'Send us a message',
       f_name: 'Full name', f_email: 'Email', f_message: 'Message',
-      send_wa: 'Send via WhatsApp',
+      send_wa: 'Send via Email',
       foot_try_h: 'Try VGIA',
       foot_try_p: 'Turn any video library into a searchable knowledge base. Free during Beta, no credit card required.',
       foot_help_h: 'Support 24/7',
@@ -2382,9 +2399,18 @@ document.querySelectorAll('.faq-item').forEach(item => {
       fr_docs: 'Documentation', fr_guides: 'Guides', fr_api: 'API reference', fr_status: 'Status',
       fc_about: 'About', fc_careers: 'Careers', fc_contact: 'Contact', fc_made: 'Made in Algeria 🇩🇿',
       login: 'Log in', signup: 'Sign up',
+      testi_eyebrow: 'Testimonials',
+      testi_title: 'What our <span class="marker">early users</span> say',
+      testi_sub: 'Genuine feedback from our Beta users in Algeria and abroad.',
+      testi_tag_research: 'Research', testi_tag_medical: 'Medical', testi_tag_media: 'Media',
+      testi_cta_lead: 'Already using VGIA?',
+      testi_cta_link: 'Share your experience →',
       testi_1: '"VGIA transformed my thesis. I indexed over 200 hours of interviews in Darija and French. Finding an exact quote now takes 3 seconds instead of several days."',
-      testi_2: '"Our hospital uses VGIA to index surgical recordings. Residents find a specific technique just by typing its name. A huge win for training."',
+      testi_1_role: 'PhD Student in Computer Science', testi_1_org: 'University of Algiers 2',
+      testi_2: '"I use VGIA to index and revise my lectures. Hours of video become searchable — I find any concept just by typing its name. Revising before an exam has never been this fast."',
+      testi_2_role: 'Medical Student', testi_2_org: 'Faculty of Medicine, University of Oran 1',
       testi_3: '"As a podcast producer, VGIA saves me 15 hours a week. The social clip is ready in 2 minutes, timestamps and captions included. Our team can\'t work without it."',
+      testi_3_role: 'Producer & Journalist', testi_3_org: 'Studio Casbah Media, Algiers',
       f_name_ph: 'Your name', f_email_ph: 'you@email.com', f_msg_ph: 'How can we help you?',
     }
   };
@@ -2422,6 +2448,80 @@ document.querySelectorAll('.faq-item').forEach(item => {
       const next = window.__currentLang === 'fr' ? 'en' : 'fr';
       window.__applyLang(next);
       if (langLabel) langLabel.textContent = next.toUpperCase();
+    });
+  }
+
+  // --- Contact form -> open a prefilled Gmail compose tab -----------------
+  const CONTACT_EMAIL = 'askvgia@gmail.com';
+  const CONTACT_PHONE = '213799940503'; // +213 799 94 05 03, digits only for wa.me
+
+  // Build a Gmail compose URL; falls back to the OS mail client if popups are blocked.
+  function openMail(subject, body) {
+    const gmail = 'https://mail.google.com/mail/?view=cm&fs=1'
+                + '&to=' + encodeURIComponent(CONTACT_EMAIL)
+                + '&su=' + encodeURIComponent(subject)
+                + '&body=' + encodeURIComponent(body);
+    if (!window.open(gmail, '_blank', 'noopener,noreferrer')) {
+      window.location.href = 'mailto:' + CONTACT_EMAIL
+        + '?subject=' + encodeURIComponent(subject)
+        + '&body=' + encodeURIComponent(body);
+    }
+  }
+
+  // Plain contact links (nav, footer) carry a real mailto: href so they still
+  // work without JS; here we upgrade them to the same Gmail compose tab the
+  // buttons use, so every route to the inbox behaves identically.
+  document.querySelectorAll('a[data-mailto]').forEach(a => {
+    a.addEventListener('click', (e) => {
+      e.preventDefault();
+      const fr = window.__currentLang !== 'en';
+      openMail(fr ? 'Contact VGIA' : 'VGIA contact',
+               fr ? 'Bonjour,\n\n' : 'Hello,\n\n');
+    });
+  });
+
+  // Direct-support buttons in the FAQ sidebar.
+  const supportMail = document.getElementById('supportMail');
+  if (supportMail) {
+    supportMail.addEventListener('click', (e) => {
+      e.preventDefault();
+      const fr = window.__currentLang !== 'en';
+      openMail(fr ? 'Support VGIA' : 'VGIA support',
+               fr ? 'Bonjour,\n\n' : 'Hello,\n\n');
+    });
+  }
+  const supportWa = document.getElementById('supportWa');
+  if (supportWa) {
+    const waText = () => encodeURIComponent(
+      window.__currentLang !== 'en'
+        ? 'Bonjour, j\'ai une question à propos de VGIA.'
+        : 'Hello, I have a question about VGIA.');
+    supportWa.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.open('https://wa.me/' + CONTACT_PHONE + '?text=' + waText(),
+                  '_blank', 'noopener,noreferrer');
+    });
+  }
+
+  const submit = document.getElementById('contactSubmit');
+  if (submit) {
+    submit.addEventListener('click', () => {
+      const fr = window.__currentLang !== 'en';
+      const name = (document.getElementById('cfName').value || '').trim();
+      const email = (document.getElementById('cfEmail').value || '').trim();
+      const message = (document.getElementById('cfMessage').value || '').trim();
+
+      if (!name || !email || !message) {
+        alert(fr ? 'Merci de remplir votre nom, votre email et votre message.'
+                 : 'Please fill in your name, email and message.');
+        return;
+      }
+
+      const subject = (fr ? 'Contact VGIA — ' : 'VGIA contact — ') + name;
+      const body = message + '\n\n---\n' + (fr ? 'Nom' : 'Name') + ': ' + name
+                 + '\nEmail: ' + email;
+
+      openMail(subject, body);
     });
   }
 })();

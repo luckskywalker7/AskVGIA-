@@ -148,16 +148,43 @@ const API = {
   },
 };
 
-// ========== HISTORY STORE (localStorage, 3-day TTL) ==========
-// ========== HISTORY STORE (server-side global, shared across all users) ==========
+// ========== HISTORY STORE (server-side, per-user, 7-day retention) ==========
+// Entries live in Supabase `ask_history`. Row-level security scopes them to the
+// signed-in user and hides anything older than 7 days — but only if the request
+// carries that user's token, so every call below sends one. Signed out means no
+// header, and the backend answers with an empty history instead of an error.
+async function _historyHeaders() {
+  try {
+    if (typeof sb === 'undefined') return {};
+    const { data } = await sb.auth.getSession();
+    const token = data?.session?.access_token;
+    return token ? { Authorization: 'Bearer ' + token } : {};
+  } catch (_) { return {}; }
+}
+
+// A Supabase row (snake_case columns, ISO created_at) in the shape the History
+// page renders. videoTitle isn't a column — it rides along in metadata.
+function _historyEntry(row) {
+  const md = row.metadata || {};
+  return {
+    id: row.id,
+    videoId: row.video_id,
+    videoTitle: md.video_title || row.video_id,
+    question: row.question || '',
+    answer: row.answer || '',
+    ts: Date.parse(row.created_at || '') || Date.now(),
+  };
+}
+
 const HistoryStore = {
-  // Fetch all entries from server
+  // Fetch this user's entries from server (last 7 days, newest first)
   async list() {
     try {
-      const r = await fetch('/history');
+      const r = await fetch('/history', { headers: await _historyHeaders() });
       if (!r.ok) return [];
       const d = await r.json();
-      return d.entries || [];
+      const rows = Array.isArray(d) ? d : (d.entries || []);
+      return rows.map(_historyEntry);
     } catch (_) { return []; }
   },
 
@@ -166,8 +193,13 @@ const HistoryStore = {
     try {
       await fetch('/history', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ videoId, videoTitle, question, answer }),
+        headers: { 'Content-Type': 'application/json', ...(await _historyHeaders()) },
+        body: JSON.stringify({
+          video_id: videoId,
+          question,
+          answer,
+          metadata: { video_title: videoTitle || '' },
+        }),
       });
     } catch (_) {}
   },
@@ -175,14 +207,20 @@ const HistoryStore = {
   // Delete a single entry by id
   async delete(id) {
     try {
-      await fetch(`/history/${id}`, { method: 'DELETE' });
+      await fetch(`/history/${id}`, {
+        method: 'DELETE',
+        headers: await _historyHeaders(),
+      });
     } catch (_) {}
   },
 
   // Wipe all entries
   async clearAll() {
     try {
-      await fetch('/history', { method: 'DELETE' });
+      await fetch('/history', {
+        method: 'DELETE',
+        headers: await _historyHeaders(),
+      });
     } catch (_) {}
   },
 };
@@ -223,13 +261,18 @@ function clearStatus() {
 function esc(s) {
   return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+// Answer prose in its pre-wrap wrapper, so the model's paragraph breaks survive.
+function _proseHTML(s) {
+  return '<div class="answer-prose">' + esc(s) + '</div>';
+}
 function cleanVideoLabel(s) {
   // Remove leading hex IDs (e.g. "20c622da ")
   let clean = String(s || '').replace(/^[0-9a-f]{8,}\s+/i, '');
   // Remove "YTDown com" / "YTDown.com" watermark (case-insensitive)
   clean = clean.replace(/YTDown[\s.]?com\s*/gi, '');
-  // Remove file extension
-  clean = clean.replace(/\.[^/.]+$/, '');
+  // Remove a media file extension — only known ones, because titles now come
+  // from YouTube and a blind /\.[^.]+$/ ate real endings ("… | 6.S191" → "… | 6")
+  clean = clean.replace(/\.(mp4|mkv|webm|mov|avi|m4v|mpe?g|mp3|m4a|wav)$/i, '');
   return clean.trim() || s;
 }
 function fmt(sec) {
@@ -522,7 +565,13 @@ function renderChunkPanel(answerEl, answerText, chunks, videoId, question) {
     }
   }
 
-  answerEl.innerHTML = pinnedBox + _linkifyTimestamps(esc(answerText)) + chunksHTML + noVisualHint;
+  // The prose gets its own wrapper: esc() leaves newlines as-is, so without a
+  // pre-wrap container every paragraph break in the model's answer collapses and
+  // the whole thing renders as one block. Scoped to the prose so the generated
+  // markup around it (pinned box, chunk list) keeps normal whitespace handling.
+  answerEl.innerHTML = pinnedBox
+    + '<div class="answer-prose">' + _linkifyTimestamps(esc(answerText)) + '</div>'
+    + chunksHTML + noVisualHint;
 
   if (!document.getElementById('chunk-item-style')) {
     const s = document.createElement('style');
@@ -533,8 +582,206 @@ function renderChunkPanel(answerEl, answerText, chunks, videoId, question) {
 }
 
 
+// ========== YOUTUBE PLAYER ==========
+// The source video files no longer exist — every demo video is on YouTube and
+// /videos returns a youtube_id.
+//
+// Reliability note: we do NOT let `new YT.Player('yt-el', {videoId})` build the
+// player, because that path tells the IFrame API to REPLACE our styled <iframe>
+// with a fresh one it constructs — which drops our width:100% styling and, on an
+// empty iframe with no src, often renders nothing. Instead we set the iframe's
+// src to the /embed URL ourselves (so the video is visible immediately, with no
+// dependency on the JS API loading) and then ATTACH a YT.Player to that existing
+// iframe purely to enable seekTo() for timestamp clicks.
+let ytPlayer = null;        // YT.Player attached to the existing iframe
+let ytPlayerReady = false;  // true once the player's onReady has fired
+let ytApiReady = false;     // true once the IFrame JS API is available
+let ytCurrentId = null;     // id currently loaded in the iframe
+let ytBlockedId = null;     // id YouTube refused to embed (poster shown instead)
+
+// Error codes from the IFrame API that mean "this will never play in an embed":
+//   101 / 150 — the uploader disabled playback on other sites
+//   100       — video removed or private
+//   2         — the id itself is rejected
+const YT_UNEMBEDDABLE = [101, 150, 100, 2];
+
+function ytEmbedSrc(id) {
+  return 'https://www.youtube.com/embed/' + id +
+         '?enablejsapi=1&rel=0&modestbranding=1&playsinline=1';
+}
+
+// Called by the youtube/iframe_api script once it has finished loading.
+window.onYouTubeIframeAPIReady = function () {
+  ytApiReady = true;
+  attachYouTubePlayer();
+};
+
+// Resolve a YouTube id from a video record, or null if it isn't a YT video.
+function ytExtractId(v) {
+  if (v.youtube_id) return v.youtube_id;
+  if (v.metadata && v.metadata.youtube_id) return v.metadata.youtube_id;
+  if (v.video_id && /^[\w-]{11}$/.test(v.video_id)) return v.video_id;
+  return null;
+}
+
+// Best available poster image for a video (card thumbnail or player fallback).
+// /videos sends the key `thumbnail` (qa_service.py:813) while the pages were
+// reading `thumbnail_url` — accept either, then derive the poster straight from
+// the YouTube id, since the source files no longer exist and the extract-a-frame
+// path has no local file_url to work with.
+function videoThumbUrl(v) {
+  if (!v) return null;
+  if (v.thumbnail_url) return v.thumbnail_url;
+  if (v.thumbnail)     return v.thumbnail;
+  const yt = ytExtractId(v);
+  return yt ? 'https://i.ytimg.com/vi/' + yt + '/mqdefault.jpg' : null;
+}
+
+// Attach a YT.Player to the existing #yt-el iframe (which already has a src).
+// Self-healing: works no matter when the API arrives, and injects the API
+// script if the page never included it.
+function attachYouTubePlayer() {
+  const ytEl = $('yt-el');
+  if (ytPlayer || !ytEl || !ytEl.src) return;   // nothing to attach to yet
+  if (typeof YT !== 'undefined' && YT.Player) {
+    ytApiReady = true;
+    ytPlayer = new YT.Player(ytEl, {
+      events: {
+        onReady: function () { ytPlayerReady = true; },
+        // Some videos (university channels especially) have embedding turned
+        // off. Without this the tab just shows YouTube's grey "unavailable"
+        // box and every timestamp click silently dies.
+        onError: function (e) {
+          if (YT_UNEMBEDDABLE.indexOf(e && e.data) !== -1) showYouTubeFallback(ytCurrentId);
+        },
+      },
+    });
+    return;
+  }
+  // API not here yet — poll for it, and inject it if it's missing entirely.
+  if (!window.__ytPoll) {
+    window.__ytPoll = setInterval(function () {
+      if (typeof YT !== 'undefined' && YT.Player) {
+        clearInterval(window.__ytPoll);
+        window.__ytPoll = null;
+        attachYouTubePlayer();
+      }
+    }, 150);
+  }
+  if (!document.querySelector('script[src*="youtube.com/iframe_api"]')) {
+    var s = document.createElement('script');
+    s.src = 'https://www.youtube.com/iframe_api';
+    document.head.appendChild(s);
+  }
+}
+
+// YouTube refused to embed this video (see YT_UNEMBEDDABLE). Replace the dead
+// grey "unavailable" box with the video's poster frame and a button out to
+// YouTube, so the panel still reads as *this* video instead of an error.
+function showYouTubeFallback(videoId) {
+  const id = videoId || ytCurrentId;
+  if (!id) return;
+  ytBlockedId = id;
+
+  const ytEl = $('yt-el');
+  const thumbEl = $('video-thumb');
+  const overlayEl = $('video-overlay');
+  const player = $('video-player');
+  if (ytEl) ytEl.style.display = 'none';
+  if (overlayEl) overlayEl.style.display = 'none';
+
+  // hqdefault is the largest size guaranteed to exist for every video.
+  if (thumbEl) {
+    thumbEl.src = 'https://i.ytimg.com/vi/' + id + '/hqdefault.jpg';
+    thumbEl.style.display = 'block';
+  }
+
+  let fb = $('yt-fallback');
+  if (!fb && player) {
+    fb = document.createElement('div');
+    fb.id = 'yt-fallback';
+    fb.className = 'yt-fallback';
+    player.appendChild(fb);
+  }
+  if (!fb) return;
+  fb.innerHTML =
+      '<a class="yt-watch-btn" id="yt-watch-btn" target="_blank" rel="noopener"'
+    + ' href="https://www.youtube.com/watch?v=' + encodeURIComponent(id) + '">'
+    +   '<i class="fa-brands fa-youtube"></i> Regarder sur YouTube'
+    + '</a>'
+    + '<span class="yt-fallback-note">La lecture externe est désactivée pour cette vidéo.</span>';
+  fb.style.display = 'flex';
+}
+
+// Back to a normal embed (called when switching to a different video).
+function clearYouTubeFallback() {
+  ytBlockedId = null;
+  const fb = $('yt-fallback');
+  if (fb) fb.style.display = 'none';
+  const thumbEl = $('video-thumb');
+  if (thumbEl) thumbEl.style.display = 'none';
+  const ytEl = $('yt-el');
+  if (ytEl) ytEl.style.display = 'block';
+}
+
+// Mount (or switch) the YouTube player to a given video id.
+function mountYouTube(videoId) {
+  const ytEl = $('yt-el');
+  if (!ytEl || videoId === ytCurrentId) return;
+  clearYouTubeFallback();   // previous video may have been blocked
+  ytCurrentId = videoId;
+
+  if (ytPlayer && ytPlayerReady && ytPlayer.loadVideoById) {
+    // Player is live — switch smoothly without reloading the iframe.
+    ytPlayer.loadVideoById(videoId);
+  } else {
+    // Show the video immediately as a plain embed (no JS-API dependency),
+    // then attach the player once the API is available.
+    ytEl.src = ytEmbedSrc(videoId);
+    attachYouTubePlayer();
+  }
+}
+
+// Is the YouTube player active AND ready to accept seek commands?
+function ytIsActive() {
+  const ytEl = $('yt-el');
+  return !!(ytEl && ytEl.style.display !== 'none' &&
+            ytPlayer && ytPlayerReady && ytPlayer.seekTo);
+}
+
 // Seek video player to a given second
 function seekVideoTo(sec) {
+  // Blocked video: nothing to seek. Point the watch button at the requested
+  // second instead, so the click still leads somewhere. Deliberately does NOT
+  // open a tab on its own — a popup per citation click would be hostile (and
+  // blocked anyway); the user clicks through when they want to.
+  if (ytBlockedId) {
+    const btn = $('yt-watch-btn');
+    if (btn) {
+      btn.href = 'https://www.youtube.com/watch?v=' + encodeURIComponent(ytBlockedId) +
+                 '&t=' + Math.floor(sec) + 's';
+      btn.innerHTML = '<i class="fa-brands fa-youtube"></i> Regarder sur YouTube à ' + fmt(sec);
+    }
+    const c = $('video-player-container');
+    if (c && c.scrollIntoView) c.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  if (ytIsActive()) {
+    ytPlayer.seekTo(sec, true);
+    ytPlayer.playVideo();
+    const c = $('video-player-container');
+    if (c && c.scrollIntoView) c.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
+  // YouTube iframe is on screen but the JS API hasn't attached yet — reload the
+  // embed at the requested time so the click still jumps the video.
+  const ytEl = $('yt-el');
+  if (ytEl && ytEl.style.display !== 'none' && ytCurrentId) {
+    ytEl.src = ytEmbedSrc(ytCurrentId) + '&start=' + Math.floor(sec) + '&autoplay=1';
+    const c = $('video-player-container');
+    if (c && c.scrollIntoView) c.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    return;
+  }
   const vid = document.querySelector('video');
   if (vid) { vid.currentTime = sec; vid.play(); }
 }
@@ -621,6 +868,9 @@ function selectVideo(v) {
   // Load transcript / chunks
   loadTranscript(id, v);
 
+  // Videos with a near-empty graph (≤2 edges) get no Graph tab at all
+  updateGraphTabVisibility(v);
+
   // Load knowledge-graph viz (fetched + cached, drawn once the Graph tab is visible)
   loadGraphViz(id);
 
@@ -643,12 +893,28 @@ function loadVideoPlayer(v) {
   const thumbEl    = $('video-thumb');
   const overlayEl  = $('video-overlay');
   const container  = $('video-player-container');
+  const ytEl       = $('yt-el');
   if (!videoEl) return;
 
   // Always stop any active stream first to avoid ghost 206 requests
   videoEl.pause();
   videoEl.removeAttribute('src');
   videoEl.load();
+
+  // YouTube branch — the demo videos live on YouTube, not as local files.
+  const ytId = ytExtractId(v);
+  if (ytId) {
+    videoEl.style.display = 'none';
+    if (thumbEl)   thumbEl.style.display = 'none';
+    if (overlayEl) overlayEl.style.display = 'none';
+    if (ytEl)      ytEl.style.display = 'block';
+    if (container) container.classList.add('has-video');
+    mountYouTube(ytId);
+    return;
+  }
+  // Not a YouTube video — hide the iframe and fall through to the existing logic.
+  if (ytEl) ytEl.style.display = 'none';
+  if (ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
 
   if (v.has_file && v.file_url) {
     videoEl.src = v.file_url;
@@ -660,8 +926,9 @@ function loadVideoPlayer(v) {
     videoEl.style.display = 'none';
     // Show thumbnail if available, otherwise hide the broken unsplash placeholder
     if (thumbEl) {
-      if (v.thumbnail_url) {
-        thumbEl.src = v.thumbnail_url;
+      const poster = videoThumbUrl(v);
+      if (poster) {
+        thumbEl.src = poster;
         thumbEl.style.display = 'block';
       } else {
         // No file and no thumbnail — show a plain placeholder instead of broken image
@@ -719,21 +986,24 @@ async function loadTranscript(videoId, v) {
 
       if (speechChunks.length) {
         speechChunks.sort((a, b) => (a.start_time ?? a.start ?? 0) - (b.start_time ?? b.start ?? 0));
-        timelinePanel.innerHTML = speechChunks.slice(0, 30).map(c => `
-          <div class="transcript-item">
-            <span class="transcript-time" data-ts="${c.start_time ?? c.start ?? 0}" style="cursor:pointer" title="Jump to this moment">
-              ${fmt(c.start_time ?? c.start ?? 0)}
-            </span>
-            <p class="transcript-text">${esc((c.text || c.content || '').slice(0, 120))}${(c.text || '').length > 120 ? '…' : ''}</p>
-          </div>`).join('');
+        timelinePanel.innerHTML = speechChunks.slice(0, 500).map(c => {
+          const ts = c.start_time ?? c.start ?? 0;
+          const text = c.text || c.content || '';
+          return `
+          <div class="transcript-item" data-ts="${ts}" role="button" tabindex="0" title="Jump to ${fmt(ts)}">
+            <span class="transcript-time">${fmt(ts)}</span>
+            <p class="transcript-text">${esc(text.slice(0, 120))}${text.length > 120 ? '…' : ''}</p>
+          </div>`;
+        }).join('');
 
-        timelinePanel.querySelectorAll('.transcript-time[data-ts]').forEach(el => {
-          el.addEventListener('click', () => {
-            const videoEl = $('video-el');
-            if (videoEl && videoEl.src) {
-              videoEl.currentTime = parseFloat(el.dataset.ts);
-              videoEl.play();
-            }
+        // The whole row is the target, and it goes through seekVideoTo() — the
+        // old handler drove #video-el directly, which no longer has a src now
+        // that every video is a YouTube embed, so nothing happened on click.
+        timelinePanel.querySelectorAll('.transcript-item[data-ts]').forEach(el => {
+          const jump = () => seekVideoTo(parseFloat(el.dataset.ts));
+          el.addEventListener('click', jump);
+          el.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); jump(); }
           });
         });
       } else {
@@ -817,8 +1087,9 @@ async function loadTranscript(videoId, v) {
 }
 
 // ========== GRAPH VIZ (per-video knowledge graph) ==========
-State.graphCache = {};        // videoId → {nodes, edges} response
+State.graphCache = {};        // videoId → {nodes, edges} response (legacy renderer)
 State.graphVideoId = null;    // video id the graph panel is currently showing
+State.graphRenderedId = null; // video id already drawn — guards against redraws
 
 const GRAPH_TYPE_COLORS = {
   PERSON: '#f472b6', ORG: '#60a5fa', ORGANIZATION: '#60a5fa', LOCATION: '#34d399',
@@ -829,40 +1100,56 @@ function graphColorFor(type) {
   return GRAPH_TYPE_COLORS[(type || 'OTHER').toUpperCase()] || GRAPH_TYPE_COLORS.OTHER;
 }
 
-// Fetch (with cache) the graph for a video, then render it if the Graph tab is visible.
-async function loadGraphViz(videoId) {
-  const container = $('graph-viz-container');
-  if (!container) return;
-  State.graphVideoId = videoId;
+// A graph with 1–2 edges renders as an empty-looking canvas, so the tab is
+// hidden for those videos. `has_graph` comes from the demo_videos_ext view; if
+// it is missing (older payload) we fail open and keep the tab visible.
+function updateGraphTabVisibility(v) {
+  const btn = document.querySelector('.tab[data-tab="graph"]');
+  if (!btn) return;
 
-  let data = State.graphCache[videoId];
-  if (!data) {
-    const graphTabVisible = $('graph')?.classList.contains('active');
-    if (graphTabVisible) {
-      container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:36px 16px;font-size:13px"><i class="fa-solid fa-spinner fa-spin" style="margin-right:6px"></i>Loading knowledge graph…</div>';
-    }
-    try {
-      data = await API.get(`/graph/video/${videoId}`);
-      State.graphCache[videoId] = data;
-    } catch (e) {
-      if (State.graphVideoId === videoId && graphTabVisible) {
-        container.innerHTML = `<div style="text-align:center;color:#fca5a5;padding:24px;font-size:13px">Could not load graph: ${esc(e.message)}</div>`;
-      }
-      return;
-    }
+  const edges = v && v.graph_edges;
+  const hide = (v && v.has_graph === false) ||
+               (typeof edges === 'number' && edges <= 2);
+
+  if (!hide) {
+    btn.style.display = '';
+    return;
   }
-  // Only draw if we're still on the same video (avoids race with fast re-selection)
-  if (State.graphVideoId === videoId) renderGraphVizIfActive();
+
+  btn.style.display = 'none';
+  // Was the hidden tab the open one? Fall back to the default (Transcript).
+  if (btn.classList.contains('active')) {
+    const fallback = document.querySelector('.tab[data-tab="transcript"]');
+    if (fallback) fallback.click();
+  }
 }
 
-// Re-draw the cached graph for the current video, but only if the Graph tab is
-// actually visible (an SVG drawn into a display:none panel measures 0×0).
+// Record which video the Graph tab should show. The drawing itself is done by
+// graph-render.js (window.renderVGIAGraph), which fetches /graph/video/{id}
+// itself — so there is nothing to pre-fetch or cache here any more.
+function loadGraphViz(videoId) {
+  State.graphVideoId = videoId;
+  State.graphRenderedId = null;   // new video selected → force a redraw
+  renderGraphVizIfActive();
+}
+
+// Draw the current video's graph, but only once the Graph tab is actually
+// visible (an SVG force layout drawn into a display:none panel measures 0×0)
+// and only once per video — main.js:17 calls this on every switch to the tab.
 function renderGraphVizIfActive() {
   const panel = $('graph');
   if (!panel || !panel.classList.contains('active')) return;
-  const videoId = State.graphVideoId;
-  const data = videoId ? State.graphCache[videoId] : null;
-  if (data) renderGraphViz(data);
+
+  const container = $('graph-viz-container');
+  const currentVideoId = State.graphVideoId;
+  if (!container || !currentVideoId) return;
+  if (State.graphRenderedId === currentVideoId) return;   // already on screen
+
+  if (window.renderVGIAGraph && currentVideoId) {
+    window.renderVGIAGraph(currentVideoId, container);
+    // Set only after the call returns, so a throw leaves the tab retryable.
+    State.graphRenderedId = currentVideoId;
+  }
 }
 
 function renderGraphViz(data) {
@@ -977,10 +1264,16 @@ function renderRecommendations() {
         : `${m}:${String(s % 60).padStart(2,'0')}`;
     }
 
-    // Thumbnail: use a static icon placeholder — no <video src> is set in HTML.
-    // The src is stored in data-src and only assigned on first hover to avoid
+    // Poster first — every YouTube-backed video resolves one, and .rec-thumb img
+    // already carries the sizing + hover zoom in style.css:932.
+    // Local files keep the placeholder below: no <video src> is set in HTML, the
+    // src lives in data-src and is only assigned on first hover, to avoid
     // Chrome/Firefox probing the stream endpoint on page load.
-    const thumbContent = v.has_file && v.file_url
+    const poster = videoThumbUrl(v);
+    const thumbContent = poster
+      ? `<img src="${esc(poster)}" alt="${esc(label)}" loading="lazy"
+             onerror="this.style.display='none'"/>`
+      : v.has_file && v.file_url
       ? `<div class="rec-thumb-placeholder" data-video-src="${esc(v.file_url)}"
               style="width:100%;height:100%;background:rgba(99,102,241,0.12);display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">
            <i class="fa-solid fa-film" style="color:#6366f1;font-size:24px;opacity:.6;pointer-events:none"></i>
@@ -1213,8 +1506,8 @@ async function sendQuestion(question) {
           thread.scrollTop = thread.scrollHeight;
           continue;
         }
-        if (chunk.token)  { fullText += chunk.token; answerEl.innerHTML = esc(fullText); }
-        if (chunk.text)   { fullText = chunk.text;   answerEl.innerHTML = esc(fullText); }
+        if (chunk.token)  { fullText += chunk.token; answerEl.innerHTML = _proseHTML(fullText); }
+        if (chunk.text)   { fullText = chunk.text;   answerEl.innerHTML = _proseHTML(fullText); }
         if (chunk.answer) { fullText = chunk.answer; }
         // Capture citations from the done event
         if (chunk.done && chunk.citations && chunk.citations.length) {

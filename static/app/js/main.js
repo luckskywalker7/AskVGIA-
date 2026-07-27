@@ -251,4 +251,139 @@ if (sidebarEl && sidebarToggleBtn) {
   });
 }
 
+// --- Ask panel: horizontal resize (index page only) ---
+// Drags the grid's second column via the --ask-w custom property, so the
+// transcript column reflows on its own. Width is remembered per browser.
+const ASK_W_KEY = 'vgia_ask_width';
+const ASK_W_DEFAULT = 440;
+const ASK_W_MIN = 340;
+const ASK_W_MAX = 820;
+
+(function setupAskResize() {
+  const panel = document.querySelector('.ask-panel');
+  const wrapper = document.querySelector('.content-wrapper');
+  if (!panel || !wrapper || wrapper.classList.contains('single-column')) return;
+
+  // Upper bound also keeps the left column usable on smaller screens.
+  const maxFor = () => Math.min(ASK_W_MAX, Math.max(ASK_W_MIN, wrapper.clientWidth - 420));
+  const applyWidth = (px) => {
+    const w = Math.round(Math.min(maxFor(), Math.max(ASK_W_MIN, px)));
+    wrapper.style.setProperty('--ask-w', w + 'px');
+    return w;
+  };
+
+  const saved = parseInt(localStorage.getItem(ASK_W_KEY) || '', 10);
+  if (saved) applyWidth(saved);
+
+  const handle = document.createElement('div');
+  handle.className = 'ask-resize';
+  handle.title = 'Drag to resize · double-click to reset';
+  handle.setAttribute('role', 'separator');
+  handle.setAttribute('aria-label', 'Resize ask panel');
+  panel.appendChild(handle);
+
+  let startX = 0, startW = 0;
+
+  handle.addEventListener('pointerdown', (e) => {
+    startX = e.clientX;
+    startW = panel.getBoundingClientRect().width;
+    handle.classList.add('dragging');
+    document.body.classList.add('ask-resizing');
+    handle.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+
+  handle.addEventListener('pointermove', (e) => {
+    if (!handle.classList.contains('dragging')) return;
+    // Handle is on the LEFT edge, so dragging left (negative dx) widens it.
+    applyWidth(startW - (e.clientX - startX));
+  });
+
+  const endDrag = (e) => {
+    if (!handle.classList.contains('dragging')) return;
+    handle.classList.remove('dragging');
+    document.body.classList.remove('ask-resizing');
+    try { handle.releasePointerCapture(e.pointerId); } catch (_) {}
+    const w = parseInt(getComputedStyle(wrapper).getPropertyValue('--ask-w'), 10);
+    if (w) localStorage.setItem(ASK_W_KEY, String(w));
+  };
+  handle.addEventListener('pointerup', endDrag);
+  handle.addEventListener('pointercancel', endDrag);
+
+  handle.addEventListener('dblclick', () => {
+    applyWidth(ASK_W_DEFAULT);
+    localStorage.setItem(ASK_W_KEY, String(ASK_W_DEFAULT));
+  });
+
+  // Keyboard nudge for accessibility.
+  handle.tabIndex = 0;
+  handle.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    e.preventDefault();
+    const cur = panel.getBoundingClientRect().width;
+    const w = applyWidth(cur + (e.key === 'ArrowLeft' ? 24 : -24));
+    localStorage.setItem(ASK_W_KEY, String(w));
+  });
+})();
+
+// --- Appearance preferences that must apply on every page ---
+// Settings writes these; every page reads them on load so the choice sticks
+// as you navigate around the app.
+const MOTION_KEY = 'vgia_reduced_motion';
+window.applyReducedMotion = function (on) {
+  document.body.classList.toggle('reduced-motion', !!on);
+  try { localStorage.setItem(MOTION_KEY, on ? '1' : '0'); } catch (_) {}
+};
+try {
+  if (localStorage.getItem(MOTION_KEY) === '1') document.body.classList.add('reduced-motion');
+} catch (_) {}
+
+// --- Sign-out confirmation (shared across every app page) ---
+// Every sidebar "Sign out" link calls this instead of signing out directly.
+// Yes -> end the Supabase session and go to the landing page.
+// No  -> close and stay exactly where you are.
+window.confirmSignOut = function confirmSignOut() {
+  if (document.querySelector('.confirm-overlay')) return;   // already open
+
+  const overlay = document.createElement('div');
+  overlay.className = 'confirm-overlay';
+  overlay.innerHTML =
+      '<div class="confirm-card" role="dialog" aria-modal="true" aria-labelledby="confirm-title">'
+    +   '<div class="confirm-icon"><i class="fa-solid fa-hand-peace"></i></div>'
+    +   '<h3 id="confirm-title">Sign out?</h3>'
+    +   '<p>You\'ll need to sign back in to reach your videos and history.</p>'
+    +   '<div class="confirm-actions">'
+    +     '<button class="confirm-no" type="button">Stay here</button>'
+    +     '<button class="confirm-yes" type="button">Yes, sign out</button>'
+    +   '</div>'
+    + '</div>';
+  document.body.appendChild(overlay);
+
+  const close = () => {
+    overlay.classList.add('closing');
+    overlay.addEventListener('animationend', () => overlay.remove(), { once: true });
+    document.removeEventListener('keydown', onKey);
+    setTimeout(() => overlay.remove(), 400);   // belt-and-braces
+  };
+  function onKey(e) {
+    if (e.key === 'Escape') close();
+  }
+  document.addEventListener('keydown', onKey);
+
+  // Clicking the dimmed backdrop is the same as "Stay here".
+  overlay.addEventListener('click', (e) => { if (e.target === overlay) close(); });
+  overlay.querySelector('.confirm-no').addEventListener('click', close);
+
+  overlay.querySelector('.confirm-yes').addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Signing out…';
+    try { await sb.auth.signOut(); } catch (_) {}
+    window.location = '/';
+  });
+
+  // Focus the safe option so a stray Enter never signs you out.
+  setTimeout(() => overlay.querySelector('.confirm-no').focus(), 60);
+};
+
 console.log('ASKVGIA Dashboard Loaded');

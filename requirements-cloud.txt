@@ -1,0 +1,21 @@
+# Cloud-only deps for qa_service.py (Render web service).
+#
+# This file must stay tiny: the cloud service does NO local inference. It calls
+# HuggingFace for embeddings, Supabase for retrieval and OpenRouter for the LLM,
+# so it needs an HTTP client and a web framework — nothing else.
+#
+# Deliberately ABSENT (these belong to requirements.txt / the local pipeline):
+#   torch, faiss-cpu, transformers, FlagEmbedding, sentence-transformers,
+#   whisperx, pyannote.audio, easyocr, opencv, numpy, scipy, networkx, ...
+# Adding any of them will blow past the free instance's build time and RAM.
+
+fastapi
+uvicorn[standard]
+httpx
+pydantic
+
+# Lets qa_service.py read the local .env so `uvicorn qa_service:app` works
+# without exporting the four vars by hand. The import is guarded by
+# try/except ImportError, so the service still runs if this is absent. On
+# Render it is a harmless no-op — env vars come from the dashboard there.
+python-dotenv

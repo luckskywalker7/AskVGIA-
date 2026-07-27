@@ -8,8 +8,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Kalam:wght@400;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"/>
-  <link rel="stylesheet" href="/app-assets/css/style.css?v=5"/>
-  <link rel="stylesheet" href="/app-assets/css/pages.css?v=5"/>
+  <link rel="stylesheet" href="/app-assets/css/style.css?v=11"/>
+  <link rel="stylesheet" href="/app-assets/css/pages.css?v=11"/>
   <script>
     // Apply the stored theme before first paint (same key as the landing pages)
     try {
@@ -30,7 +30,7 @@
       </button>
       <div class="sidebar-top">
         <a href="/" class="logo">
-          <svg width="26" height="26" viewBox="0 0 32 32" fill="none"><rect x="2" y="2" width="28" height="28" rx="8" fill="url(#sbLogoGrad)"/><path d="M11 12L16 22L21 12" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/><defs><linearGradient id="sbLogoGrad" x1="0" y1="0" x2="32" y2="32"><stop offset="0%" stop-color="#A78BFA"/><stop offset="100%" stop-color="#6366F1"/></linearGradient></defs></svg>
+          <img src="/app-assets/img/askvgia-mark-128.png" alt="askVGIA" class="logo-mark" width="34" height="34"/>
           <span class="logo-text">ask<span class="lt-accent">VGIA</span></span>
         </a>
         <div class="sidebar-section-label">Workspace</div>
@@ -46,7 +46,7 @@
         </nav>
       </div>
       <div class="sidebar-bottom">
-        <a href="/" class="menu-item logout" title="Sign out" onclick="event.preventDefault(); (async()=>{ try{ await sb.auth.signOut(); }catch(_){}; window.location='/'; })();"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="menu-label">Sign out</span></a>
+        <a href="/" class="menu-item logout" title="Sign out" onclick="event.preventDefault(); confirmSignOut();"><i class="fa-solid fa-arrow-right-from-bracket"></i><span class="menu-label">Sign out</span></a>
       </div>
     </aside>
 
@@ -75,6 +75,7 @@
           <p>Manage your profile, security, notifications and appearance.</p>
         </div>
 
+        <div class="settings-layout">
         <div class="settings-grid">
           <div class="settings-nav">
             <a href="#profile" class="settings-nav-item active" data-section="profile"><i class="fa-solid fa-user"></i> Profile</a>
@@ -87,8 +88,16 @@
             <!-- PROFILE -->
             <div class="settings-section active" id="profile">
               <h2>Profile</h2>
+              <p class="section-intro">How you appear across askVGIA. Your name and photo show in the sidebar and on anything you share.</p>
               <div class="settings-card">
                 <div id="profile-alert" class="form-alert"></div>
+                <div class="settings-card-head">
+                  <div class="sch-icon"><i class="fa-solid fa-id-card"></i></div>
+                  <div>
+                    <h3>Personal details</h3>
+                    <p>Your display name, contact address and a short bio.</p>
+                  </div>
+                </div>
                 <div class="avatar-upload">
                   <div class="user-avatar-lg" id="profile-avatar-preview">H</div>
                   <div>
@@ -129,8 +138,16 @@
             <!-- SECURITY -->
             <div class="settings-section" id="account">
               <h2>Security</h2>
+              <p class="section-intro">Control how you sign in and what can reach your library programmatically.</p>
               <div class="settings-card">
                 <div id="password-alert" class="form-alert"></div>
+                <div class="settings-card-head">
+                  <div class="sch-icon"><i class="fa-solid fa-key"></i></div>
+                  <div>
+                    <h3>Password</h3>
+                    <p>Use at least 6 characters. You'll stay signed in on this device.</p>
+                  </div>
+                </div>
                 <div class="form-group">
                   <label>Current password</label>
                   <input type="password" id="pw-current" placeholder="Enter current password" class="form-input"/>
@@ -154,6 +171,13 @@
               </div>
 
               <div class="settings-card">
+                <div class="settings-card-head">
+                  <div class="sch-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                  <div>
+                    <h3>Access &amp; authentication</h3>
+                    <p>Extra checks on sign-in, and programmatic access to your library.</p>
+                  </div>
+                </div>
                 <div class="toggle-row">
                   <div class="toggle-info">
                     <h4>Two-factor authentication</h4>
@@ -171,8 +195,13 @@
               </div>
 
               <div class="settings-card danger-zone">
-                <h3><i class="fa-solid fa-triangle-exclamation"></i> Danger zone</h3>
-                <p>Permanently delete your account and all indexed videos. This cannot be undone.</p>
+                <div class="settings-card-head">
+                  <div class="sch-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                  <div>
+                    <h3>Danger zone</h3>
+                    <p>Permanently delete your account and every indexed video. This cannot be undone.</p>
+                  </div>
+                </div>
                 <button class="btn-danger"><i class="fa-solid fa-trash"></i> Delete account</button>
               </div>
             </div>
@@ -180,7 +209,15 @@
             <!-- NOTIFICATIONS -->
             <div class="settings-section" id="notifications">
               <h2>Notifications</h2>
+              <p class="section-intro">Indexing a long video can take a while — choose how you'd like to hear when it's done.</p>
               <div class="settings-card">
+                <div class="settings-card-head">
+                  <div class="sch-icon"><i class="fa-solid fa-bell"></i></div>
+                  <div>
+                    <h3>Email &amp; push</h3>
+                    <p>Browser push asks for permission the first time you turn it on.</p>
+                  </div>
+                </div>
                 <div class="toggle-row">
                   <div class="toggle-info">
                     <h4>Indexing complete</h4>
@@ -208,7 +245,15 @@
             <!-- APPEARANCE -->
             <div class="settings-section" id="appearance">
               <h2>Appearance</h2>
+              <p class="section-intro">These apply everywhere in the app and are remembered on this device.</p>
               <div class="settings-card">
+                <div class="settings-card-head">
+                  <div class="sch-icon"><i class="fa-solid fa-palette"></i></div>
+                  <div>
+                    <h3>Theme &amp; layout</h3>
+                    <p>Switch the colour scheme, tighten the sidebar, or reduce animation.</p>
+                  </div>
+                </div>
                 <div class="toggle-row">
                   <div class="toggle-info">
                     <h4>Dark mode</h4>
@@ -234,6 +279,24 @@
             </div>
           </div>
         </div>
+
+        <aside class="brand-banner">
+          <img src="/app-assets/img/askvgia-logo.png" alt="askVGIA — ask anything, search in video"
+               class="brand-banner-logo"/>
+          <div class="brand-banner-copy">
+            <h2>Ask anything.<br/>Search in video.</h2>
+            <p>Every answer is grounded in what was said, shown and written on screen —
+               and traces back to a timestamp you can jump to.</p>
+          </div>
+          <div class="brand-chips">
+            <span class="brand-chip">Speech</span>
+            <span class="brand-chip">Vision</span>
+            <span class="brand-chip">On-screen OCR</span>
+            <span class="brand-chip">Knowledge graph</span>
+            <span class="brand-chip">Cited answers</span>
+          </div>
+        </aside>
+        </div>
       </div>
     </main>
   </div>
@@ -242,7 +305,7 @@
   <script src="/app-assets/js/supabase-client.js"></script>
   <script src="/app-assets/js/guard.js"></script>
   <script src="/app-assets/js/profile.js?v=6"></script>
-  <script src="/app-assets/js/main.js?v=5"></script>
+  <script src="/app-assets/js/main.js?v=7"></script>
   <script>
     // ---- Settings › Profile: load, edit, save ----
     // Reads and writes through Profile (js/profile.js), which is the only
@@ -364,7 +427,95 @@
       }
     });
 
-    document.addEventListener('DOMContentLoaded', fillForm);
+    // ---- Appearance / Notifications: make the switches actually do something ----
+    // main.js already toggles .active and persists every switch to
+    // `vgia_toggles`; these listeners run after it, so `.active` is current by
+    // the time they fire. Each one then applies the real effect.
+    const isOn = (el) => el.classList.contains('active');
+
+    // Dark mode — drives the same applyTheme()/vgia_theme the top-bar button uses.
+    const darkSwitch = $s('toggle-dark');
+    if (darkSwitch) {
+      darkSwitch.addEventListener('click', () => {
+        const theme = isOn(darkSwitch) ? 'dark' : 'light';
+        applyTheme(theme);
+        try { localStorage.setItem('vgia_theme', theme); } catch (_) {}
+      });
+    }
+
+    // Compact sidebar — same `sidebarCollapsed` key the sidebar chevron writes.
+    const compactSwitch = $s('toggle-compact');
+    if (compactSwitch) {
+      compactSwitch.addEventListener('click', () => {
+        const collapsed = isOn(compactSwitch);
+        document.querySelector('.sidebar')?.classList.toggle('collapsed', collapsed);
+        try { localStorage.setItem('sidebarCollapsed', collapsed ? '1' : '0'); } catch (_) {}
+      });
+    }
+
+    // Reduced motion — applied on every page via main.js.
+    const motionSwitch = $s('toggle-motion');
+    if (motionSwitch) {
+      motionSwitch.addEventListener('click', () => applyReducedMotion(isOn(motionSwitch)));
+    }
+
+    // Browser push — a real permission prompt; reflect the browser's answer.
+    const pushSwitch = $s('notif-push');
+    if (pushSwitch) {
+      pushSwitch.addEventListener('click', async () => {
+        if (!isOn(pushSwitch)) return;
+        if (!('Notification' in window)) {
+          pushSwitch.classList.remove('active');
+          alertIn('profile-alert', 'This browser does not support notifications.', true);
+          return;
+        }
+        const perm = await Notification.requestPermission();
+        if (perm !== 'granted') {
+          // Denied at the browser level — don't leave the switch claiming it's on.
+          pushSwitch.classList.remove('active');
+          alertIn('profile-alert', 'Browser notifications are blocked — enable them in site settings.', true);
+        }
+      });
+    }
+
+    // Danger zone. Removing the auth user itself needs a service-role key, which
+    // the browser must never hold — so this calls a server-side RPC. If that RPC
+    // hasn't been created yet it fails loudly here rather than doing nothing.
+    const deleteBtn = document.querySelector('.danger-zone .btn-danger');
+    if (deleteBtn) {
+      deleteBtn.addEventListener('click', () => {
+        if (!confirm('Permanently delete your account and every indexed video?\n\nThis cannot be undone.')) return;
+        (async () => {
+          try {
+            const { error } = await sb.rpc('delete_own_account');
+            if (error) throw error;
+            await sb.auth.signOut();
+            window.location = '/';
+          } catch (err) {
+            alertIn('password-alert',
+              'Account deletion is not enabled yet: ' + (err.message || 'the delete_own_account function is missing.'),
+              true);
+            document.querySelector('.settings-nav-item[data-section="account"]')?.click();
+          }
+        })();
+      });
+    }
+
+    // Reflect the live state of the app in the switches on load, so they never
+    // contradict the actual theme / sidebar (those have their own storage keys).
+    function syncAppearanceSwitches() {
+      const light = document.body.classList.contains('light-mode');
+      darkSwitch?.classList.toggle('active', !light);
+      compactSwitch?.classList.toggle('active',
+        document.querySelector('.sidebar')?.classList.contains('collapsed') || false);
+      motionSwitch?.classList.toggle('active',
+        document.body.classList.contains('reduced-motion'));
+      if (pushSwitch && 'Notification' in window && Notification.permission === 'denied') {
+        pushSwitch.classList.remove('active');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => { fillForm(); syncAppearanceSwitches(); });
   </script>
 </body>
 </html>
