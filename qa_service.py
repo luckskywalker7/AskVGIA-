@@ -129,14 +129,24 @@ async def embed_question(text: str) -> List[float]:
     headers = {"Authorization": f"Bearer {HF_TOKEN}"}
 
     last = None
-    async with httpx.AsyncClient(timeout=90) as client:
-        for attempt in range(4):
+    async with httpx.AsyncClient(timeout=120) as client:
+        for attempt in range(8):
             try:
                 r = await client.post(HF_EMBED_URL, json=payload, headers=headers)
-                if r.status_code == 503:      # model cold-loading
-                    await asyncio.sleep(4 * (attempt + 1))
+                if r.status_code == 503:                 # model cold-loading
+                    last = "model loading (503)"
+                    await asyncio.sleep(min(8 + attempt * 6, 30))
                     continue
-                r.raise_for_status()
+                if r.status_code == 429:                 # rate limited
+                    last = "rate limited (429)"
+                    await asyncio.sleep(min(6 + attempt * 4, 25))
+                    continue
+                if r.status_code >= 400:
+                    last = f"HF {r.status_code}: {r.text[:160]}"
+                    if r.status_code in (401, 403, 404):
+                        raise HTTPException(502, f"embedding unavailable: {last}")
+                    await asyncio.sleep(4)
+                    continue
                 vec = r.json()
                 # HF may return [1024] or [[1024]] depending on the pipeline
                 while isinstance(vec, list) and vec and isinstance(vec[0], list):
@@ -144,10 +154,12 @@ async def embed_question(text: str) -> List[float]:
                 if not isinstance(vec, list) or len(vec) != 1024:
                     raise ValueError(f"unexpected embedding shape: {len(vec) if isinstance(vec,list) else type(vec)}")
                 return [float(x) for x in vec]
+            except HTTPException:
+                raise
             except Exception as e:
-                last = e
-                await asyncio.sleep(2 * (attempt + 1))
-    raise HTTPException(502, f"embedding failed: {last}")
+                last = str(e)[:160]
+                await asyncio.sleep(3 + attempt * 2)
+    raise HTTPException(503, "The model is warming up. Please ask again in a few seconds.")
 
 
 async def hybrid_search(video_id: str, question: str, vec: List[float],
@@ -701,6 +713,18 @@ async def health():
         "hf": bool(HF_TOKEN),
         "openrouter": bool(OPENROUTER_API_KEY),
     }
+
+
+@app.get("/warmup")
+async def warmup():
+    """Ping target for UptimeRobot. Embeds one token so the HF BGE-M3 model
+    stays warm, preventing the cold-start 'model is warming up' on the first
+    real question. Never raises — always 200 so the monitor stays green."""
+    try:
+        await embed_question("warmup")
+        return {"ok": True, "warm": True}
+    except Exception as e:
+        return {"ok": True, "warm": False, "note": str(e)[:120]}
 
 
 # --- history (ask_history, per-user + 7-day RLS from 05_history_peruser.sql) --
