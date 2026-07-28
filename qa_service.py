@@ -715,16 +715,48 @@ async def health():
     }
 
 
-@app.get("/warmup")
-async def warmup():
-    """Ping target for UptimeRobot. Embeds one token so the HF BGE-M3 model
-    stays warm, preventing the cold-start 'model is warming up' on the first
-    real question. Never raises — always 200 so the monitor stays green."""
+# --- background warmer ----------------------------------------------------
+# /warmup is a monitor ping, so it has to answer in milliseconds. Embedding
+# inline made the response time equal to HF latency — measured at 1s, 3s and
+# 22s within the same minute — and embed_question's retry ladder can hold a
+# request open for over two minutes on a bad HF stretch. That is longer than
+# any timeout UptimeRobot offers, so the monitor opened a false "down"
+# incident while the service was perfectly healthy. The ping now schedules the
+# warm and returns; hitting the route is what keeps Render awake either way.
+_warm_state: Dict[str, Any] = {"running": False, "last_ok": None, "note": "", "at": 0.0}
+_warm_task: Optional[asyncio.Task] = None
+
+
+async def _do_warm() -> None:
+    import time
     try:
         await embed_question("warmup")
-        return {"ok": True, "warm": True}
+        _warm_state.update(last_ok=True, note="", at=time.time())
     except Exception as e:
-        return {"ok": True, "warm": False, "note": str(e)[:120]}
+        _warm_state.update(last_ok=False, note=str(e)[:120], at=time.time())
+    finally:
+        _warm_state["running"] = False
+
+
+@app.get("/warmup")
+async def warmup():
+    """Ping target for UptimeRobot. Kicks off a background embed so the HF
+    BGE-M3 model stays warm, preventing the cold-start 'model is warming up' on
+    a juror's first question. Returns immediately and never raises, so the
+    monitor measures this service's latency rather than HuggingFace's."""
+    global _warm_task
+    import time
+    if not _warm_state["running"]:
+        _warm_state["running"] = True
+        # Keep the reference: a bare create_task can be garbage-collected mid-flight.
+        _warm_task = asyncio.create_task(_do_warm())
+    return {
+        "ok": True,
+        "warming": _warm_state["running"],
+        "last_ok": _warm_state["last_ok"],
+        "age_s": round(time.time() - _warm_state["at"], 1) if _warm_state["at"] else None,
+        "note": _warm_state["note"] or None,
+    }
 
 
 # --- history (ask_history, per-user + 7-day RLS from 05_history_peruser.sql) --
