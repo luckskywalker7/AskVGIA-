@@ -738,7 +738,12 @@ async def _do_warm() -> None:
         _warm_state["running"] = False
 
 
-@app.get("/warmup")
+# HEAD as well as GET: UptimeRobot sends HEAD by default (it is the lighter
+# request, and choosing the method is a paid feature), and FastAPI's @app.get —
+# unlike Starlette's plain Route — does NOT register HEAD alongside GET. So a
+# GET-only route answers every check with 405 and the monitor sits permanently
+# down on a healthy service.
+@app.api_route("/warmup", methods=["GET", "HEAD"])
 async def warmup():
     """Ping target for UptimeRobot. Kicks off a background embed so the HF
     BGE-M3 model stays warm, preventing the cold-start 'model is warming up' on
