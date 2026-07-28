@@ -868,6 +868,11 @@ function selectVideo(v) {
   // Load transcript / chunks
   loadTranscript(id, v);
 
+  // Drop the video you just picked out of "More in your library" — the filter
+  // lives in renderRecommendations(), but it only reads State.currentVideo, so
+  // it has to run again on every switch and not just when the list is loaded.
+  renderRecommendations();
+
   // Videos with a near-empty graph (≤2 edges) get no Graph tab at all
   updateGraphTabVisibility(v);
 

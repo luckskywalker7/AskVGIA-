@@ -251,6 +251,69 @@ if (sidebarEl && sidebarToggleBtn) {
   });
 }
 
+// --- Mobile sidebar drawer (shared across every app page) ---
+// Below 1024px the sidebar is translated off-screen by CSS; this adds the
+// hamburger that slides it back in, plus a scrim to tap it away. The button
+// and scrim are built here rather than in each page's markup so all five app
+// pages get the same behaviour without five copies of the same HTML.
+(function setupMobileDrawer() {
+  const sidebar = document.querySelector('.sidebar');
+  const topbar = document.querySelector('.topbar');
+  const titleBlock = topbar && topbar.querySelector('.topbar-title');
+  if (!sidebar || !topbar) return;
+
+  const btn = document.createElement('button');
+  btn.className = 'nav-mobile-btn';
+  btn.type = 'button';
+  btn.id = 'nav-mobile-btn';
+  btn.setAttribute('aria-label', 'Open menu');
+  btn.setAttribute('aria-expanded', 'false');
+  btn.setAttribute('aria-controls', sidebar.id || 'sidebar');
+  btn.innerHTML = '<i class="fa-solid fa-bars"></i>';
+  // Inside .topbar-title, not beside it: .topbar is space-between, so a third
+  // direct child would get flung to the middle of the bar.
+  if (titleBlock) titleBlock.insertBefore(btn, titleBlock.firstChild);
+  else topbar.insertBefore(btn, topbar.firstChild);
+
+  const scrim = document.createElement('div');
+  scrim.className = 'sidebar-scrim';
+  document.body.appendChild(scrim);
+
+  const setOpen = (open) => {
+    sidebar.classList.toggle('open', open);
+    scrim.classList.toggle('show', open);
+    btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+    btn.querySelector('i').className = open ? 'fa-solid fa-xmark' : 'fa-solid fa-bars';
+    // Only lock the page behind the drawer — on desktop the drawer is not a
+    // thing and the body must keep scrolling normally.
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    setOpen(!sidebar.classList.contains('open'));
+  });
+  scrim.addEventListener('click', () => setOpen(false));
+
+  // Tapping a destination should close the drawer, not leave it covering the
+  // page it just navigated to (same-page anchors would otherwise strand it).
+  sidebar.querySelectorAll('.menu-item').forEach(item => {
+    item.addEventListener('click', () => setOpen(false));
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sidebar.classList.contains('open')) setOpen(false);
+  });
+
+  // Growing the window past the breakpoint puts the sidebar back in the flow —
+  // leaving `open` (and the body scroll lock) set would then be invisible but
+  // still active, which is exactly the "resize looks weird" case.
+  const wide = window.matchMedia('(min-width: 1025px)');
+  const onChange = (e) => { if (e.matches) setOpen(false); };
+  if (wide.addEventListener) wide.addEventListener('change', onChange);
+  else wide.addListener(onChange);
+})();
+
 // --- Ask panel: horizontal resize (index page only) ---
 // Drags the grid's second column via the --ask-w custom property, so the
 // transcript column reflows on its own. Width is remembered per browser.

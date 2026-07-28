@@ -1,0 +1,435 @@
+/* ==========================================================================
+   askVGIA — shared responsive layer for the public site + auth pages
+   --------------------------------------------------------------------------
+   Loaded AFTER each page's inline <style>, so equal-specificity rules here
+   win the tie. Rules that have to beat an inline @media block are scoped one
+   level deeper (body.auth-page .layout) rather than marked !important.
+
+   Breakpoints
+     <=1180  small laptop   · tighten the split layouts
+     <=1024  tablet         · auth stacks to a single centred column
+     <= 980  tablet         · site nav collapses into a drawer
+     <= 780  large phone
+     <= 560  phone
+     <= 400  small phone
+   ========================================================================== */
+
+/* ── Global overflow guards ─────────────────────────────────────────────── */
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-x: hidden; }
+img, video, canvas, iframe { max-width: 100%; }
+pre, table { max-width: 100%; }
+pre { overflow-x: auto; }
+
+/* Wrapper added by site-mobile.js around every table. */
+.table-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ==========================================================================
+   1 · SITE NAV → MOBILE DRAWER
+   The drawer element is created by site-mobile.js and wraps .nav-menu +
+   .nav-right. `display: contents` keeps it out of the desktop flex layout
+   entirely, so nothing about the wide nav changes.
+   ========================================================================== */
+.nav-drawer { display: contents; }
+
+.nav-burger {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 42px;
+  height: 38px;
+  flex-shrink: 0;
+  margin-left: auto;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: var(--bg-soft);
+  cursor: pointer;
+  transition: background .18s, border-color .18s;
+}
+.nav-burger span {
+  display: block;
+  width: 17px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--ink-2);
+  transition: transform .22s ease, opacity .16s ease;
+}
+.nav-burger:hover { background: rgba(99, 102, 241, .12); border-color: rgba(99, 102, 241, .35); }
+
+/* Over the dark hero video the nav inverts — the burger has to follow. */
+.nav.on-dark .nav-burger { background: rgba(255, 255, 255, .14); border-color: rgba(255, 255, 255, .26); }
+.nav.on-dark .nav-burger span { background: #fff; }
+
+/* Open state: the three bars fold into an ✕. */
+.nav.nav-open .nav-burger span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+.nav.nav-open .nav-burger span:nth-child(2) { opacity: 0; }
+.nav.nav-open .nav-burger span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+@keyframes navDrawerIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@media (max-width: 980px) {
+  .nav-inner { position: relative; gap: 12px; justify-content: space-between; }
+  .nav-burger { display: inline-flex; }
+
+  .nav-drawer {
+    display: none;
+    position: absolute;
+    top: calc(100% + 1px);
+    left: 0;
+    right: 0;
+    padding: 14px 24px 20px;
+    /* Opaque, not translucent: over the hero video the headline reads straight
+       through anything less and the menu becomes unreadable. */
+    background: #fff;
+    border-bottom: 1px solid var(--line);
+    box-shadow: 0 26px 46px -26px rgba(11, 11, 20, .45);
+    max-height: calc(100vh - 64px);
+    overflow-y: auto;
+  }
+  .nav.nav-open .nav-drawer { display: block; animation: navDrawerIn .2s ease-out both; }
+  .nav.on-dark .nav-drawer {
+    background: #0B0B14;
+    border-bottom-color: rgba(255, 255, 255, .1);
+  }
+  .nav.on-dark .nav-drawer .nav-item,
+  .nav.on-dark .nav-drawer .link { color: rgba(255, 255, 255, .92); }
+  .nav.on-dark .nav-drawer .nav-item:hover { background: rgba(255, 255, 255, .1); }
+
+  .nav-drawer .nav-menu,
+  .nav-drawer .nav-right {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    flex: none;
+    width: 100%;
+    gap: 2px;
+  }
+  .nav-drawer .nav-right {
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+  }
+  .nav.on-dark .nav-drawer .nav-right { border-top-color: rgba(255, 255, 255, .12); }
+
+  .nav-drawer .nav-item,
+  .nav-drawer .nav-right a.link {
+    width: 100%;
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 15px;
+  }
+  /* The active underline is a full-width bar on desktop; as a list row it
+     reads better as a short marker at the left edge. */
+  .nav-drawer .nav-item.active::after { left: 12px; right: auto; width: 24px; bottom: 6px; }
+
+  .nav-drawer .lang-toggle,
+  .nav-drawer .login-btn,
+  .nav-drawer .signup-btn,
+  .nav-drawer .btn-try {
+    width: 100%;
+    justify-content: center;
+    padding: 12px 18px;
+  }
+  .nav-drawer .btn-try { font-size: 20px; }
+}
+
+/* ==========================================================================
+   2 · LANDING PAGE (VGIA.html)
+   ========================================================================== */
+@media (max-width: 900px) {
+  /* The floating chips are positioned against a 1440-wide stage — under that
+     they land on top of the headline. */
+  .hero-chips { display: none; }
+  .ps-mini-cards { grid-template-columns: repeat(2, 1fr); }
+
+  /* ── "Without / with VGIA" ──────────────────────────────────────────────
+     Two absolutely-stacked panels cross-fading inside a 1120x560 stage. Once
+     their contents flow, the stage has to flow with them: give the panels a
+     place in the document and let the hidden one take up no room at all
+     (opacity alone would leave the shown panel sitting on empty space). */
+  .ww-stage { min-height: 0; }
+  .ww-panel {
+    position: static;
+    inset: auto;
+    padding: 0;
+    transform: none !important;
+  }
+  .ww-panel.hidden { display: none; }
+  .ww-panel.shown { display: block; }
+
+  /* WITHOUT — the scatter IS the illustration, and it cannot survive being
+     squeezed. Keep the pieces, drop the choreography: sources and sticky
+     notes become wrapped rows, the connecting scribbles go. */
+  .chaos-canvas {
+    height: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+  }
+  .chaos-scribble { display: none; }
+  .chaos-video-icon,
+  .chaos-note {
+    position: static !important;
+    inset: auto !important;
+    transform: none !important;
+  }
+  .chaos-note { white-space: normal; font-size: 16px; }
+  .chaos-note::after { display: none; }
+  .ww-center {
+    position: static !important;
+    transform: none !important;
+    min-width: 0;
+    width: 100%;
+    order: 99;
+    margin-top: 8px;
+  }
+
+  /* The hub-and-spokes diagram is six absolutely-positioned nodes laid out
+     around a 1080x560 stage; below that they pile onto the hub. Rebuild it as
+     an ordinary grid — hub first, then the nodes, then the badge row.
+     The node offsets are inline style attributes, hence the !important. */
+  .clean-canvas {
+    height: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px 18px;
+    align-items: start;
+  }
+  .clean-canvas > svg { display: none; }          /* the connector lines */
+  .clean-node {
+    position: static !important;
+    inset: auto !important;
+    max-width: none;
+  }
+  .clean-hub {
+    position: static !important;
+    transform: none !important;
+    grid-column: 1 / -1;
+    order: -1;
+    margin: 0 auto 6px;
+  }
+  /* The "Search with VGIA" card sits inside this canvas too — lead with it. */
+  .clean-canvas .ww-center {
+    grid-column: 1 / -1;
+    order: -2;
+    width: auto;
+    margin: 0 auto 4px;
+    text-align: center;
+  }
+  .clean-footer {
+    position: static !important;
+    transform: none !important;
+    grid-column: 1 / -1;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px 14px;
+    margin: 4px auto 0;
+    width: -moz-max-content;
+    width: max-content;
+    max-width: 100%;
+  }
+  .clean-footer .divider { display: none; }
+}
+
+@media (max-width: 780px) {
+  .hero {
+    min-height: 0;
+    padding: 132px 0 68px;
+  }
+  .hero-title { font-size: clamp(34px, 9.4vw, 56px); }
+  .hero-sub { font-size: 15.5px; }
+  .hero-ctas { flex-direction: column; align-items: stretch; }
+  .hero-ctas > a { justify-content: center; }
+  .fw-card { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .support-buttons { grid-template-columns: minmax(0, 1fr); }
+  .cta-grid { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 560px) {
+  .container, .container-wide { padding: 0 16px; }
+  .ps-mini-cards { grid-template-columns: minmax(0, 1fr); }
+  .clean-canvas { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  /* Back to icon-beside-text now that each node owns a full row. */
+  .clean-node.right { flex-direction: row; text-align: left; }
+  .modules-grid { grid-template-columns: repeat(2, 1fr); gap: 18px 12px; }
+  .hero-scroll-hint { display: none; }
+}
+
+@media (max-width: 460px) {
+  .footer-cols { grid-template-columns: minmax(0, 1fr); gap: 24px; }
+}
+
+/* ==========================================================================
+   3 · PRICING
+   ========================================================================== */
+@media (max-width: 780px) {
+  .adopter-banner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    text-align: center;
+    justify-items: center;
+    padding: 22px 20px;
+  }
+}
+@media (max-width: 560px) {
+  /* The billing switch is one animated pill with a JS-positioned thumb, so it
+     must not wrap — shrink it instead, and let it scroll if it still cannot fit. */
+  .duration-tabs-wrap { overflow-x: auto; scrollbar-width: none; }
+  .duration-tabs-wrap::-webkit-scrollbar { display: none; }
+  .duration-tabs { margin: 28px auto; flex-shrink: 0; }
+  .duration-tab { padding: 9px 12px; font-size: 12.5px; gap: 5px; }
+  .duration-tab .save { font-size: 9px; padding: 2px 6px; }
+}
+
+@media (max-width: 420px) {
+  .plan-quotas { grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 14px; }
+}
+
+/* ==========================================================================
+   4 · DOCUMENTATION
+   ========================================================================== */
+@media (max-width: 1000px) {
+  /* `1fr` is `minmax(auto, 1fr)`: the column refuses to shrink below the
+     widest code block, which pushes the whole page sideways on a phone. */
+  .doc-layout { grid-template-columns: minmax(0, 1fr); }
+  .doc-content { min-width: 0; max-width: 100%; }
+  .doc-content pre,
+  .doc-content table { max-width: 100%; overflow-x: auto; }
+}
+
+@media (max-width: 780px) {
+  .doc-layout { padding: 28px 16px 60px; }
+  .doc-title { font-size: clamp(28px, 8vw, 44px); }
+}
+
+/* ==========================================================================
+   5 · AUTH PAGES (login.html · signup.html)
+   Scoped to body.auth-page so the generic .layout / .card / .left class names
+   can never leak onto the marketing pages.
+   ========================================================================== */
+body.auth-page {
+  /* One knob for the card width — the grid column and the card's own cap both
+     read it, so they can never drift apart at a breakpoint. */
+  --auth-card-w: 440px;
+
+  /* login.html sets html,body { height: 100% }, which pins the absolutely
+     positioned .discover pill to the viewport instead of the document once
+     the page gets taller than the screen. */
+  height: auto;
+  min-height: 100vh;
+  min-height: 100svh;
+}
+body.auth-page.auth-signup { --auth-card-w: 470px; }
+
+body.auth-page .layout {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 8px 32px 32px;
+  gap: 52px;
+  grid-template-columns: minmax(0, 1fr) minmax(0, var(--auth-card-w));
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 84px);
+  min-height: calc(100svh - 84px);
+}
+
+/* The card is the fixed point of the page: it never stretches to fill the
+   column, it centres inside whatever room it is given. */
+body.auth-page .card {
+  width: 100%;
+  max-width: var(--auth-card-w);
+  margin: 0 auto;
+}
+
+@media (max-width: 1180px) {
+  body.auth-page { --auth-card-w: 400px; }
+  body.auth-page.auth-signup { --auth-card-w: 430px; }
+  body.auth-page .layout { gap: 36px; padding: 8px 24px 28px; }
+}
+
+/* ── Tablet & below: one centred column ─────────────────────────────────── */
+@media (max-width: 1024px) {
+  body.auth-page { --auth-card-w: 440px; }
+  body.auth-page.auth-signup { --auth-card-w: 460px; }
+  body.auth-page .layout {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    align-content: start;
+    max-width: 640px;
+    gap: 26px;
+    padding: 12px 20px 36px;
+    min-height: 0;
+  }
+  body.auth-page .left { text-align: center; max-width: 540px; }
+  body.auth-page .lede { margin-left: auto; margin-right: auto; }
+  body.auth-page .capabilities,
+  body.auth-page .perks { justify-items: center; margin-left: auto; margin-right: auto; }
+  body.auth-page .badge-row { justify-content: center; }
+
+  /* Back into the flow — see the height:auto note above. */
+  body.auth-page .discover {
+    position: static;
+    transform: none;
+    display: flex;
+    width: -moz-max-content;
+    width: max-content;
+    max-width: calc(100% - 40px);
+    margin: 0 auto 34px;
+    justify-content: center;
+    text-align: center;
+  }
+  body.auth-page .discover:hover { transform: translateY(-1px); }
+}
+
+@media (max-width: 780px) {
+  body.auth-page .top { padding: 14px 18px 4px; }
+  body.auth-page .logo-link,
+  body.auth-page .logo-img { height: 38px; }
+  body.auth-page h1 { font-size: clamp(31px, 8.6vw, 46px); }
+  body.auth-page .lede { font-size: 14.5px; margin-bottom: 20px; }
+  body.auth-page .card { padding: 26px 22px 22px; border-radius: 20px; }
+  body.auth-page .card-logo { width: 64px; height: 64px; border-radius: 17px; margin-bottom: 12px; }
+  body.auth-page .card h2 { font-size: 21px; }
+  body.auth-page .capabilities { grid-template-columns: repeat(2, 1fr); gap: 14px 16px; max-width: 430px; }
+
+  /* Anything under 16px makes iOS zoom the page in on focus and never zoom
+     back out — that is most of the "looks weird when I shrink it". */
+  body.auth-page input[type="text"],
+  body.auth-page input[type="email"],
+  body.auth-page input[type="password"],
+  body.auth-page select,
+  body.auth-page textarea { font-size: 16px; }
+}
+
+@media (max-width: 560px) {
+  body.auth-page .layout { padding: 8px 14px 30px; gap: 22px; }
+  body.auth-page .capabilities { grid-template-columns: minmax(0, 1fr); max-width: 320px; gap: 12px; }
+  body.auth-page .cap { grid-template-columns: 46px 1fr; gap: 11px; text-align: left; }
+  body.auth-page .cap-icon { width: 46px; height: 46px; border-radius: 13px; padding: 6px; }
+  body.auth-page .badge-row { gap: 10px; padding: 9px 14px; margin-top: 20px; }
+  body.auth-page .card { padding: 22px 17px 20px; }
+  body.auth-page .field-row { grid-template-columns: minmax(0, 1fr); }
+  body.auth-page .row { flex-wrap: wrap; gap: 8px; }
+  body.auth-page .fp-modal { padding: 14px; }
+  body.auth-page .fp-card { padding: 26px 20px 22px; }
+}
+
+@media (max-width: 400px) {
+  body.auth-page .top { padding: 12px 14px 2px; }
+  body.auth-page .top-actions { gap: 7px; }
+  body.auth-page .card { padding: 20px 14px 18px; border-radius: 18px; }
+  body.auth-page .oauth-btn { font-size: 12.5px; gap: 8px; }
+  body.auth-page .badge-row { font-size: 10.5px; }
+}

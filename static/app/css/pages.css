@@ -816,3 +816,39 @@ body.light-mode .settings-card-head .sch-icon { color: var(--brand); }
   .settings-nav-item { white-space: nowrap; }
   .form-row { grid-template-columns: 1fr; }
 }
+
+@media (max-width: 720px) {
+  .videos-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 12px; }
+  .video-card-body { padding: 12px 13px 14px; }
+  .video-card-actions { flex-wrap: wrap; }
+  .btn-ask { flex: 1 1 100%; justify-content: center; }
+
+  .pricing-grid { max-width: none; }
+  .pricing-toggle { flex-wrap: wrap; justify-content: center; gap: 10px; }
+
+  /* Settings: nav becomes a horizontal rail that scrolls instead of wrapping. */
+  .settings-nav { gap: 6px; scrollbar-width: none; }
+  .settings-nav::-webkit-scrollbar { display: none; }
+
+  .avatar-upload { flex-direction: column; align-items: flex-start; gap: 12px; }
+  .avatar-actions { width: 100%; }
+  .avatar-actions .btn-primary,
+  .avatar-actions .btn-secondary { flex: 1; justify-content: center; }
+
+  .settings-card-head { flex-direction: column; align-items: flex-start; gap: 10px; }
+  .form-actions { flex-direction: column-reverse; }
+  .form-actions .btn-primary,
+  .form-actions .btn-secondary { width: 100%; justify-content: center; }
+
+  .toggle-row { gap: 12px; }
+  .billing-row { flex-wrap: wrap; gap: 8px; }
+  .danger-zone .form-actions { width: 100%; }
+  .btn-danger { width: 100%; justify-content: center; }
+}
+
+@media (max-width: 480px) {
+  .videos-grid { grid-template-columns: minmax(0, 1fr); }
+  .toolbar-actions { flex-wrap: wrap; }
+  .toolbar-actions > * { flex: 1 1 auto; justify-content: center; }
+  .dropdown-menu { right: 0; left: auto; min-width: 160px; }
+}

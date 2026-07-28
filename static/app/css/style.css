@@ -1577,3 +1577,193 @@ body.light-mode .icon-btn-more:hover {
   border-color: rgba(225, 29, 72, 0.35);
   color: var(--c-rose);
 }
+
+/* ============================================================
+   RESPONSIVE — TABLET & MOBILE
+   ------------------------------------------------------------
+   Breakpoints
+     <=1180  small laptop  · ask column narrows
+     <=1024  tablet        · sidebar becomes an off-canvas drawer
+     <= 900  small tablet  · single column
+     <= 720  phone         · compact topbar, stacked headers
+     <= 480  small phone   · tightest spacing
+   ============================================================ */
+
+/* The hamburger + scrim are injected by main.js on every app page and stay
+   hidden until the sidebar turns into a drawer. */
+.nav-mobile-btn {
+  display: none;
+  width: 38px;
+  height: 38px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.nav-mobile-btn:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  border-color: var(--border-light);
+}
+
+.sidebar-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 45;
+  background: rgba(6, 5, 20, 0.58);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.22s ease;
+}
+.sidebar-scrim.show { opacity: 1; pointer-events: auto; }
+
+/* Nothing on any page may push the document sideways. */
+html { -webkit-text-size-adjust: 100%; }
+body { overflow-x: hidden; }
+img, video, canvas, iframe { max-width: 100%; }
+
+@media (max-width: 1180px) {
+  .topbar { padding: 12px 22px; }
+  .content-wrapper {
+    /* Ignore the width the drag handle stored — below this the ask column
+       has to give way to the transcript, not the other way round. */
+    grid-template-columns: minmax(0, 1fr) minmax(300px, 360px);
+    gap: 18px;
+    padding: 16px 22px 36px;
+  }
+  .top-link { padding: 6px 11px; font-size: 12.5px; }
+}
+
+@media (max-width: 1024px) {
+  /* ── Sidebar → off-canvas drawer ─────────────────────────── */
+  .sidebar {
+    width: 264px;
+    transform: translateX(-100%);
+    transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+  .sidebar.open { transform: none; box-shadow: 0 0 70px rgba(0, 0, 0, 0.55); }
+  body.light-mode .sidebar.open { box-shadow: 0 0 60px rgba(15, 23, 42, 0.25); }
+
+  /* The desktop "collapsed" state is meaningless once it is a drawer — a
+     64px drawer with no labels would be unusable, so force it back open. */
+  .sidebar.collapsed { width: 264px; }
+  .sidebar.collapsed .menu-label,
+  .sidebar.collapsed .logo-text,
+  .sidebar.collapsed .sidebar-section-label {
+    opacity: 1;
+    pointer-events: auto;
+    width: auto;
+    overflow: visible;
+  }
+  .sidebar.collapsed .menu-item { justify-content: flex-start; padding: 9px 12px; }
+  .sidebar.collapsed .logo { justify-content: flex-start; }
+  .sidebar-toggle { display: none; }
+
+  .main,
+  .sidebar.collapsed + .main { margin-left: 0; }
+
+  .nav-mobile-btn { display: inline-flex; }
+  /* The drawer already lists every destination — the duplicate pill row in
+     the topbar is the first thing to go when width gets scarce. */
+  .top-links { display: none; }
+}
+
+@media (max-width: 900px) {
+  .content-wrapper {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    padding: 14px 18px 34px;
+  }
+  .ask-panel { position: relative; top: 0; padding: 18px; }
+  .ask-resize { display: none; }
+  /* body-prefixed: the per-page <style> block is loaded after this file, so a
+     bare .chat-thread here would lose the tie. */
+  body .chat-thread { max-height: 460px; }
+  .rec-grid { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); }
+  .settings-layout { grid-template-columns: minmax(0, 1fr); }
+
+  /* Upload page. `1fr` is `minmax(auto, 1fr)`, and the hidden <input type=file>
+     that covers the drop zone carries Chrome's ~400px intrinsic widget width —
+     enough to hold the column open and push the page sideways. */
+  body .intake-grid { grid-template-columns: minmax(0, 1fr); }
+  body .upload-drop-zone,
+  body .yt-section { min-width: 0; }
+  body .upload-drop-zone input[type="file"] { min-width: 0; max-width: 100%; }
+}
+
+@media (max-width: 720px) {
+  .topbar {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+  /* "Workspace / Ask" → just "Ask"; the crumb is redundant once the drawer
+     shows you where you are. */
+  .topbar-title .crumb,
+  .topbar-title .crumb-sep { display: none; }
+  .topbar-title h1 { font-size: 16px; }
+  .top-actions { gap: 6px; }
+  .user-name { display: none; }
+  .user-menu { padding: 4px; }
+  .user-menu > i { display: none; }
+
+  .content-wrapper { padding: 12px 14px 30px; }
+  .page-header { margin-bottom: 18px; }
+  .page-header h1 { font-size: 23px; letter-spacing: -0.5px; }
+  .page-header p { font-size: 13.5px; }
+
+  .video-title-row { flex-direction: column; align-items: stretch; gap: 10px; }
+  .video-title { font-size: 18.5px; }
+  .video-actions { justify-content: flex-start; }
+
+  /* Tab rails scroll rather than wrap into a ragged two-line block. */
+  .tabs {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tabs::-webkit-scrollbar { display: none; }
+  .tab { padding: 11px 13px; font-size: 13px; white-space: nowrap; flex-shrink: 0; }
+
+  .transcript-item { gap: 10px; padding: 10px; }
+  .transcript-time { min-width: 42px; }
+  .ask-panel { padding: 16px; border-radius: var(--radius-lg); }
+  .ask-header h2 { font-size: 17px; }
+  .rec-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
+
+  #graph-viz-container { height: 320px !important; }
+
+  /* iOS zooms the whole page in on focus for any field under 16px. */
+  input, select, textarea, #ask-textarea { font-size: 16px !important; }
+}
+
+@media (max-width: 480px) {
+  .sidebar { width: 82vw; max-width: 300px; }
+  .sidebar.collapsed { width: 82vw; max-width: 300px; }
+  .content-wrapper { padding: 10px 12px 26px; }
+  .topbar { padding: 9px 12px; }
+  .topbar-title h1 { font-size: 15px; }
+  .page-header h1 { font-size: 20.5px; }
+  .rec-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .ask-panel { padding: 14px; }
+  body .video-select-bar { padding: 9px 10px; }
+  .btn-upload { width: 100%; justify-content: center; }
+  .confirm-card { padding: 24px 18px 20px; }
+  .confirm-actions { flex-direction: column; }
+}
+
+/* A drawer that animates in from off-screen is the one transition that must
+   still run for the UI to make sense, so it keeps a (short) duration. */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar { transition-duration: 0.01ms; }
+  .sidebar-scrim { transition-duration: 0.01ms; }
+}
