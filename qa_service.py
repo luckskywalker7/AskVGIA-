@@ -420,11 +420,33 @@ async def generate_answer(question: str, context: str) -> tuple[str, str]:
 # process for the process lifetime. The corpus is static (ingestion is local),
 # so a restart is the only invalidation needed. See DIAG.md for the full
 # rationale behind each of these.
-from collections import Counter as _Counter
+from collections import Counter as _Counter, OrderedDict as _OrderedDict
 
-_chunks_cache: Dict[str, List[Dict[str, Any]]] = {}
-_derived_cache: Dict[str, Dict[str, Any]] = {}
-_tags_cache: Dict[str, List[str]] = {}
+
+class _LRU(_OrderedDict):
+    """Dict avec taille max. Évince l'entrée la moins récemment utilisée une
+    fois plein — empêche la RAM de croître sans limite (Render free = 512MB)."""
+    def __init__(self, maxsize=6):
+        super().__init__()
+        self.maxsize = maxsize
+
+    def __getitem__(self, key):
+        self.move_to_end(key)
+        return super().__getitem__(key)
+
+    def __setitem__(self, key, value):
+        if key in self:
+            self.move_to_end(key)
+        super().__setitem__(key, value)
+        while len(self) > self.maxsize:
+            self.popitem(last=False)
+
+
+# le gros cache — listes de chunks complètes par vidéo ; plafond serré
+_chunks_cache: "Dict[str, List[Dict[str, Any]]]" = _LRU(maxsize=4)
+# petits caches (résumés / tags) ; on en garde un peu plus
+_derived_cache: "Dict[str, Dict[str, Any]]" = _LRU(maxsize=20)
+_tags_cache: "Dict[str, List[str]]" = _LRU(maxsize=20)
 
 # youtube_id -> (title, retry_after_epoch). Successes never expire; a failed
 # lookup is cached briefly so a YouTube hiccup can't add its timeout to every
