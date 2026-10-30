@@ -52,13 +52,34 @@ HF_EMBED_URL = "https://router.huggingface.co/hf-inference/models/BAAI/bge-m3/pi
 # Free model IDs rotate constantly on OpenRouter (models get retired without
 # notice). "openrouter/free" is their auto-router: it picks whatever free model
 # is currently available. That's what keeps this working unattended for months.
-# The named IDs after it are only a backstop; verify at openrouter.ai/models
-# if you ever want to pin a specific one.
+#
+# The named IDs after it are only a backstop, and they MUST be checked against
+# https://openrouter.ai/api/v1/models before being listed here. The two previous
+# entries (openai/gpt-oss-120b:free, openai/gpt-oss-20b:free) had been retired
+# and returned 404 "This model is unavailable for free" on every single call.
+# Because the loop below kept only the LAST error, that dead backstop became the
+# error users saw ("model not available") whenever the router itself hiccuped,
+# masking the real cause. Both IDs below were confirmed live (HTTP 200, correct
+# French reply) and are listed at zero price in the catalogue.
+# openrouter/free appears three times on purpose. It picks a free model at
+# RANDOM on every single call, so a second attempt is a genuinely different
+# model — by far the cheapest way to survive one bad draw (a model that returns
+# empty content, or an upstream 429). The two pinned IDs are the last resort.
 OPENROUTER_MODELS = [
     "openrouter/free",
-    "openai/gpt-oss-120b:free",
-    "openai/gpt-oss-20b:free",
+    "openrouter/free",
+    "openrouter/free",
+    "nvidia/nemotron-3.5-lightning:free",
+    "liquid/lfm-2.5-2.6b:free",
 ]
+
+# Most free models are reasoning models: they fill a "reasoning" field before
+# writing "content". Providers differ on whether those tokens count against this
+# budget, and when they do, 700 ran out mid-thought and content came back null
+# with finish_reason "length". Free models cost nothing per token, so the only
+# thing a generous ceiling buys is headroom — the answers themselves stay short
+# because the prompt asks for 2-5 points.
+MAX_ANSWER_TOKENS = 6000
 
 TOP_K = 10          # chunks fed to the LLM
 CANDIDATES = 60     # per-branch candidates inside hybrid_search
@@ -109,6 +130,14 @@ class AskResponse(BaseModel):
     video_id: str
     youtube_id: Optional[str] = None
     model_used: Optional[str] = None
+    # which language the answer was written in, and whether it was asked for
+    # explicitly ("requested") or inferred from the question ("detected")
+    language: Optional[str] = None
+    language_source: Optional[str] = None
+    # "hybrid" = dense + FTS as designed; "keyword" = embeddings were down and
+    # this answer came from full-text search only. The UI can warn on the latter.
+    retrieval_mode: Optional[str] = None
+    notice: Optional[str] = None
 
 
 # ----------------------------------------------------------------- helpers
@@ -120,10 +149,83 @@ def _sb_headers() -> Dict[str, str]:
     }
 
 
+class EmbeddingUnavailable(Exception):
+    """
+    Dense embeddings could not be produced. Carries whether the cause is
+    transient (cold start, rate limit) or terminal (no credits, bad token) so
+    /ask can say something true instead of always blaming a warmup.
+    """
+
+    def __init__(self, detail: str, transient: bool = False):
+        super().__init__(detail)
+        self.detail = detail
+        self.transient = transient
+
+
+# ----------------------------------------------------------------- language
+# core/language_detector.py does this properly, but importing it would drag
+# core.contracts (and optionally langdetect) into the cloud image, and
+# requirements-cloud.txt is deliberately four packages. Same heuristics,
+# inlined: Arabic script by codepoint first, then FR/EN stopword counts.
+def detect_language(text: str) -> str:
+    """
+    Return "ar", "fr" or "en" for a question. Mirrors LanguageDetector's
+    ordering: Arabic script wins on any meaningful presence (it is never
+    produced by accident), then stopword counts, then English.
+    """
+    import re
+    t = (text or "").strip()
+    if not t:
+        return "en"
+
+    arabic = len(re.findall(r"[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]", t))
+    latin = len(re.findall(r"[A-Za-z\u00C0-\u00FF]", t))
+    if arabic and arabic >= 0.20 * max(1, arabic + latin):
+        return "ar"
+
+    fr = len(re.findall(
+        r"\b(le|la|les|des|une|un|est|sont|avec|dans|pour|sur|pas|plus|que|qui|"
+        r"quoi|quel|quelle|comment|pourquoi|quand|ce|cette|du|au|aux|et|ou|mais|"
+        r"vidone|parle|dit|explique|resume)\b", t, re.I))
+    en = len(re.findall(
+        r"\b(the|a|an|is|are|was|were|with|in|for|on|not|more|than|what|how|why|"
+        r"when|which|this|that|of|and|or|but|does|do|did|say|says|explain|"
+        r"summarize|summarise|about)\b", t, re.I))
+    if fr > en:
+        return "fr"
+    if en > fr:
+        return "en"
+    # Accents are a French tell when the stopword counts tie.
+    if re.search(r"[\u00e0\u00e2\u00e7\u00e9\u00e8\u00ea\u00eb\u00ee\u00ef\u00f4\u00fb\u00f9\u00fc]", t, re.I):
+        return "fr"
+    return "en"
+
+
+LANG_NAMES = {"ar": "Arabic", "fr": "French", "en": "English"}
+
+
+def language_directive(lang: str) -> str:
+    """The one hard instruction that pins the answer language, named outright."""
+    name = LANG_NAMES.get(lang, "English")
+    line = (
+        "ANSWER LANGUAGE: {n}. Write the ENTIRE answer in {n}, including the "
+        "opening sentence and every numbered point. Do not answer in any other "
+        "language, and do not translate technical terms or on-screen wording out "
+        "of the form the video uses.".format(n=name)
+    )
+    if lang == "ar":
+        line += (" Use Arabic script, not transliteration. Leave the timestamp"
+                 " digits as Western numerals (2:14) — the interface parses them"
+                 " to seek the video.")
+    return line
+
+
 async def embed_question(text: str) -> List[float]:
     """BGE-M3 dense 1024-d via HF Inference API, with cold-start retries."""
     if not HF_TOKEN:
-        raise HTTPException(500, "HF_TOKEN not set")
+        # Same treatment as a dead endpoint: /ask degrades to keyword retrieval
+        # rather than 500-ing, so a missing token costs precision, not service.
+        raise EmbeddingUnavailable("HF_TOKEN not set")
 
     payload = {"inputs": text, "options": {"wait_for_model": True}}
     headers = {"Authorization": f"Bearer {HF_TOKEN}"}
@@ -143,8 +245,14 @@ async def embed_question(text: str) -> List[float]:
                     continue
                 if r.status_code >= 400:
                     last = f"HF {r.status_code}: {r.text[:160]}"
-                    if r.status_code in (401, 403, 404):
-                        raise HTTPException(502, f"embedding unavailable: {last}")
+                    # 402 = the HF account has no Inference credits left. That is
+                    # permanent until someone tops up, so retrying is pure
+                    # latency: eight attempts burned ~35s and then reported "the
+                    # model is warming up", sending users off to wait for a cold
+                    # start that was never going to finish. Fail fast instead and
+                    # let /ask fall back to keyword retrieval.
+                    if r.status_code in (401, 402, 403, 404):
+                        raise EmbeddingUnavailable(last)
                     await asyncio.sleep(4)
                     continue
                 vec = r.json()
@@ -154,12 +262,13 @@ async def embed_question(text: str) -> List[float]:
                 if not isinstance(vec, list) or len(vec) != 1024:
                     raise ValueError(f"unexpected embedding shape: {len(vec) if isinstance(vec,list) else type(vec)}")
                 return [float(x) for x in vec]
-            except HTTPException:
+            except (HTTPException, EmbeddingUnavailable):
                 raise
             except Exception as e:
                 last = str(e)[:160]
                 await asyncio.sleep(3 + attempt * 2)
-    raise HTTPException(503, "The model is warming up. Please ask again in a few seconds.")
+    # Genuinely transient: every attempt above hit 503/429 or a network error.
+    raise EmbeddingUnavailable(last or "exhausted retries", transient=True)
 
 
 async def hybrid_search(video_id: str, question: str, vec: List[float],
@@ -242,6 +351,106 @@ def dedupe_visual(rows: List[Dict[str, Any]], thresh: float = 0.85) -> List[Dict
     return sorted(kept, key=lambda r: order.get(r.get("chunk_id"), 999))
 
 
+# Candidates pulled from Postgres before local re-ranking. PostgREST cannot
+# ORDER BY ts_rank without a dedicated RPC, so ranking happens here instead;
+# 200 rows is a few hundred KB and covers any single video in this corpus.
+_KEYWORD_CANDIDATES = 200
+
+
+def _query_terms(question: str) -> List[str]:
+    """
+    Split a question into tsquery-safe terms.
+
+    to_tsquery() is strict: ':', '&', '|', '!', '(', ')' and stray quotes make it
+    raise, which would turn a fallback into a 500. Keeping only letters, digits
+    and Arabic codepoints sidesteps the whole escaping problem.
+    """
+    import re
+    words = re.findall(
+        r"[0-9A-Za-z\u00C0-\u00FF\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF]+",
+        (question or "").lower())
+    seen, terms = set(), []
+    for w in words:
+        if len(w) < 2 or w in seen:
+            continue
+        seen.add(w)
+        terms.append(w)
+    return terms[:24]          # a long question should not build a huge tsquery
+
+
+async def keyword_search(video_id: str, question: str,
+                         limit: int = TOP_K) -> List[Dict[str, Any]]:
+    """
+    Full-text-only retrieval, used when embeddings are unavailable.
+
+    hybrid_search needs a 1024-d query vector, so it cannot run at all without
+    the embedding endpoint. This hits PostgREST directly against the indexed
+    `fts` tsvector column — no RPC, no vector — so /ask can still answer (less
+    precisely) while the embedding provider is down or unfunded.
+
+    Terms are OR-ed, not AND-ed. The obvious `fts=wfts.<question>` is wrong here:
+    websearch_to_tsquery ANDs every lexeme, so a whole sentence only matches a
+    chunk containing all of it at once — in practice zero rows for any real
+    question. OR-ing recovers the matches, then the rows are re-ranked locally by
+    how many distinct query terms each one actually contains, because PostgREST
+    cannot ORDER BY ts_rank. Without that re-rank the `limit` would just take
+    whichever rows Postgres happened to return first.
+
+    Returns rows shaped like the RPC's, with rrf_score carrying the overlap score
+    so existing callers stay uniform.
+    """
+    terms = _query_terms(question)
+    if not terms:
+        return []
+
+    url = f"{SUPABASE_URL}/rest/v1/video_chunks"
+    params = {
+        "select": ("chunk_id,video_id,text,start_time,end_time,"
+                   "chunk_type,speaker,metadata"),
+        "video_id": f"eq.{video_id}",
+        "fts": "fts." + "|".join(terms),
+        "limit": str(_KEYWORD_CANDIDATES),
+    }
+    async with httpx.AsyncClient(timeout=30) as client:
+        r = await client.get(url, params=params, headers=_sb_headers())
+        if r.status_code >= 400:
+            # A tsquery Postgres still refuses is not worth failing /ask over.
+            print(f"[keyword_search] {r.status_code}: {r.text[:160]}")
+            return []
+        rows = r.json() or []
+
+    # Rank by distinct-term overlap, longer terms first (they are the content
+    # words; "the" and "le" survive tokenising but carry almost no signal).
+    import re as _re2
+    weights = {t: (2.0 if len(t) > 4 else 1.0) for t in terms}
+    for row in rows:
+        text = (row.get("text") or "").lower()
+        score = sum(w for t, w in weights.items()
+                    if _re2.search(r"(?<![0-9a-z])" + _re2.escape(t), text))
+        row["rrf_score"] = score
+    rows = [r_ for r_ in rows if r_["rrf_score"] > 0]
+    rows.sort(key=lambda r_: (-r_["rrf_score"], float(r_.get("start_time") or 0)))
+    return rows[:limit]
+
+
+# No-match text, in the answer language — an English-only string here would
+# defeat the whole point of pinning the answer language.
+NO_MATCH = {
+    "en": "I couldn't find anything in this video that answers that.",
+    "fr": "Je n'ai rien trouvé dans cette vidéo qui réponde à cette question.",
+    "ar": "لم أجد في هذا الفيديو ما يجيب على هذا السؤال.",
+}
+
+EMBED_NOTICE = {
+    "en": ("Search is running in keyword-only mode right now, so results may be "
+           "less precise than usual."),
+    "fr": ("La recherche fonctionne actuellement en mode mots-clés uniquement ; "
+           "les résultats peuvent être moins précis que d'habitude."),
+    "ar": ("البحث يعمل حالياً بالكلمات المفتاحية فقط، لذا قد تكون النتائج أقل دقة "
+           "من المعتاد."),
+}
+
+
 def build_context(rows: List[Dict[str, Any]]) -> str:
     """Numbered passages the model can cite by index."""
     parts = []
@@ -298,11 +507,11 @@ GROUNDING:
 - Use only the passages. If they do not answer the question, say so in one sentence and stop.
 - Passages marked "visual" come from on-screen text and frame descriptions; passages marked "speech" come from the spoken transcript. Both are valid evidence.
 
-LANGUAGE — the user may mix languages (Arabic, French, English) in one question,
-which is normal in this context. Handle it like this:
-- Reply in the DOMINANT language of the question — the one most of the words are in.
-  If French words dominate, answer in French; if Arabic, in Arabic; if English, in English.
-- If it is a genuine 50/50 mix, prefer French.
+LANGUAGE — the language to answer in is decided by the server and handed to you
+explicitly as an "ANSWER LANGUAGE" line with the request. Obey that line exactly.
+It overrides any impression you form from the passages, which are frequently in a
+different language from the question: never answer in the passages' language when
+the directive names another one.
 - Keep technical terms in the form they naturally appear — usually English
   (deep learning, rank, matrix, gradient) or exactly as written on screen / spoken
   in the video. Do NOT translate technical terms into the answer language.
@@ -363,14 +572,23 @@ def clean_answer(txt: str) -> str:
     return t.strip()
 
 
-async def generate_answer(question: str, context: str) -> tuple[str, str]:
+async def generate_answer(question: str, context: str,
+                          lang: str = "en") -> tuple[str, str]:
     if not OPENROUTER_API_KEY:
         raise HTTPException(500, "OPENROUTER_API_KEY not set")
 
+    # Repeated before and after the passages on purpose: with a long context the
+    # small free models reliably drift into the passages' language if the
+    # directive only appears once, at the top.
+    directive = language_directive(lang)
     user = (
+        f"{directive}\n\n"
         f"Question: {question}\n\n"
         f"Passages from the video:\n\n{context}\n\n"
-        f"Answer the question using only these passages, citing them as [n]."
+        f"Answer the question using only these passages, citing them as [n]. "
+        f"Every claim must carry its [n] and the (M:SS) from the header of the "
+        f"passage it came from \u2014 that is the evidence the interface links to."
+        f"\n{directive}"
     )
     headers = {
         "Authorization": f"Bearer {OPENROUTER_API_KEY}",
@@ -379,9 +597,9 @@ async def generate_answer(question: str, context: str) -> tuple[str, str]:
         "X-Title": "AskVGIA",
     }
 
-    last = None
+    errors: List[str] = []
     async with httpx.AsyncClient(timeout=120) as client:
-        for model in OPENROUTER_MODELS:
+        for attempt, model in enumerate(OPENROUTER_MODELS, 1):
             try:
                 r = await client.post(
                     "https://openrouter.ai/api/v1/chat/completions",
@@ -393,24 +611,68 @@ async def generate_answer(question: str, context: str) -> tuple[str, str]:
                             {"role": "user", "content": user},
                         ],
                         "temperature": 0.2,
-                        "max_tokens": 700,
+                        "max_tokens": MAX_ANSWER_TOKENS,
                     },
                 )
                 if r.status_code >= 400:
-                    last = f"{model} -> {r.status_code}: {r.text[:180]}"
+                    errors.append(f"{model} -> {r.status_code}: {r.text[:180]}")
+                    # A 429 comes in two flavours and they need opposite
+                    # handling. "temporarily rate-limited upstream" is about one
+                    # provider, so the next model is worth trying. The daily
+                    # free-model quota is per ACCOUNT, so every remaining
+                    # attempt would fail identically — walking the chain just
+                    # adds latency and burns nothing useful. Stop and say so.
+                    if r.status_code == 429 and "free-models-per-day" in r.text:
+                        raise HTTPException(
+                            429,
+                            "The OpenRouter account has used up its free-model "
+                            "quota for today. Answers resume when the quota "
+                            "resets, or immediately if credits are added to the "
+                            "account.")
                     continue
                 data = r.json()
-                if "error" in data:
-                    last = f"{model} -> {str(data['error'])[:180]}"
+                if data.get("error"):
+                    errors.append(f"{model} -> {str(data['error'])[:180]}")
                     continue
-                txt = data["choices"][0]["message"]["content"].strip()
-                txt = clean_answer(strip_reasoning(txt))
+
+                choice = (data.get("choices") or [{}])[0]
+                msg = choice.get("message") or {}
+                # Reasoning models (most of what openrouter/free routes to) write
+                # a "reasoning" field first and only then "content". If the token
+                # budget runs out mid-thought the response is a valid HTTP 200
+                # with content=null. The old code called .strip() straight on that
+                # null, which threw AttributeError into the except below and fell
+                # through to the next model — so a merely truncated answer looked
+                # like a dead model, and the user got the last model's error.
+                #
+                # Deliberately NOT falling back to msg["reasoning"]: that field is
+                # raw chain-of-thought ("Here's a thinking process: 1. Analyze
+                # user input"), and strip_reasoning() cannot reliably tell it from
+                # a real answer. Treat it as this model's failure and let the next
+                # one answer instead. MAX_ANSWER_TOKENS is what keeps this rare.
+                raw = msg.get("content") or ""
+                if not raw.strip():
+                    errors.append(
+                        f"{model} -> empty content (finish_reason="
+                        f"{choice.get('finish_reason')})")
+                    continue
+
+                txt = clean_answer(strip_reasoning(raw))
                 if txt:
-                    return txt, data.get("model", model)
+                    # data["model"] is the model the router actually picked, which
+                    # is what should surface - not the "openrouter/free" alias.
+                    return txt, data.get("model") or model
+                errors.append(f"{model} -> answer empty after cleanup")
+            except HTTPException:
+                raise
             except Exception as e:
-                last = f"{model} -> {type(e).__name__}: {str(e)[:180]}"
+                errors.append(
+                    f"attempt {attempt} {model} -> "
+                    f"{type(e).__name__}: {str(e)[:180]}")
                 continue
-    raise HTTPException(502, f"no free model answered. last error: {last}")
+    # Report every model's failure, not just the last: in a fallback chain the
+    # last error is usually the least informative one.
+    raise HTTPException(502, "no free model answered. " + " | ".join(errors))
 
 
 # ------------------------------------------------------------- derived data
@@ -1095,19 +1357,41 @@ async def ask(req: AskRequest):
     video = await get_video(req.video_id)
     youtube_id = video.get("youtube_id")
 
-    vec = await embed_question(q)
-    # over-fetch so dedup still leaves TOP_K distinct passages
-    rows = await hybrid_search(req.video_id, q, vec, limit=TOP_K * 3)
+    # Answer language: an explicit client choice wins, otherwise detect it from
+    # the question. req.language used to be accepted and silently dropped, which
+    # is why picking a language in the UI changed nothing.
+    requested = (req.language or "").strip().lower()[:2]
+    if requested in LANG_NAMES:
+        lang, lang_source = requested, "requested"
+    else:
+        lang, lang_source = detect_language(q), "detected"
+
+    # Dense retrieval when we can, keyword-only when the embedder is down.
+    notice = None
+    retrieval_mode = "hybrid"
+    try:
+        vec = await embed_question(q)
+        # over-fetch so dedup still leaves TOP_K distinct passages
+        rows = await hybrid_search(req.video_id, q, vec, limit=TOP_K * 3)
+    except EmbeddingUnavailable as e:
+        retrieval_mode = "keyword"
+        notice = EMBED_NOTICE.get(lang, EMBED_NOTICE["en"])
+        print(f"[ask] embeddings unavailable (transient={e.transient}): "
+              f"{e.detail} - falling back to keyword search")
+        rows = await keyword_search(req.video_id, q, limit=TOP_K * 3)
+
     rows = dedupe_visual(rows)[:TOP_K]
 
     if not rows:
         return AskResponse(
-            answer="I couldn't find anything in this video that answers that.",
+            answer=NO_MATCH.get(lang, NO_MATCH["en"]),
             citations=[], video_id=req.video_id, youtube_id=youtube_id,
+            language=lang, language_source=lang_source,
+            retrieval_mode=retrieval_mode, notice=notice,
         )
 
     context = build_context(rows)
-    answer, model_used = await generate_answer(q, context)
+    answer, model_used = await generate_answer(q, context, lang=lang)
 
     cites = []
     for r in rows:
@@ -1134,6 +1418,8 @@ async def ask(req: AskRequest):
     return AskResponse(
         answer=answer, citations=cites, chunks=cites, sources=cites, results=cites,
         video_id=req.video_id, youtube_id=youtube_id, model_used=model_used,
+        language=lang, language_source=lang_source,
+        retrieval_mode=retrieval_mode, notice=notice,
     )
 
 
